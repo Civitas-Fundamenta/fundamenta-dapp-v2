@@ -1,11 +1,12 @@
 import { MessagePanel as msg } from '../components/MessagePanel'
-import $ from 'jquery'
+import $ from 'jquery';
 import { enable, disable } from './ui';
 import { WalletProvider as wallet } from './walletProvider'
 import { Config as config } from './config'
 import { Conversions as convert } from './conversions';
-import { Sorter as sort } from './sorter';
 import EventEmitter from 'events';
+
+import { NetworkSelect as ns } from '../components/NetworkSelect';
 
 export class UiCommon {
 
@@ -17,23 +18,19 @@ export class UiCommon {
         var data = this.getSelectedData();
 
         msg.clearAll();
+        disable("#button");
 
-        if (!data) {
-            msg.showError("Ensure all fields are entered");
-            disable("#button");
-            return;
-        }
+        var balance = await this.getTokenBalance();
 
-        if (data.network.chainId !== wallet.chainId) {
-            msg.showWarn("Switch to the " + data.network.network + " network to continue");
-            disable("#button");
+        if (!data)
             return;
-        }
+
+        if (data.network.chainId !== wallet.chainId)
+            return;
 
         if (!wallet.web3.eth.defaultAccount)
             return;
 
-        var balance = await this.getTokenBalance();
         var amount = parseFloat($("#amount").val());
         if (isNaN(amount) || amount <= 0 || isNaN(balance) || balance < amount) {
             msg.showWarn("Invalid amount entered");
@@ -48,7 +45,7 @@ export class UiCommon {
         var data = this.getSelectedData();
 
         if (!data) {
-            $("#balance").empty();
+            $("#amount").attr("placeholder", "Enter amount");
             return;
         }
 
@@ -69,24 +66,48 @@ export class UiCommon {
 
             var balance = convert.fromAtomicUnits(bal, token.decimals).toString();
 
-            $("#balance").text(" (max " + balance + ")");
+            $("#amount").attr('placeholder', `Enter amount (max ${balance})`);
             return parseFloat(balance);
         }
     }
 
     getSelectedData() {
-        var netIndex = $("#network").prop('selectedIndex') - 1;
-        var tokIndex = $("#token").prop('selectedIndex') - 1;
-        if (netIndex < 0 || tokIndex < 0)
+        var chainId = ns.get().chainId;
+        if (chainId === 0)
             return;
 
-        var network = sort.wrapData[netIndex];
+        var network = ns.getFromMap(chainId);
+
+        var tokIndex = $("#token").prop('selectedIndex') - 1;
+        if (tokIndex < 0)
+            return;
+
         var token = network.tokens[tokIndex];
 
         return {
             network: network,
             token: token
         };
+    }
+
+    populateTokenDropDown() {
+        $("#token").empty();
+        $("#token").append($("<option />").text("Select token"));
+        var chainId = ns.get().chainId;
+
+        if (isNaN(chainId)) {
+            disable("#form");
+            return;
+        }
+
+        enable("#form");
+        
+        var network = ns.getFromMap(chainId);
+        if (network) {
+            $.each(network.tokens, function () {
+                $("#token").append($("<option />").text(this.ticker));
+            });
+        }
     }
 
     registerWalletListeners(id) {
@@ -100,6 +121,7 @@ export class UiCommon {
 
             em.on('disconnect', (disconnectInfo) => {
                 disable("#form");
+                msg.clearAll();
             });
 
             em.on('accountsChanged', async (accounts) => {
@@ -113,6 +135,7 @@ export class UiCommon {
             });
 
             em.on('chainChanged', async (chainId) => {
+                this.populateTokenDropDown();
                 await this.toggleNetworkWarning();
             });
 

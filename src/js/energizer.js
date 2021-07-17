@@ -3,7 +3,7 @@ import { Config as config } from './config'
 import { Conversions as convert } from './conversions';
 
 import EventEmitter from 'events';
-import $ from 'jquery'
+import $ from 'jquery';
 
 export class Energizer {
     constructor(teleport, cancellationToken) {
@@ -65,7 +65,7 @@ export class Energizer {
         var serverSignatures = [];
 
         $.each(approval, function () {
-            serverSignatures.push("0x" + this.data.s);
+            serverSignatures.push(`0x${this.data.s}`);
         });
 
         this.emitter.emit("ok", serverSignatures);
@@ -101,12 +101,9 @@ export class Energizer {
     }
 
     async getServerApproval(index, block, txData, cSig) {
-        var url = "https://cp" + index + "." + config.app.serverDomain + "/authorize/?n=" + config.app.cpNet +
-            "&d=" + txData +
-            "&s=" + cSig +
-            "&b=" + block;
+        var url = `https://cp${index}.${config.app.serverDomain}/authorize/?n=${config.app.cpNet}&d=${txData}&s=${cSig}&b=${block}`;
 
-        console.log("Contacting server " + index);
+        console.log("Contacting server:", index);
 
         var result = await $.ajax({
             url: url,

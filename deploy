@@ -21,6 +21,8 @@ function _deploy_directory() {
     rsync --rsh="ssh -i ${SSH_KEY} -p ${PORT}" -r ${dir}/${SRC} ${USER}@${HOST}:${DEST}
 }
 
+npm run build
+
 files=(
     asset-manifest.json
     favicon.ico

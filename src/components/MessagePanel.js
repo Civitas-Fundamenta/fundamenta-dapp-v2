@@ -1,7 +1,7 @@
 import React from 'react';
 import { show, hide } from '../js/ui';
 
-import $ from 'jquery'
+import $ from 'jquery';
 
 export class MessagePanel
 {

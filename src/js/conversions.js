@@ -35,7 +35,7 @@ export class Conversions {
 
     static toAtomicUnitsHexPrefixed(value, decimals) {
         if (isNaN(decimals)) decimals = 18;
-        return "0x" + (value * Math.pow(10, decimals)).toString(16).padStart(64, '0');
+        return `0x${(value * Math.pow(10, decimals)).toString(16).padStart(64, '0')}`;
     }
 
     static toAtomicUnits(value, decimals) {

@@ -64,7 +64,10 @@ export class WalletProvider {
                 5: "https://goerli.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783",
                 56: "https://bsc-dataseed.binance.org/"
             },
-            chainId: config.cpNet === "testnet" ? 4 : 1
+            chainId: config.cpNet === "testnet" ? 4 : 1,
+            qrcodeModalOptions: {
+                mobileLinks: [ ],
+              }
         });
 
         this.web3 = new Web3(this.provider);
@@ -186,20 +189,21 @@ export class WalletProvider {
     }
 
     static async disconnect() {
-        console.log("Disconecting wallet");
+        this.web3 = null;
+
+        console.log("Disconnecting wallet");
         if (this.provider) {
             if (this.isWalletConnect)
                 await this.provider.disconnect();
         }
+
+        this.provider = null;
 
         if (this.isMetamask) {
             for (let e of this.emitters.values())
                 e.emit('disconnect', null);
         }
 
-        this.web3 = null;
-        this.provider = null;
-        this.walletType = null;
         this.isWalletConnect = false;
         this.isMetamask = false;
     }

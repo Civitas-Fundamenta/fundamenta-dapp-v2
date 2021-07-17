@@ -1,5 +1,5 @@
 import React from 'react';
-import $ from 'jquery'
+import $ from 'jquery';
 
 import { Config as config } from '../js/config'
 import { Conversions as convert } from '../js/conversions';
@@ -9,6 +9,7 @@ import { WalletProvider as wallet } from '../js/walletProvider'
 import { UiCommon } from '../js/wrapUi';
 
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
+import { NetworkSelect as ns } from '../components/NetworkSelect';
 
 export default class Unwrap extends React.Component {
 
@@ -27,28 +28,9 @@ export default class Unwrap extends React.Component {
         else
             disable("#form");
 
-        config.fetchNetworkConfig(function (data) {
-            sort.wrappable(data);
-            $("#network").append($("<option />").text("Select network"));
-            $.each(sort.wrapData, function () {
-                $("#network").append($("<option />").text(this.network));
-            });
-        });
-
-        $("#network").on('change', async () => {
-            $("#token").empty();
-
-            var index = $("#network").prop('selectedIndex') - 1;
-            if (index >= 0) {
-                var network = sort.wrapData[index];
-                $("#token").append($("<option />").text("Select token"));
-                $.each(network.tokens, function () {
-                    $("#token").append($("<option />").text(this.wrappedTicker));
-                });
-            }
-
-            this.common.toggleNetworkWarning();
-        });
+        ns.populateWrappable();
+        ns.toggleNetworkWarning();
+        this.common.populateTokenDropDown();
 
         $("#token").on('change', async () => {
             this.common.toggleNetworkWarning();
@@ -98,7 +80,7 @@ export default class Unwrap extends React.Component {
 
     render() {
         return (
-            <div className="p-3">
+            <div className="ps-3 pe-3">
                 <div className="row">
                     <div className="col-sm">
                         <div>
@@ -106,15 +88,8 @@ export default class Unwrap extends React.Component {
                                 <div className="card-header">Unwrap</div>
                                 <div className="card-body">
                                     <div id="form">
-                                        <div>Select Token</div>
                                         <div className="input-group mb-3">
-                                            <select id="network" className="form-control form-select"></select>
                                             <select id="token" className="form-control form-select"></select>
-                                        </div>
-                                        <div className="input-group">
-                                            <div>Amount</div>&nbsp;<div id="balance"></div>
-                                        </div>
-                                        <div className="mb-3">
                                             <input type="number" id="amount" className="form-control input-sm numeric-input"
                                                 placeholder="Enter amount" />
                                         </div>

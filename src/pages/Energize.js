@@ -1,5 +1,5 @@
 import React from 'react';
-import $ from 'jquery'
+import $ from 'jquery';
 import EventEmitter from 'events';
 
 import { CancellationToken } from '../js/cancellationToken';
@@ -9,6 +9,7 @@ import { enable, disable } from '../js/ui';
 import { WalletProvider as wallet } from '../js/walletProvider'
 
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
+import { NetworkSelect as ns } from '../components/NetworkSelect';
 
 export default class Energize extends React.Component {
 
@@ -16,14 +17,6 @@ export default class Energize extends React.Component {
         super(props);
         this.recoveredTeleport = null;
         this.cancellationToken = new CancellationToken();
-    }
-
-    getNetworkFromDropdown() {
-        var sourceIndex = $("#network").prop('selectedIndex') - 1;
-        if (sourceIndex < 0)
-            return;
-        var network = config.network[sourceIndex];
-        return network;
     }
 
     async validateUiState() {
@@ -40,26 +33,24 @@ export default class Energize extends React.Component {
             }
             else {
                 if (wallet.isMetamask)
-                    msg.showWarn("Switch MetaMask to the " + this.recoveredTeleport.destination.network + " network to energize");
+                    msg.showWarn(`Switch MetaMask to the ${this.recoveredTeleport.destination.network} network to energize`);
                 else if (wallet.isWalletConnect) {
-                    msg.showWarn("Sending request to change to the " + this.recoveredTeleport.destination.network + " network to energize");
+                    msg.showWarn(`Sending request to change to the ${this.recoveredTeleport.destination.network} network to energize`);
                     wallet.switchNetwork(this.recoveredTeleport.destination.chainId);
                 }
             }
         }
         else {
-            var net = this.getNetworkFromDropdown();
+            var data = ns.get();
 
-            if (!net)
-            {
+            if (isNaN(data.chainId)) {
                 console.log("no network");
                 return;
             }
 
             var tx = $("#hash").val();
 
-            if (!tx)
-            {
+            if (!tx) {
                 console.log("no hash");
                 return;
             }
@@ -69,7 +60,31 @@ export default class Energize extends React.Component {
                 return;
             }
 
-            if (wallet.chainId === net.chainId) {
+            if (data.network.chainId !== wallet.chainId) {
+                disable("#button");
+                return;
+            }
+
+            this.recoveredTeleport = await this.recoverTeleport(tx);
+            console.log(this.recoveredTeleport);
+
+            if (!this.recoveredTeleport) {
+                msg.showError("Teleport not found");
+                return;
+            }
+
+            msg.showOk("Teleport found");
+            disable("#selectors");
+            enable("#button");
+
+            if (wallet.isMetamask)
+                msg.showWarn(`Switch MetaMask to the ${this.recoveredTeleport.destination.network} network to energize`);
+            else if (wallet.isWalletConnect) {
+                msg.showWarn(`Sending request to change to the ${this.recoveredTeleport.destination.network} network to energize`);
+                wallet.switchNetwork(this.recoveredTeleport.destination.chainId);
+            }
+
+            /*if (wallet.chainId === net.chainId) {
                 console.log("chain id match");
                 this.recoveredTeleport = await this.recoverTeleport(tx);
 
@@ -85,25 +100,25 @@ export default class Energize extends React.Component {
                 enable("#button");
 
                 if (wallet.isMetamask)
-                    msg.showWarn("Switch MetaMask to the " + this.recoveredTeleport.destination.network + " network to energize");
+                    msg.showWarn(`Switch MetaMask to the ${this.recoveredTeleport.destination.network} network to energize`);
                 else if (wallet.isWalletConnect) {
-                    msg.showWarn("Sending request to change to the " + this.recoveredTeleport.destination.network + " network to energize");
+                    msg.showWarn(`Sending request to change to the ${this.recoveredTeleport.destination.network} network to energize`);
                     wallet.switchNetwork(this.recoveredTeleport.destination.chainId);
                 }
             }
             else {
                 if (wallet.isMetamask)
-                    msg.showWarn("Switch MetaMask to the " + net.network + " network to recover");
+                    msg.showWarn(`Switch MetaMask to the ${net.network} network to recover`);
                 else if (wallet.isWalletConnect) {
-                    msg.showWarn("Sending request to change to the " + net.network + " network to recover");
+                    msg.showWarn(`Sending request to change to the ${net.network} network to recover`);
                     wallet.switchNetwork(net.chainId);
                 }
-            }
+            }*/
         }
     }
 
     async recoverTeleport(txHash) {
-        console.log("Attempting recovery: " + txHash);
+        console.log("Attempting recovery:", txHash);
         var receipt = await wallet.web3.eth.getTransactionReceipt(txHash);
 
         if (!receipt) {
@@ -174,6 +189,7 @@ export default class Energize extends React.Component {
 
             em.on('disconnect', () => {
                 disable("#form");
+                msg.clearAll();
                 this.cancellationToken.cancel();
             });
 
@@ -183,7 +199,6 @@ export default class Energize extends React.Component {
                     return;
                 }
 
-                enable("#form");
                 await this.validateUiState();
             });
 
@@ -199,16 +214,8 @@ export default class Energize extends React.Component {
         else
             disable("#form");
 
-        config.fetchNetworkConfig(function (data) {
-            $("#network").append($("<option />").text("Select network"));
-            $.each(data, function () {
-                $("#network").append($("<option />").text(this.network));
-            });
-        });
-
-        $("#network").on('change', async () => {
-            await this.validateUiState();
-        });
+        ns.populateAll();
+        ns.toggleNetworkWarning();
 
         $("#hash").on('change', async () => {
             await this.validateUiState();
@@ -239,7 +246,7 @@ export default class Energize extends React.Component {
                     enable("#form");
                 }
 
-                msg.showError("Error " + code + ": " + error);
+                msg.showError(`Error ${code}: ${error}`);
             });
 
             energizer.on('ok', async (serverSignatures) => {
@@ -253,7 +260,7 @@ export default class Energize extends React.Component {
                     var depositTx = await destBridgeContract.methods.deposit(energizer.teleport.signature, serverSignatures, energizer.teleport.transactionData).send({ from: wallet.web3.eth.defaultAccount });
                     console.log("Deposit: ", depositTx);
                     enable("#form");
-                    msg.showOk("Energized: " + depositTx.transactionHash);
+                    msg.showOk("Energized:", depositTx.transactionHash);
                 }
                 catch
                 {
@@ -277,7 +284,7 @@ export default class Energize extends React.Component {
 
     render() {
         return (
-            <div className="p-3">
+            <div className="ps-3 pe-3">
                 <div className="row">
                     <div className="col-sm">
                         <div>
@@ -286,13 +293,8 @@ export default class Energize extends React.Component {
                                 <div className="card-body">
                                     <div id="form">
                                         <div id="selectors">
-                                            <div>Transaction Hash</div>
-                                            <div className="input-group mb-3">
+                                            <div className="mb-3">
                                                 <input id="hash" className="form-control input-sm" placeholder="Enter TX hash" />
-                                            </div>
-                                            <div>Network</div>
-                                            <div className="input-group mb-3">
-                                                <select id="network" className="form-control form-select"></select>
                                             </div>
                                         </div>
                                         <div>

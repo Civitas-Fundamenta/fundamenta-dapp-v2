@@ -1,5 +1,5 @@
 import React from 'react';
-import $ from 'jquery'
+import $ from 'jquery';
 import EventEmitter from 'events';
 
 import { Config as config } from '../js/config'
@@ -10,6 +10,7 @@ import { enable, disable } from '../js/ui';
 import { WalletProvider as wallet } from '../js/walletProvider'
 
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
+import { NetworkSelect as ns } from '../components/NetworkSelect';
 
 export default class Teleport extends React.Component {
 
@@ -19,16 +20,39 @@ export default class Teleport extends React.Component {
         this.cancellationToken = new CancellationToken();
     }
 
-    getSourceNetworkFromDropdown() {
-        var sourceIndex = $("#source").prop('selectedIndex') - 1;
-        if (sourceIndex < 0)
+    async populateTokenDropDown() {
+        $("#sourceToken").empty();
+        $("#destination").empty();
+        $("#sourceToken").append($("<option />").text("Select token"));
+        $("#destination").append($("<option />").text("Select destination"));
+        var chainId = ns.get().chainId;
+
+        if (isNaN(chainId)) {
+            disable("#form");
             return;
-        var network = config.network[sourceIndex];
-        return network;
+        }
+
+        enable("#form");
+
+        var network = ns.getFromMap(chainId);
+
+        console.log(network);
+
+        await this.validateUiState();
+
+        if (!network)
+            return;
+
+        $("#sourceToken").append($("<option />").text(network.fmtaToken.ticker));
+
+        $.each(network.tokens, function () {
+            if (this.bridgeAddress)
+                $("#sourceToken").append($("<option />").text(this.ticker));
+        });
     }
 
     getSourceTokenFromDropdown() {
-        var network = this.getSourceNetworkFromDropdown();
+        var network = ns.getFromMap(ns.get().chainId);
         if (!network)
             return;
 
@@ -81,21 +105,26 @@ export default class Teleport extends React.Component {
     }
 
     async validateUiState() {
-        var net = this.getSourceNetworkFromDropdown();
-
-        disable("#button");
+        var net = ns.getFromMap(ns.get().chainId);
+        
         msg.clearAll();
+        disable("#button");
+        
+        var balance = await this.getTokenBalance();
 
         if (!net)
+        {
+            disable("#form");
             return;
+        }
 
         if (net.chainId !== wallet.chainId) {
             if (wallet.isMetamask) {
-                msg.showWarn("Switch to the " + net.network + " network to teleport");
+                msg.showWarn(`Switch to the ${net.network} network to teleport`);
                 return;
             }
             else if (wallet.isWalletConnect) {
-                msg.showWarn("Sending request to change to the " + net.network + " network for teleport");
+                msg.showWarn(`Sending request to change to the ${net.network} network for teleport`);
                 wallet.switchNetwork(net.chainId);
                 return;
             }
@@ -105,33 +134,35 @@ export default class Teleport extends React.Component {
         if (index < 0)
             return;
 
-        var balance = await this.getCurrentSourceTokenBalance();
         var amount = parseFloat($("#amount").val());
         if (isNaN(amount) || amount <= 0 || isNaN(balance) || balance < amount) {
-            msg.showError("Enter an amount to teleport");
+            msg.showWarn("Invalid amount entered");
             disable("#button");
+            return;
         }
-        else
-            enable("#button");
+        
+        enable("#button");
     };
 
-    async getCurrentSourceTokenBalance() {
-        var network = this.getSourceNetworkFromDropdown();
+    async getTokenBalance() {
+        var network = ns.getFromMap(ns.get().chainId);
         var token = this.getSourceTokenFromDropdown();
 
         if (!network || !token) {
-            $("#balance").empty();
+            $("#amount").attr("placeholder", "Enter amount");
             return;
         }
 
         if (wallet.chainId === network.chainId && wallet.web3.eth.defaultAccount) {
             var contract = new wallet.web3.eth.Contract(config.app.tokenAbi, token.tokenAddress);
             var bal = await contract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
-            if (!bal) {
+            if (!bal)
                 bal = 0;
-            }
-            $("#balance").text(" (max " + convert.fromAtomicUnits(bal, token.decimals) + " " + token.ticker + ")");
-            return bal;
+
+            var balance = convert.fromAtomicUnits(bal, token.decimals).toString();
+
+            $("#amount").attr('placeholder', `Enter amount (max ${balance})`);
+            return parseFloat(balance);
         }
     }
 
@@ -158,6 +189,7 @@ export default class Teleport extends React.Component {
 
             em.on('disconnect', () => {
                 disable("#form");
+                msg.clearAll();
                 this.cancellationToken.cancel();
             });
 
@@ -173,12 +205,13 @@ export default class Teleport extends React.Component {
 
             em.on('chainChanged', async (chainId) => {
                 msg.clearAll();
+                await this.populateTokenDropDown();
                 if (this.completedTeleport == null) {
                     await this.validateUiState();
                     return;
                 }
 
-                var net = this.getSourceNetworkFromDropdown();
+                var net = ns.getFromMap(ns.get().chainId);
 
                 if (this.completedTeleport.destination.chainId !== wallet.chainId) {
                     msg.showWarn("Switch to the " + net.network + " network to energize");
@@ -186,7 +219,7 @@ export default class Teleport extends React.Component {
                 }
 
                 msg.showOk("Waiting for energize. Do not close this page");
-                
+
                 this.cancellationToken = new CancellationToken();
                 var energizer = new Energizer(this.completedTeleport, this.cancellationToken);
                 energizer.on('error', (code, error) => {
@@ -229,35 +262,12 @@ export default class Teleport extends React.Component {
         else
             disable("#form");
 
-        config.fetchNetworkConfig(function (data) {
-            $("#source").append($("<option />").text("Select network"));
-            $.each(data, function () {
-                $("#source").append($("<option />").text(this.network));
-            });
-        });
-
-        $("#source").on('change', async () => {
-            var network = this.getSourceNetworkFromDropdown();
-            $("#sourceToken").empty();
-            $("#destination").empty();
-            $("#sourceToken").append($("<option />").text("Select token"));
-            $("#destination").append($("<option />").text("Select destination"));
-
-            await this.validateUiState();
-
-            if (!network)
-                return;
-
-            $("#sourceToken").append($("<option />").text(network.fmtaToken.ticker));
-
-            $.each(network.tokens, function () {
-                if (!this.bridgeAddress)
-                    $("#sourceToken").append($("<option />").text(this.ticker));
-            });
-        });
+        ns.populateAll();
+        ns.toggleNetworkWarning();
+        await this.populateTokenDropDown();
 
         $("#sourceToken").on('change', async () => {
-            var network = this.getSourceNetworkFromDropdown();
+            var network = ns.getFromMap(ns.get().chainId);
             var token = this.getSourceTokenFromDropdown();
 
             $("#destination").empty();
@@ -296,7 +306,7 @@ export default class Teleport extends React.Component {
         $("#button").on('click', async () => {
             msg.clearAll();
             disable("#form");
-            var source = this.getSourceNetworkFromDropdown();
+            var source = ns.getFromMap(ns.get().chainId);
             var sourceToken = this.getSourceTokenFromDropdown();
             var destination = this.getDestinationNetworkFromDropDown();
             var destinationToken = this.getDestinationTokenFromDropDown();
@@ -358,7 +368,7 @@ export default class Teleport extends React.Component {
                 enable("#form");
             }
 
-            await this.getCurrentSourceTokenBalance();
+            await this.getTokenBalance();
         });
     }
 
@@ -369,7 +379,7 @@ export default class Teleport extends React.Component {
 
     render() {
         return (
-            <div className="p-3">
+            <div className="ps-3 pe-3">
                 <div className="row">
                     <div className="col-sm">
                         <div>
@@ -377,21 +387,13 @@ export default class Teleport extends React.Component {
                                 <div className="card-header">Teleport</div>
                                 <div className="card-body">
                                     <div id="form">
-                                        <div>From</div>
                                         <div className="input-group mb-3">
-                                            <select id="source" className="form-control form-select"></select>
                                             <select id="sourceToken" className="form-control form-select"></select>
-                                        </div>
-                                        <div>To</div>
-                                        <div className="mb-3">
-                                            <select id="destination" className="form-control form-select"></select>
-                                        </div>
-                                        <div className="input-group">
-                                            <div>Amount</div>&nbsp;<div id="balance"></div>
-                                        </div>
-                                        <div className="mb-3">
                                             <input type="number" id="amount" className="form-control input-sm numeric-input"
                                                 placeholder="Enter amount" />
+                                        </div>
+                                        <div className="mb-3">
+                                            <select id="destination" className="form-control form-select"></select>
                                         </div>
                                         <div>
                                             <button type="button" id="button" className="btn btn-primary">Teleport!</button>

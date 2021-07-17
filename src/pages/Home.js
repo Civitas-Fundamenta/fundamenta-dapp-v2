@@ -5,9 +5,9 @@ import { WalletProvider as wallet } from '../js/walletProvider'
 
 import { NetworkSelect as ns } from '../components/NetworkSelect'
 
-export default class Mining extends React.Component {
+export default class Home extends React.Component {
     async componentDidMount() {
-        if (!wallet.hasListener('mining')) {
+        if (!wallet.hasListener('home')) {
             console.log("Registering home component wallet listeners");
             var em = new EventEmitter();
 
@@ -27,7 +27,7 @@ export default class Mining extends React.Component {
                 ns.toggleNetworkWarning();
             });
 
-            wallet.addListener('mining', em);
+            wallet.addListener('home', em);
         }
 
         ns.populateAll();
@@ -35,12 +35,12 @@ export default class Mining extends React.Component {
     }
 
     componentWillUnmount() {
-        wallet.removeListener('mining');
+        wallet.removeListener('home');
     }
 
     render() {
         return(
-            <div className="ps-3 pe-3">Reserved for mining page</div>
+            <div className="ps-3 pe-3" />
         )
     }
 }

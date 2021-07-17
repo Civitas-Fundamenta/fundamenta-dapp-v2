@@ -3,7 +3,7 @@
 //mainnet.next
 //mainnet
 
-import $ from 'jquery'
+import $ from 'jquery';
 
 export class Config {
 
@@ -171,7 +171,7 @@ export class Config {
         if (!this.network) {
             console.log("Fetching network config");
             $.ajax({
-                url: "https://" + this.app.resourceUrl + "/config/?x=" + this.app.cpNet,
+                url: `https://${this.app.resourceUrl}/config/?x=${this.app.cpNet}`,
                 dataType: 'json',
                 cache: 'false',
                 success: function (data) {
