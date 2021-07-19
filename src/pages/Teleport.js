@@ -25,20 +25,10 @@ export default class Teleport extends React.Component {
         $("#destination").empty();
         $("#sourceToken").append($("<option />").text("Select token"));
         $("#destination").append($("<option />").text("Select destination"));
-        var chainId = ns.get().chainId;
-
-        if (isNaN(chainId)) {
-            disable("#form");
-            return;
-        }
-
-        enable("#form");
-
-        var network = ns.getFromMap(chainId);
-
-        console.log(network);
 
         await this.validateUiState();
+        
+        var network = ns.getFromMap(wallet.chainId);
 
         if (!network)
             return;
@@ -52,7 +42,7 @@ export default class Teleport extends React.Component {
     }
 
     getSourceTokenFromDropdown() {
-        var network = ns.getFromMap(ns.get().chainId);
+        var network = ns.getFromMap(wallet.chainId);
         if (!network)
             return;
 
@@ -105,9 +95,9 @@ export default class Teleport extends React.Component {
     }
 
     async validateUiState() {
-        var net = ns.getFromMap(ns.get().chainId);
+        var net = ns.getFromMap(wallet.chainId);
         
-        msg.clearAll();
+        msg.clear();
         disable("#button");
         
         var balance = await this.getTokenBalance();
@@ -118,17 +108,8 @@ export default class Teleport extends React.Component {
             return;
         }
 
-        if (net.chainId !== wallet.chainId) {
-            if (wallet.isMetamask) {
-                msg.showWarn(`Switch to the ${net.network} network to teleport`);
-                return;
-            }
-            else if (wallet.isWalletConnect) {
-                msg.showWarn(`Sending request to change to the ${net.network} network for teleport`);
-                wallet.switchNetwork(net.chainId);
-                return;
-            }
-        }
+        if (net.chainId !== wallet.chainId)
+            return;
 
         var index = $("#destination").prop('selectedIndex') - 1;
         if (index < 0)
@@ -145,7 +126,7 @@ export default class Teleport extends React.Component {
     };
 
     async getTokenBalance() {
-        var network = ns.getFromMap(ns.get().chainId);
+        var network = ns.getFromMap(wallet.chainId);
         var token = this.getSourceTokenFromDropdown();
 
         if (!network || !token) {
@@ -178,9 +159,8 @@ export default class Teleport extends React.Component {
     }
 
     async componentDidMount() {
-        msg.clearAll();
+        msg.clear();
         if (!wallet.hasListener('teleport')) {
-            console.log("Registering teleport component wallet listeners");
             var em = new EventEmitter();
 
             em.on('connect', () => {
@@ -189,12 +169,12 @@ export default class Teleport extends React.Component {
 
             em.on('disconnect', () => {
                 disable("#form");
-                msg.clearAll();
+                msg.clear();
                 this.cancellationToken.cancel();
             });
 
             em.on('accountsChanged', async (accounts) => {
-                if (accounts.length === 0) {
+                if (accounts === null || accounts.length === 0) {
                     disable("#form");
                     return;
                 }
@@ -204,27 +184,27 @@ export default class Teleport extends React.Component {
             });
 
             em.on('chainChanged', async (chainId) => {
-                msg.clearAll();
+                msg.clear();
                 await this.populateTokenDropDown();
                 if (this.completedTeleport == null) {
                     await this.validateUiState();
                     return;
                 }
 
-                var net = ns.getFromMap(ns.get().chainId);
+                var net = ns.getFromMap(wallet.chainId);
 
                 if (this.completedTeleport.destination.chainId !== wallet.chainId) {
                     msg.showWarn("Switch to the " + net.network + " network to energize");
                     return;
                 }
 
-                msg.showOk("Waiting for energize. Do not close this page");
+                msg.showWarn("Waiting for energize. Do not close this page");
 
                 this.cancellationToken = new CancellationToken();
                 var energizer = new Energizer(this.completedTeleport, this.cancellationToken);
                 energizer.on('error', (code, error) => {
                     if (code !== 100) {
-                        msg.hideOk();
+                        msg.hideWarn();
                         enable("#form");
                     }
 
@@ -232,20 +212,19 @@ export default class Teleport extends React.Component {
                 });
 
                 energizer.on('ok', async (serverSignatures) => {
-                    msg.hideWarn();
-                    msg.hideError();
-                    msg.showOk("Energized confirmed. Processing transaction...");
+                    msg.clear();
+                    msg.showWarn("Energized confirmed. Processing transaction...");
                     try {
                         var destBridgeContract = new wallet.web3.eth.Contract(config.app.bridgeAbi, energizer.teleport.destinationToken.bridgeAddress);
-                        var depositTx = await destBridgeContract.methods.deposit(energizer.teleport.signature, serverSignatures, energizer.teleport.transactionData).send({ from: wallet.web3.eth.defaultAccount });
-                        console.log("Deposit: ", depositTx);
+                        var tx = await destBridgeContract.methods.deposit(energizer.teleport.signature, serverSignatures, energizer.teleport.transactionData).send({ from: wallet.web3.eth.defaultAccount });
+                        console.log("Transaction: ", tx);
                         enable("#form");
-                        msg.showOk("Energized: " + depositTx.transactionHash);
+                        msg.showOk("Energize success!");
                     }
                     catch
                     {
-                        msg.hideOk();
-                        msg.showError("Transaction failed");
+                        msg.clear();
+                        msg.showError("Energize faile!");
                         enable("#form");
                         return;
                     }
@@ -263,11 +242,10 @@ export default class Teleport extends React.Component {
             disable("#form");
 
         ns.populateAll();
-        ns.toggleNetworkWarning();
         await this.populateTokenDropDown();
 
         $("#sourceToken").on('change', async () => {
-            var network = ns.getFromMap(ns.get().chainId);
+            var network = ns.getFromMap(wallet.chainId);
             var token = this.getSourceTokenFromDropdown();
 
             $("#destination").empty();
@@ -304,9 +282,9 @@ export default class Teleport extends React.Component {
         });
 
         $("#button").on('click', async () => {
-            msg.clearAll();
+            msg.clear();
             disable("#form");
-            var source = ns.getFromMap(ns.get().chainId);
+            var source = ns.getFromMap(wallet.chainId);
             var sourceToken = this.getSourceTokenFromDropdown();
             var destination = this.getDestinationNetworkFromDropDown();
             var destinationToken = this.getDestinationTokenFromDropDown();
@@ -319,7 +297,7 @@ export default class Teleport extends React.Component {
 
             var transactionData = "0x" + amountAtomicUnitsHex + uuid + nonce + address;
 
-            msg.showOk("Requesting signature...");
+            msg.showWarn("Requesting signature...");
             var signature;
 
             try {
@@ -327,14 +305,14 @@ export default class Teleport extends React.Component {
             }
             catch
             {
-                msg.hideOk();
+                msg.hideWarn();
                 msg.showError("Transaction signing failed");
                 enable("#form");
                 return
             }
 
             try {
-                msg.showOk("Processing teleport. Please wait...");
+                msg.showWarn("Processing teleport. Please wait...");
                 var sourceBridgeContract = new wallet.web3.eth.Contract(config.app.bridgeAbi, sourceToken.bridgeAddress);
                 var withdrawTx = await sourceBridgeContract.methods.withdraw(signature, transactionData).send({ from: wallet.web3.eth.defaultAccount });
                 console.log("Withdraw: ", withdrawTx);
@@ -352,6 +330,7 @@ export default class Teleport extends React.Component {
                     signature
                 };
 
+                msg.clear();
                 msg.showOk("Teleport completed.");
 
                 if (wallet.isMetamask)
@@ -362,9 +341,9 @@ export default class Teleport extends React.Component {
                 }
             }
             catch (ex) {
-                msg.hideOk();
+                msg.clear();
                 msg.showError("Teleport transaction failed");
-                console.log(ex);
+                console.error(ex);
                 enable("#form");
             }
 
@@ -396,7 +375,7 @@ export default class Teleport extends React.Component {
                                             <select id="destination" className="form-control form-select"></select>
                                         </div>
                                         <div>
-                                            <button type="button" id="button" className="btn btn-primary">Teleport!</button>
+                                            <button type="button" id="button" className="btn btn-primary w-100">Teleport!</button>
                                         </div>
                                     </div>
                                     <MessagePanelComponent />

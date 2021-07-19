@@ -20,10 +20,9 @@ export default class Energize extends React.Component {
     }
 
     async validateUiState() {
-        console.log("Validating UI state");
         enable("#form");
         disable("#button");
-        msg.clearAll();
+        msg.clear();
 
         if (this.recoveredTeleport) {
             if (wallet.chainId === this.recoveredTeleport.destination.chainId) {
@@ -41,27 +40,13 @@ export default class Energize extends React.Component {
             }
         }
         else {
-            var data = ns.get();
-
-            if (isNaN(data.chainId)) {
-                console.log("no network");
-                return;
-            }
-
             var tx = $("#hash").val();
 
-            if (!tx) {
-                console.log("no hash");
+            if (!tx)
                 return;
-            }
 
             if (tx.length < 66) {
                 msg.showError("Invalid transaction hash");
-                return;
-            }
-
-            if (data.network.chainId !== wallet.chainId) {
-                disable("#button");
                 return;
             }
 
@@ -83,37 +68,6 @@ export default class Energize extends React.Component {
                 msg.showWarn(`Sending request to change to the ${this.recoveredTeleport.destination.network} network to energize`);
                 wallet.switchNetwork(this.recoveredTeleport.destination.chainId);
             }
-
-            /*if (wallet.chainId === net.chainId) {
-                console.log("chain id match");
-                this.recoveredTeleport = await this.recoverTeleport(tx);
-
-                console.log(this.recoveredTeleport);
-
-                if (!this.recoveredTeleport) {
-                    msg.showError("Teleport not found");
-                    return;
-                }
-
-                msg.showOk("Teleport found");
-                disable("#selectors");
-                enable("#button");
-
-                if (wallet.isMetamask)
-                    msg.showWarn(`Switch MetaMask to the ${this.recoveredTeleport.destination.network} network to energize`);
-                else if (wallet.isWalletConnect) {
-                    msg.showWarn(`Sending request to change to the ${this.recoveredTeleport.destination.network} network to energize`);
-                    wallet.switchNetwork(this.recoveredTeleport.destination.chainId);
-                }
-            }
-            else {
-                if (wallet.isMetamask)
-                    msg.showWarn(`Switch MetaMask to the ${net.network} network to recover`);
-                else if (wallet.isWalletConnect) {
-                    msg.showWarn(`Sending request to change to the ${net.network} network to recover`);
-                    wallet.switchNetwork(net.chainId);
-                }
-            }*/
         }
     }
 
@@ -177,10 +131,9 @@ export default class Energize extends React.Component {
     }
 
     componentDidMount() {
-        msg.clearAll();
+        msg.clear();
 
         if (!wallet.hasListener('energize')) {
-            console.log("Registering wrap component wallet listeners");
             var em = new EventEmitter();
 
             em.on('connect', async () => {
@@ -189,12 +142,12 @@ export default class Energize extends React.Component {
 
             em.on('disconnect', () => {
                 disable("#form");
-                msg.clearAll();
+                msg.clear();
                 this.cancellationToken.cancel();
             });
 
             em.on('accountsChanged', async (accounts) => {
-                if (accounts.length === 0) {
+                if (accounts === null || accounts.length === 0) {
                     disable("#form");
                     return;
                 }
@@ -215,64 +168,64 @@ export default class Energize extends React.Component {
             disable("#form");
 
         ns.populateAll();
-        ns.toggleNetworkWarning();
 
         $("#hash").on('change', async () => {
             await this.validateUiState();
         });
 
         $("#button").on('click', async () => {
-            msg.clearAll();
+            msg.clear();
             disable("#form");
-            msg.showOk("Requesting signature...");
-
+            msg.showWarn("Requesting signature...");
+    
+            console.log("Transaction Data:", this.recoveredTeleport.transactionData);
+    
             try {
                 var signature = await wallet.web3.eth.personal.sign(this.recoveredTeleport.transactionData, wallet.web3.eth.defaultAccount);
                 this.recoveredTeleport.signature = signature;
             }
             catch
             {
-                msg.hideOk();
-                msg.showError("Transaction signing failed");
+                msg.clear();
                 enable("#form");
+                msg.showError("Transaction signing failed");
                 return;
             }
-
+    
             this.cancellationToken = new CancellationToken();
             var energizer = new Energizer(this.recoveredTeleport, this.cancellationToken);
             energizer.on('error', (code, error) => {
                 if (code !== 100) {
-                    msg.hideOk();
+                    msg.hideWarn();
                     enable("#form");
                 }
-
+    
                 msg.showError(`Error ${code}: ${error}`);
             });
-
+    
             energizer.on('ok', async (serverSignatures) => {
-                msg.hideWarn();
-                msg.hideError();
+                msg.clear();
                 console.log(energizer.teleport);
-                console.log(wallet.web3.eth.defaultAccount);
-                msg.showOk("Energized confirmed. Processing transaction...");
+                msg.showWarn("Energize confirmed. Processing transaction...");
                 try {
                     var destBridgeContract = new wallet.web3.eth.Contract(config.app.bridgeAbi, energizer.teleport.destinationToken.bridgeAddress);
-                    var depositTx = await destBridgeContract.methods.deposit(energizer.teleport.signature, serverSignatures, energizer.teleport.transactionData).send({ from: wallet.web3.eth.defaultAccount });
-                    console.log("Deposit: ", depositTx);
+                    var tx = await destBridgeContract.methods.deposit(energizer.teleport.signature, serverSignatures, energizer.teleport.transactionData).send({ from: wallet.web3.eth.defaultAccount });
+                    console.log("Transaction:", tx);
                     enable("#form");
-                    msg.showOk("Energized:", depositTx.transactionHash);
+                    msg.clear();
+                    msg.showOk("Energize Success!");
                 }
                 catch
                 {
-                    msg.hideOk();
-                    msg.showError("Transaction failed");
+                    msg.clear();
+                    msg.showError("Transaction failed!");
                     enable("#form");
                     return;
                 }
             });
-
-            msg.showOk("Verifying teleport...");
-
+    
+            msg.showWarn("Verifying teleport...");
+    
             await energizer.start();
         });
     }
@@ -298,7 +251,7 @@ export default class Energize extends React.Component {
                                             </div>
                                         </div>
                                         <div>
-                                            <button type="button" id="button" className="btn btn-primary">Energize!</button>
+                                            <button type="button" id="button" className="btn btn-primary w-100">Energize!</button>
                                         </div>
                                     </div>
                                     <MessagePanelComponent />

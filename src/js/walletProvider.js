@@ -13,16 +13,16 @@ export class WalletProvider {
     static isMetamask = false;
 
     static networkNames = new Map([
-        [ 1, "ethereum" ],
-        [ 4, "rinkeby" ],
-        [ 5, "goerli" ],
-        [ 56, "binance" ]
+        [1, "ethereum"],
+        [4, "rinkeby"],
+        [5, "goerli"],
+        [56, "binance"]
     ]);
 
     static getNetworkName() {
         if (this.networkNames.has(this.chainId))
             return this.networkNames.get(this.chainId);
-
+            
         return "unknown";
     }
 
@@ -66,16 +66,15 @@ export class WalletProvider {
             },
             chainId: config.cpNet === "testnet" ? 4 : 1,
             qrcodeModalOptions: {
-                mobileLinks: [ ],
-              }
+                mobileLinks: [],
+            }
         });
 
         this.web3 = new Web3(this.provider);
 
         this.#registerProvider();
 
-        this.provider.wc.on('wc_sessionUpdate', (error, payload) =>
-        {
+        this.provider.wc.on('wc_sessionUpdate', (error, payload) => {
             if (error) {
                 this.chainId = 0;
                 console.warn('wc_sessionUpdate', error);
@@ -94,7 +93,8 @@ export class WalletProvider {
             await this.provider.enable();
         } catch {
             this.isWalletConnect = false;
-            return false; }
+            return false;
+        }
 
         await this.provider.request({ method: 'eth_requestAccounts' });
         this.chainId = parseInt(await this.provider.request({ method: 'eth_chainId' }));
@@ -118,32 +118,30 @@ export class WalletProvider {
                 e.emit('accountsChanged', [window.ethereum.selectedAddress]);
 
             this.chainId = parseInt(await this.provider.request({ method: 'eth_chainId' }));
-
-            for (let e of this.emitters.values())
-                e.emit('chainChanged', WalletProvider.chainId);
-
-            for (let e of this.emitters.values())
-                e.emit('connect');
         }
-        else
-        {
+        else {
             await this.provider.request({ method: 'eth_requestAccounts' });
             this.chainId = parseInt(await this.provider.request({ method: 'eth_chainId' }));
         }
+
+        for (let e of this.emitters.values())
+            e.emit('chainChanged', WalletProvider.chainId);
+
+        for (let e of this.emitters.values())
+            e.emit('connect');
 
         return true;
     }
 
     static #registerProvider() {
         this.provider.on('accountsChanged', async function (accounts) {
-            if (accounts.length > 0)
+            if (accounts !== null && accounts.length > 0) {
                 WalletProvider.web3.eth.defaultAccount = accounts[0];
+                for (let e of WalletProvider.emitters.values())
+                    e.emit('accountsChanged', accounts);
+            }
             else
-                WalletProvider.web3.eth.defaultAccount = null;
-
-            console.log('accountsChanged', accounts);
-            for (let e of WalletProvider.emitters.values())
-                e.emit('accountsChanged', accounts);
+                WalletProvider.disconnect();
         });
 
         this.provider.on('chainChanged', async function (chainId) {
@@ -151,20 +149,17 @@ export class WalletProvider {
                 WalletProvider.chainId = parseInt(chainId);
             else
                 WalletProvider.chainId = chainId;
-            
-            console.log('WalletProvider.chainChanged', WalletProvider.chainId);
+
             for (let e of WalletProvider.emitters.values())
                 e.emit('chainChanged', WalletProvider.chainId);
         });
 
         this.provider.on('connect', async function (connectInfo) {
-            console.log('WalletProvider.connect');
             for (let e of WalletProvider.emitters.values())
                 e.emit('connect', connectInfo);
         });
 
         this.provider.on('disconnect', async function (disconnectInfo) {
-            console.log('WalletProvider.disconnect');
             for (let e of WalletProvider.emitters.values())
                 e.emit('disconnect', disconnectInfo);
         });
@@ -191,7 +186,6 @@ export class WalletProvider {
     static async disconnect() {
         this.web3 = null;
 
-        console.log("Disconnecting wallet");
         if (this.provider) {
             if (this.isWalletConnect)
                 await this.provider.disconnect();

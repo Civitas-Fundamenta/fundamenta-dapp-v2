@@ -3,7 +3,6 @@ import $ from 'jquery';
 
 import { Config as config } from '../js/config'
 import { Conversions as convert } from '../js/conversions';
-import { Sorter as sort } from '../js/sorter';
 import { enable, disable } from '../js/ui';
 import { WalletProvider as wallet } from '../js/walletProvider'
 import { UiCommon } from '../js/wrapUi';
@@ -37,9 +36,9 @@ export default class Wrap extends React.Component {
             return parseFloat(allowance);
         }
     }
-    
+
     async componentDidMount() {
-        msg.clearAll();
+        msg.clear();
 
         this.common.registerWalletListeners('wrap');
 
@@ -49,68 +48,70 @@ export default class Wrap extends React.Component {
             disable("#form");
 
         ns.populateWrappable();
-        ns.toggleNetworkWarning();
         this.common.populateTokenDropDown();
+    }
 
-        $("#token").on('change', async () => {
-            await this.common.toggleNetworkWarning();
-        });
+    btnWrap_Clicked = async () => {
+        var data = this.common.getSelectedData();
+        var amount = parseFloat($("#amount").val());
+        var balance = await this.common.getTokenBalance();
 
-        $("#amount").on('change', async () => {
-            await this.common.toggleNetworkWarning();
-        });
+        if (isNaN(amount) || amount <= 0) {
+            msg.showWarn("Invalid amount entered");
+            return;
+        }
 
-        $("#button").on('click', async () => {
-            var data = this.common.getSelectedData();
-            var amount = parseFloat($("#amount").val());
+        if (isNaN(balance) || balance < amount) {
+            msg.showWarn("Amount exceeds balance");
+            return;
+        }
 
-            var tContract = new wallet.web3.eth.Contract(config.app.tokenAbi, data.token.tokenAddress);
-            var wtContract = new wallet.web3.eth.Contract(config.app.tokenAbi, data.token.wrappedTokenAddress);
-            msg.showWarn("Processing. Please wait...");
-            msg.hideOk();
-            msg.hideError();
-            disable("#form");
+        var tContract = new wallet.web3.eth.Contract(config.app.tokenAbi, data.token.tokenAddress);
+        var wtContract = new wallet.web3.eth.Contract(config.app.tokenAbi, data.token.wrappedTokenAddress);
+        msg.clear();
+        msg.showWarn("Processing. Please wait...");
+        disable("#form");
 
-            var ok = false;
+        var ok = false;
 
+        try {
+            var allowance = await this.getTokenAllowance();
+            if (allowance < amount) {
+                var au2 = convert.toAtomicUnitsHexPrefixed(100000000, data.token.decimals);
+                var at = await tContract.methods.approve(data.token.wrappedTokenAddress, au2).send({ from: wallet.web3.eth.defaultAccount });
+                console.log("Transaction: ", at);
+                ok = at.status;
+            }
+            else
+                ok = true;
+        } catch (ex) {
+            console.error(ex);
+            ok = false;
+        }
+
+        if (ok) {
             try {
-                var allowance = await this.getTokenAllowance();
-                console.log(allowance);
-                if (allowance < amount) {
-                    var au2 = convert.toAtomicUnitsHexPrefixed(100000000, data.token.decimals);
-                    var at = await tContract.methods.approve(data.token.wrappedTokenAddress, au2).send({ from: wallet.web3.eth.defaultAccount });
-                    console.log(at);
-                    ok = at.status;
-                }
-                else
-                    ok = true;
+                var au = convert.toAtomicUnitsHexPrefixed(amount, data.token.decimals);
+                var tx = await wtContract.methods.wrap(au).send({ from: wallet.web3.eth.defaultAccount });
+                console.log("Transaction: ", tx);
+                ok = tx.status;
             } catch (ex) {
-                console.log(ex);
+                console.error(ex);
                 ok = false;
             }
+        }
 
-            if (ok) {
-                try {
-                    var au = convert.toAtomicUnitsHexPrefixed(amount, data.token.decimals);
-                    var tx = await wtContract.methods.wrap(au).send({ from: wallet.web3.eth.defaultAccount });
-                    console.log("Transaction: ", tx);
-                    ok = tx.status;
-                } catch (ex) {
-                    console.log(ex);
-                    ok = false;
-                }
-            }
+        await this.common.getTokenBalance();
 
-            enable("#form");
-            msg.hideWarn();
+        enable("#form");
+        msg.clear();
 
-            if (ok)
-                msg.showOk("Wrap success!");
-            else
-                msg.showError("Wrap failed!");
+        if (ok)
+            msg.showOk("Wrap success!");
+        else
+            msg.showError("Wrap failed!");
 
-            await this.common.getTokenBalance();
-        });
+            $("#amount").val('');
     }
 
     componentWillUnmount() {
@@ -128,12 +129,13 @@ export default class Wrap extends React.Component {
                                 <div className="card-body">
                                     <div id="form">
                                         <div className="input-group mb-3">
-                                            <select id="token" className="form-control form-select"></select>
-                                            <input type="number" id="amount" className="form-control input-sm numeric-input"
-                                                placeholder="Enter amount" />
+                                            <select id="token" className="form-control form-select" onChange={async () => {
+                                                await this.common.getTokenBalance();
+                                            }}></select>
+                                            <input type="number" id="amount" className="form-control input-sm" placeholder="Enter amount" />
                                         </div>
                                         <div>
-                                            <button type="button" id="button" className="btn btn-primary">Wrap!</button>
+                                            <button type="button" id="button" className="btn btn-primary w-100" onClick={this.btnWrap_Clicked}>Wrap!</button>
                                         </div>
                                     </div>
                                     <MessagePanelComponent />

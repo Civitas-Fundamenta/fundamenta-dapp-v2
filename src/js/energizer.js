@@ -24,7 +24,7 @@ export class Energizer {
         {
             if (this.cancellationToken.cancelRequested)
             {
-                console.log("Energize task cancelled by token");
+                console.warn("Energize task cancelled by token");
                 return;
             }
 

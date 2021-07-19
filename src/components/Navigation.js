@@ -11,7 +11,7 @@ export class Navigation extends React.Component {
                     The CiviPort Web Teleporter is Beta software.
                 </div>
                 <div className="d-flex p-0 ps-3 pe-3">
-                    <div className="d-flex w-100 justify-content-start">
+                    <div className="w-100 justify-content-start">
                         <Navbar collapseOnSelect expand="md" className="navbar navbar-expand-md p-0">
                             <Navbar.Toggle />
                             <Navbar.Collapse>
@@ -43,7 +43,7 @@ export class Navigation extends React.Component {
                             </Navbar.Collapse>
                         </Navbar>
                     </div>
-                    <div className="d-flex justify-content-end">
+                    <div className="justify-content-end">
                         <NetworkSelectComponent />
                     </div>
                 </div>

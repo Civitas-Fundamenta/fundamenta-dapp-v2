@@ -3,7 +3,6 @@ import $ from 'jquery';
 
 import { Config as config } from '../js/config'
 import { Conversions as convert } from '../js/conversions';
-import { Sorter as sort } from '../js/sorter';
 import { enable, disable } from '../js/ui';
 import { WalletProvider as wallet } from '../js/walletProvider'
 import { UiCommon } from '../js/wrapUi';
@@ -19,7 +18,7 @@ export default class Unwrap extends React.Component {
     }
 
     async componentDidMount() {
-        msg.clearAll();
+        msg.clear();
 
         this.common.registerWalletListeners('unwrap');
 
@@ -29,50 +28,53 @@ export default class Unwrap extends React.Component {
             disable("#form");
 
         ns.populateWrappable();
-        ns.toggleNetworkWarning();
         this.common.populateTokenDropDown();
-
-        $("#token").on('change', async () => {
-            this.common.toggleNetworkWarning();
-        });
-
-        $("#amount").on('change', async () => {
-            this.common.toggleNetworkWarning();
-        });
-
-        $("#button").on('click', async () => {
-            var data = this.common.getSelectedData();
-            var amount = parseFloat($("#amount").val());
-
-            var contract = new wallet.web3.eth.Contract(config.app.tokenAbi, data.token.wrappedTokenAddress);
-            msg.showWarn("Processing. Please wait...");
-            msg.hideOk();
-            msg.hideError();
-            disable("#form");
-
-            var ok = false;
-
-            try {
-                var au = convert.toAtomicUnitsHexPrefixed(amount, data.token.decimals);
-                var tx = await contract.methods.unwrap(au).send({ from: wallet.web3.eth.defaultAccount });
-                console.log("Transaction: ", tx);
-                ok = tx.status;
-            } catch (ex) {
-                console.log(ex);
-                ok = false;
-            }
-
-            enable("#form");
-            msg.hideWarn();
-
-            if (ok)
-                msg.showOk("Unwrap success!");
-            else
-                msg.showError("Unwrap failed!");
-
-            await this.common.getTokenBalance();
-        });
     }
+
+    btnUnwrap_Clicked = async () => {
+        var data = this.common.getSelectedData();
+        var amount = parseFloat($("#amount").val());
+        var balance = await this.common.getTokenBalance();
+
+        if (isNaN(amount) || amount <= 0) {
+            msg.showWarn("Invalid amount entered");
+            return;
+        }
+
+        if (isNaN(balance) || balance < amount) {
+            msg.showWarn("Amount exceeds balance");
+            return;
+        }
+
+        var contract = new wallet.web3.eth.Contract(config.app.tokenAbi, data.token.wrappedTokenAddress);
+        msg.clear();
+        msg.showWarn("Processing. Please wait...");
+        disable("#form");
+
+        var ok = false;
+
+        try {
+            var au = convert.toAtomicUnitsHexPrefixed(amount, data.token.decimals);
+            var tx = await contract.methods.unwrap(au).send({ from: wallet.web3.eth.defaultAccount });
+            console.log("Transaction: ", tx);
+            ok = tx.status;
+        } catch (ex) {
+            console.error(ex);
+            ok = false;
+        }
+
+        await this.common.getTokenBalance();
+
+        msg.clear();
+        enable("#form");
+
+        if (ok)
+            msg.showOk("Unwrap success!");
+        else
+            msg.showError("Unwrap failed!");
+
+        $("#amount").val('');
+    };
 
     componentWillUnmount() {
         wallet.removeListener('unwrap');
@@ -89,12 +91,13 @@ export default class Unwrap extends React.Component {
                                 <div className="card-body">
                                     <div id="form">
                                         <div className="input-group mb-3">
-                                            <select id="token" className="form-control form-select"></select>
-                                            <input type="number" id="amount" className="form-control input-sm numeric-input"
-                                                placeholder="Enter amount" />
+                                            <select id="token" className="form-control form-select" onChange={async () => {
+                                                await this.common.getTokenBalance();
+                                            }}></select>
+                                            <input type="number" id="amount" className="form-control input-sm" placeholder="Enter amount" />
                                         </div>
                                         <div>
-                                            <button type="button" id="button" className="btn btn-primary">Unwrap!</button>
+                                            <button type="button" id="button" className="btn btn-primary w-100" onClick={this.btnUnwrap_Clicked}>Unwrap!</button>
                                         </div>
                                     </div>
                                     <MessagePanelComponent />

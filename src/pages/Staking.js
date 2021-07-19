@@ -5,8 +5,8 @@ import { Navbar, Nav } from 'react-bootstrap';
 
 import { Config as config } from '../js/config'
 import { Conversions as convert } from '../js/conversions';
-import { show, hide, disable } from '../js/ui';
-import { WalletProvider as wallet } from '../js/walletProvider'
+import { show, hide, disable, enable } from '../js/ui';
+import { WalletProvider as wallet, WalletProvider } from '../js/walletProvider'
 
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
 import { NetworkSelect as ns } from '../components/NetworkSelect'
@@ -17,42 +17,129 @@ export default class Staking extends React.Component {
         this.currentTab = null;
     }
 
-    async getTokenBalance(network) {
-        if (!network)
-            return 0;
+    async getStake(network) {
+        try {
+            var stake = 0;
+            var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, network.fmtaToken.stakingAddress);
+            if (wallet.web3.eth.defaultAccount) {
+                var s = await stakingContract.methods.stakeOf(wallet.web3.eth.defaultAccount).call();
+                if (!s) s = 0;
+                stake = convert.fromAtomicUnits(s, 18);
+            }
 
-        if (wallet.chainId === network.chainId && wallet.web3.eth.defaultAccount) {
-            var contract = new wallet.web3.eth.Contract(config.app.tokenAbi, network.fmtaToken.tokenAddress);
-            var bal = await contract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
-            if (!bal)
-                bal = 0;
-
-            return convert.fromAtomicUnits(bal, 18);
+            return stake;
         }
+        catch (ex) {
+            console.error(ex);
+            return 0;
+        }
+    }
 
-        return 0;
+    async getBalance(network) {
+        try {
+            var balance = 0;
+            var tokenContract = new wallet.web3.eth.Contract(config.app.tokenAbi, network.fmtaToken.tokenAddress);
+            if (wallet.web3.eth.defaultAccount) {
+                var b = await tokenContract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
+                if (!b) b = 0;
+                balance = convert.fromAtomicUnits(b, 18);
+            }
+
+            return balance;
+        }
+        catch (ex) {
+            console.error(ex);
+            return 0;
+        }
+    }
+
+    async getBalances(network) {
+        try {
+            var stake = 0;
+            var balance = 0;
+            var reward = 0;
+
+            var tokenContract = new wallet.web3.eth.Contract(config.app.tokenAbi, network.fmtaToken.tokenAddress);
+            var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, network.fmtaToken.stakingAddress);
+
+            if (wallet.web3.eth.defaultAccount) {
+                var b = await tokenContract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
+                if (!b) b = 0;
+                balance = convert.fromAtomicUnits(b, 18);
+
+                var s = await stakingContract.methods.stakeOf(wallet.web3.eth.defaultAccount).call();
+                if (!s) s = 0;
+                stake = convert.fromAtomicUnits(s, 18);
+
+                var r = await stakingContract.methods.rewardsAccrued().call();
+                if (!r) r = 0;
+                reward = convert.fromAtomicUnits(r, 18);
+            }
+
+            return {
+                balance: balance,
+                stake: stake,
+                reward: reward
+            };
+        }
+        catch (ex) {
+            console.error(ex);
+            return {
+                balance: 0,
+                stake: 0,
+                reward: 0
+            };
+        }
+    }
+
+    disableNavBar() {
+        disable("#btnTake");
+        disable("#btnCompound");
+        disable("#btnAdd");
+        disable("#btnRemove");
     }
 
     async validateUiState() {
-        var net = ns.get();
-        msg.clearAll();
+        var net = ns.getFromMap(WalletProvider.chainId);
+        msg.clear();
 
-        if (!net.value)
+        if (!net) {
+            this.disableNavBar();
+            this.hideAllTabs();
+            $("#lblBalance").text("0.00");
+            $("#lblStake").text("0.00");
+            $("#lblReward").text("0.00");
             return;
-
-        if (net.chainId !== wallet.chainId) {
-            if (wallet.isMetamask) {
-                msg.showWarn(`Switch metamask to the ${net.network} network`);
-                return;
-            }
-            else if (wallet.isWalletConnect) {
-                msg.showWarn(`Sending request to change to the ${net.network} network for teleport`);
-                wallet.switchNetwork(net.chainId);
-                return;
-            }
         }
 
-        $("#lblBalance").text(await this.getTokenBalance(net));
+        var balances = await this.getBalances(net);
+
+        var fmtr = new Intl.NumberFormat('us-us', {
+            style: 'decimal',
+            useGrouping: false,
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 10
+          });
+
+        $("#lblBalance").text(fmtr.format(balances.balance));
+        $("#lblStake").text(fmtr.format(balances.stake));
+        $("#lblReward").text(fmtr.format(balances.reward));
+
+        this.enableTab("Take", balances.reward > 0);
+        this.enableTab("Compound", balances.reward > 0);
+        this.enableTab("Add", balances.balance > 0 && balances.reward === 0);
+        this.enableTab("Remove", balances.stake > 0);
+    }
+
+    enableTab(name, condition) {
+        if (condition) {
+            enable(`#btn${name}`);
+            enable(`#div${name}`);
+        }
+        else {
+            disable(`#btn${name}`);
+            disable(`#div${name}`);
+        }
     }
 
     hideAllTabs() {
@@ -77,28 +164,23 @@ export default class Staking extends React.Component {
     }
 
     async componentDidMount() {
-        msg.clearAll();
+        msg.clear();
         ns.populateAll();
 
+        this.hideAllTabs();
+
         if (!wallet.hasListener('staking')) {
-            console.log("Registering wrap component wallet listeners");
             var em = new EventEmitter();
 
             em.on('connect', async () => {
                 await this.validateUiState();
             });
 
-            em.on('disconnect', () => {
-                disable("#form");
-                msg.clearAll();
+            em.on('disconnect', async () => {
+                await this.validateUiState();
             });
 
-            em.on('accountsChanged', async (accounts) => {
-                if (accounts.length === 0) {
-                    disable("#form");
-                    return;
-                }
-
+            em.on('accountsChanged', async () => {
                 await this.validateUiState();
             });
 
@@ -109,14 +191,7 @@ export default class Staking extends React.Component {
             wallet.addListener('staking', em);
         }
 
-        if (wallet.isConnected()) {
-            this.showTab("#divTake");
-            await this.validateUiState();
-        }
-        else {
-            this.hideAllTabs();
-            disable("#form");
-        }
+        await this.validateUiState();
     }
 
     componentWillUnmount() {
@@ -124,8 +199,169 @@ export default class Staking extends React.Component {
     }
 
     btnTake_Clicked = async () => {
-        this.showTab("#divRemove");
+        var net = ns.getFromMap(WalletProvider.chainId);
+
+        if (!net)
+            return;
+
+        var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, net.fmtaToken.stakingAddress);
+
+        msg.clear();
+        msg.showWarn("Processing. Please wait...");
+        this.disableNavBar();
+        this.enableTab("Take", false);
+
+        var ok = false;
+
+        try {
+            var tx = await stakingContract.methods.withdrawReward().send({ from: wallet.web3.eth.defaultAccount });
+            console.log("Transaction: ", tx);
+            ok = tx.status;
+        } catch (ex) {
+            console.error(ex);
+            ok = false;
+        }
+
         await this.validateUiState();
+        msg.clear();
+
+        if (ok)
+            msg.showOk("Taking stake rewards success!");
+        else
+            msg.showError("Taking stake rewards failed!");
+    };
+
+    btnCompound_Clicked = async () => {
+        var net = ns.getFromMap(WalletProvider.chainId);
+
+        if (!net)
+            return;
+
+        var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, net.fmtaToken.stakingAddress);
+
+        msg.clear();
+        msg.showWarn("Processing. Please wait...");
+        this.disableNavBar();
+        this.enableTab("Compound", false);
+
+        var ok = false;
+
+        try {
+            var tx = await stakingContract.methods.compoundRewards().send({ from: wallet.web3.eth.defaultAccount });
+            console.log("Transaction: ", tx);
+            ok = tx.status;
+        } catch (ex) {
+            console.error(ex);
+            ok = false;
+        }
+
+        await this.validateUiState();
+        msg.clear();
+
+        if (ok)
+            msg.showOk("Compounding stake rewards success!");
+        else
+            msg.showError("Compounding stake rewards failed!");
+    };
+
+    btnAdd_Clicked = async () => {
+        var net = ns.getFromMap(WalletProvider.chainId);
+
+        if (!net)
+            return;
+
+        var amount = parseFloat($("#inAddAmount").val());
+        if (isNaN(amount) || amount <= 0) {
+            msg.showWarn("Invalid amount entered");
+            return;
+        }
+
+        var balance = await this.getBalance(net);
+
+        if (isNaN(balance) || balance < amount) {
+            msg.showWarn("Amount exceeds balance");
+            return;
+        }
+
+        var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, net.fmtaToken.stakingAddress);
+        var au = convert.toAtomicUnitsHexPrefixed(amount, net.fmtaToken.decimals);
+
+        msg.clear();
+        msg.showWarn("Processing. Please wait...");
+        this.disableNavBar();
+        this.enableTab("Add", false);
+
+        var ok = false;
+
+        try {
+            var tx = await stakingContract.methods.createStake(au).send({ from: wallet.web3.eth.defaultAccount });
+            console.log("Transaction: ", tx);
+            ok = tx.status;
+        } catch (ex) {
+            console.error(ex);
+            ok = false;
+        }
+
+        await this.validateUiState();
+        msg.clear();
+
+        if (ok)
+            msg.showOk("Creating stake success!");
+        else
+            msg.showError("Creating stake failed!");
+
+        $("#inAddAmount").val('');
+    };
+
+    btnRemove_Clicked = async () => {
+        var net = ns.getFromMap(WalletProvider.chainId);
+
+        if (!net)
+            return;
+
+        var amount = parseFloat($("#inRemoveAmount").val());
+        if (isNaN(amount) || amount <= 0) {
+            msg.showWarn("Invalid amount entered");
+            return;
+        }
+
+        var balance = await this.getStake(net);
+
+        if (isNaN(balance) || balance < amount) {
+            msg.showWarn("Amount exceeds balance");
+            return;
+        }
+
+        var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, net.fmtaToken.stakingAddress);
+        var au = convert.toAtomicUnitsHexPrefixed(amount, net.fmtaToken.decimals);
+
+        msg.clear();
+        msg.showWarn("Processing. Please wait...");
+        this.disableNavBar();
+        this.enableTab("Remove", false);
+
+        var ok = false;
+
+        try {
+            var tx = await stakingContract.methods.removeStake(au).send({ from: wallet.web3.eth.defaultAccount });
+            console.log("Transaction: ", tx);
+            ok = tx.status;
+        } catch (ex) {
+            console.error(ex);
+            ok = false;
+        }
+
+        await this.validateUiState();
+        msg.clear();
+
+        this.enableTab("Remove", true);
+
+        if (ok)
+            msg.showOk("Removing stake success!");
+        else
+            msg.showError("Removing stake failed!");
+
+        $("#inRemoveAmount").val('');
     };
 
     render() {
@@ -138,69 +374,64 @@ export default class Staking extends React.Component {
                                 <div className="card-header">Staking</div>
                                 <div className="card-body">
                                     <div id="form">
-                                        <div className="row ps-0">
-                                            <div className="col">
-                                                <Navbar collapseOnSelect expand="sm" className="navbar navbar-expand-sm">
-                                                    <Navbar.Toggle />
-                                                    <Navbar.Collapse>
-                                                        <Nav>
-                                                            <button className="btn btn-link nav-link text-start ps-0"
-                                                                style={{ outline: "none", border: "none", boxShadow: "none" }} id="btnTake" onClick={async () => {
-                                                                    this.showTab("#divTake");
-                                                                    await this.validateUiState();
-                                                                }}>Take</button>
-                                                            <button className="btn btn-link nav-link text-start"
-                                                                style={{ outline: "none", border: "none", boxShadow: "none" }} id="btnCompound" onClick={async () => {
-                                                                    this.showTab("#divCompound");
-                                                                    await this.validateUiState();
-                                                                }}>Compound</button>
-                                                            <button className="btn btn-link nav-link text-start" id="btnAdd"
-                                                                style={{ outline: "none", border: "none", boxShadow: "none" }} onClick={async () => {
-                                                                    this.showTab("#divAdd");
-                                                                    await this.validateUiState();
-                                                                }}>Add</button>
-                                                            <button className="btn btn-link nav-link text-start" id="btnRemove"
-                                                                style={{ outline: "none", border: "none", boxShadow: "none" }} onClick={async () => {
-                                                                    this.showTab("#divRemove");
-                                                                    await this.validateUiState();
-                                                                }}>Remove</button>
-                                                        </Nav>
-                                                    </Navbar.Collapse>
-                                                </Navbar>
-                                            </div>
-                                            <div className="col">
-                                                <select id="network" className="form-select" style={{ width: "auto", float: "right" }} />
-                                            </div>
-                                        </div>
-
-                                        <script>
-
-                                        </script>
-
+                                        <Navbar collapseOnSelect expand="sm" className="navbar navbar-expand-sm pt-0">
+                                            <Navbar.Toggle />
+                                            <Navbar.Collapse>
+                                                <Nav>
+                                                    <button type="button" className="btn btn-link nav-link text-start ps-0"
+                                                        style={{ outline: "none", border: "none", boxShadow: "none" }} id="btnTake" onClick={async () => {
+                                                            msg.clear();
+                                                            this.showTab("#divTake");
+                                                        }}>Take</button>
+                                                    <button type="button" className="btn btn-link nav-link text-start"
+                                                        style={{ outline: "none", border: "none", boxShadow: "none" }} id="btnCompound" onClick={async () => {
+                                                            msg.clear();
+                                                            this.showTab("#divCompound");
+                                                        }}>Compound</button>
+                                                    <button type="button" className="btn btn-link nav-link text-start" id="btnAdd"
+                                                        style={{ outline: "none", border: "none", boxShadow: "none" }} onClick={async () => {
+                                                            msg.clear();
+                                                            this.showTab("#divAdd");
+                                                        }}>Add</button>
+                                                    <button type="button" className="btn btn-link nav-link text-start" id="btnRemove"
+                                                        style={{ outline: "none", border: "none", boxShadow: "none" }} onClick={async () => {
+                                                            msg.clear();
+                                                            this.showTab("#divRemove");
+                                                            disable("#btnRemove");
+                                                        }}>Remove</button>
+                                                </Nav>
+                                            </Navbar.Collapse>
+                                        </Navbar>
                                         <div className="d-flex pb-3">
                                             <div className="text-end">
                                                 <div>FMTA Balance:&nbsp;</div>
                                                 <div>Staked FMTA:&nbsp;</div>
                                                 <div>Rewards:&nbsp;</div>
-                                           </div>
-                                           <div className="text-start">
+                                            </div>
+                                            <div className="text-start">
                                                 <div id="lblBalance">0</div>
-                                                <div id="lblStaked">0</div>
-                                                <div id="lblRewards">0</div>
-                                           </div>
+                                                <div id="lblStake">0</div>
+                                                <div id="lblReward">0</div>
+                                            </div>
                                         </div>
 
                                         <div id="divTake">
-                                            <button className="btn btn-primary" onClick={this.btnTake_Clicked}>Take</button>
+                                            <button className="btn btn-primary w-100" onClick={this.btnTake_Clicked}>Take</button>
                                         </div>
                                         <div id="divCompound">
-                                            Compound
+                                            <button className="btn btn-primary w-100" onClick={this.btnCompound_Clicked}>Compound</button>
                                         </div>
                                         <div id="divAdd">
-                                            Add
+                                            <div className="input-group mb-3">
+                                                <input type="number" id="inAddAmount" className="form-control input-sm" placeholder="Enter amount" />
+                                                <button className="btn btn-primary" onClick={this.btnAdd_Clicked}>Add</button>
+                                            </div>
                                         </div>
                                         <div id="divRemove">
-                                            Remove
+                                            <div className="input-group mb-3">
+                                                <input type="number" id="inRemoveAmount" className="form-control input-sm" placeholder="Enter amount" />
+                                                <button className="btn btn-primary" onClick={this.btnRemove_Clicked}>Remove</button>
+                                            </div>
                                         </div>
                                     </div>
                                     <MessagePanelComponent />

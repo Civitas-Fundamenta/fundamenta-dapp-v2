@@ -14,6 +14,8 @@ export class NetworkSelect {
 
     static networkMap = [];
 
+    static emptyAddress = "0x0000000000000000000000000000000000000000";
+
     static toggleNetworkWarning() {
         if (!wallet.isConnected()) {
             console.log("wallet not connected");
@@ -23,7 +25,6 @@ export class NetworkSelect {
             return;
         }
         else {
-            console.log("wallet is connected");
             if (wallet.web3.eth.defaultAccount == null) {
                 hide('#_aAcc');
                 show('#_aNoAcc');
@@ -37,7 +38,7 @@ export class NetworkSelect {
 
         var net = ns.getFromMap(wallet.chainId);
 
-        if (net == null) {
+        if (!net) {
             $("#_aInvNetText").text(`Invalid network. Wallet set to chain ${wallet.chainId}`);
             show("#_aInvNet");
         }
@@ -63,7 +64,6 @@ export class NetworkSelect {
     }
 
     static populateAll() {
-        console.log("ns.populateAll");
         this.empty();
         config.fetchNetworkConfig(function (data) {
             $.each(data, function () {
@@ -76,10 +76,11 @@ export class NetworkSelect {
             this.set(wallet.chainId);
         else
             this.set(0);
+
+        this.toggleNetworkWarning();
     }
 
     static populateWrappable() {
-        console.log("ns.populateWrappable");
         this.empty();
         config.fetchNetworkConfig(function (data) {
             sort.wrappable(data);
@@ -93,9 +94,33 @@ export class NetworkSelect {
             this.set(wallet.chainId);
         else
             this.set(0);
+
+        this.toggleNetworkWarning();
+    }
+
+    static populateMineable() {
+        this.empty();
+        config.fetchNetworkConfig(function (data) {
+            $.each(data, function () {
+                if (this.liquidityMining.address !== ns.emptyAddress) {
+                    ns.networkMap.push(this);
+                    $("#_sNs").append(`<option value="${this.chainId}">${this.network}</option>`);
+                }
+            });
+        });
+
+        if (wallet.isConnected())
+            this.set(wallet.chainId);
+        else
+            this.set(0);
+
+        this.toggleNetworkWarning();
     }
 
     static getFromMap(chainId) {
+        if (chainId === 0)
+            return null;
+
         var ret = null;
         $.each(this.networkMap, function (idx, val) {
             if (val.chainId === chainId) {
@@ -124,7 +149,7 @@ export class NetworkSelect {
 
         var net = ns.getFromMap(wallet.chainId);
 
-        if (net === null) {
+        if (!net) {
             $("#_sNs").prop("selectedIndex", 0);
             return;
         }
@@ -146,7 +171,6 @@ export class NetworkSelect {
             return;
 
         var net = ns.get();
-        console.log(net);
 
         if (isNaN(net.chainId)) {
             $("#_aInvNetText").text(`Select a network to continue`);
@@ -163,8 +187,7 @@ export class NetworkSelect {
                 wallet.switchNetwork(net.chainId);
             }
         }
-        else
-        {
+        else {
             hide("#_aInvNet");
         }
     }
@@ -186,6 +209,10 @@ export class NetworkSelect {
                 show("#_btnC");
             }
         }
+    }
+
+    static async _btnE_clicked() {
+        ns.closeModal();
     }
 
     static async _btnD_clicked() {
@@ -224,33 +251,37 @@ export class NetworkSelect {
 export class NetworkSelectComponent extends React.Component {
     componentDidMount() {
         if (!wallet.hasListener('networkSelect')) {
-            console.log("Registering networkSelect component wallet listeners");
             var em = new EventEmitter();
 
             em.on('connect', async () => {
                 enable("#_sNs");
                 hide("#_btnC");
                 show("#_btnD");
-                ns.toggleNetworkWarning();
+
                 ns.set(wallet.chainId);
+                ns.toggleNetworkWarning();
             });
 
             em.on('disconnect', () => {
                 disable("#_sNs");
                 hide("#_btnD");
                 show("#_btnC");
-                ns.toggleNetworkWarning();
+
                 ns.set(0);
+                ns.toggleNetworkWarning();
             });
 
             em.on('accountsChanged', async (accounts) => {
-                if (accounts.length === 0) {
+                if (accounts === null || accounts.length === 0) {
+                    disable("#_sNs");
                     hide("#_btnD");
                     show("#_btnC");
-                    ns.toggleNetworkWarning();
+
                     ns.set(0);
+                    ns.toggleNetworkWarning();
                 }
                 else {
+                    $("#_btnD").text(wallet.getNetworkName());
                     hide("#_btnC");
                     show("#_btnD");
                     ns.toggleNetworkWarning();
@@ -259,8 +290,9 @@ export class NetworkSelectComponent extends React.Component {
 
             em.on('chainChanged', async (chainId) => {
                 $("#_btnD").text(wallet.getNetworkName());
-                ns.toggleNetworkWarning();
+
                 ns.set(chainId);
+                ns.toggleNetworkWarning();
             });
 
             wallet.addListener('networkSelect', em);
@@ -276,6 +308,7 @@ export class NetworkSelectComponent extends React.Component {
             ns.toggleNetworkWarning();
         }
         else {
+            $("#_btnD").text(wallet.getNetworkName());
             hide("#_btnC");
             show("#_btnD");
             ns.toggleNetworkWarning();
@@ -285,10 +318,10 @@ export class NetworkSelectComponent extends React.Component {
     render() {
         return (
             <div className="d-flex">
-                <select id="_sNs" className="form-select" onChange={ns._sNs_change} style={{ width: "auto", float: "right" }} />
+                <select id="_sNs" className="form-select" onChange={ns._sNs_change} style={{ width: "auto" }} />
                 <div>
-                    <button className="btn btn-outline-success" id="_btnC" onClick={ns._btnC_clicked} style={{ float: "right" }}>Connect</button>
-                    <button className="btn btn-outline-danger" id="_btnD" onClick={ns._btnD_clicked} style={{ float: "right" }}>Disconnect</button>
+                    <button className="btn btn-outline-success" id="_btnC" onClick={ns._btnC_clicked}>Connect</button>
+                    <button className="btn btn-outline-danger" id="_btnD" onClick={ns._btnD_clicked}>Disconnect</button>
                     <div className="modal fade" id="_modSelect" tabIndex="-1" role="dialog" aria-hidden="true">
                         <div className="modal-dialog modal-dialog-centered" role="document">
                             <div className="modal-content">
@@ -310,9 +343,7 @@ export class NetworkSelectComponent extends React.Component {
                                     <div>
                                         <h4>Note to Wallet Connect users:</h4>
                                         <div>
-                                            Fundamenta is a multi-chain system. When you connect you will be asked to
-                                            connect to the Ethereum network. The dApp will then issue requests to your wallet to change
-                                            networks as required. Your ability to use this dapp may be impacted if your wallet does not
+                                            Fundamenta is a multi-chain system. Your ability to use this dapp may be impacted if your wallet does not
                                             support network switching.
                                         </div>
                                         <br />
@@ -322,7 +353,7 @@ export class NetworkSelectComponent extends React.Component {
                                     </div>
                                 </div>
                                 <div className="modal-footer">
-                                    <button type="button" className="btn btn-danger" data-dismiss="modal">Exit</button>
+                                    <button type="button" className="btn btn-danger" onClick={ns._btnE_clicked}>Exit</button>
                                 </div>
                             </div>
                         </div>

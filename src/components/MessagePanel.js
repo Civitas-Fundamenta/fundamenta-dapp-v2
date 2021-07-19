@@ -5,16 +5,12 @@ import $ from 'jquery';
 
 export class MessagePanel
 {
-    static clearAll() {
+    static clear() {
         hide("#okAlert");
         hide("#warnAlert");
         hide("#errorAlert");
     }
-
-    static hideOk() { hide("#okAlert"); }
-    static hideWarn() { hide("#warnAlert"); }
-    static hideError() { hide("#errorAlert"); }
-
+    
     static showOk(text) {
         $("#okAlertText").text(text);
         show("#okAlert");
@@ -37,7 +33,7 @@ export class MessagePanelComponent extends React.Component {
         return (
             <div className="mt-3">
                 <div id="okAlert">
-                    <div className="popup-div-margins alert alert-success d-flex align-items-center input-group" role="alert">
+                    <div className="popup-div-margins alert alert-success d-flex align-items-center" role="alert">
                         <div id="okAlertText" className="text-truncate d-inline-block"></div>
                     </div>
                 </div>
