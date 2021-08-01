@@ -96,7 +96,7 @@ export class WalletProvider {
             return false;
         }
 
-        await this.provider.request({ method: 'eth_requestAccounts' });
+        //await this.provider.request({ method: 'eth_requestAccounts' });
         this.chainId = parseInt(await this.provider.request({ method: 'eth_chainId' }));
 
         return true;
