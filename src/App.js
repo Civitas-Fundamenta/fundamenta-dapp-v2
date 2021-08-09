@@ -10,6 +10,7 @@ import Teleport from './pages/Teleport'
 import Wrap from './pages/Wrap'
 import Unwrap from './pages/Unwrap'
 import Energize from './pages/Energize'
+import Stats from './pages/Stats'
 
 class App extends React.Component {
     render() {
@@ -24,6 +25,7 @@ class App extends React.Component {
                     <Route path="/wrap" component={Wrap} />
                     <Route path="/unwrap" component={Unwrap} />
                     <Route path="/energize" component={Energize} />
+                    <Route path="/stats" component={Stats} />
                 </Switch>
             </div>
         )

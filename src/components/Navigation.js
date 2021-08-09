@@ -39,6 +39,10 @@ export class Navigation extends React.Component {
                                     <LinkContainer to="/energize">
                                         <Nav.Link>Energize</Nav.Link>
                                     </LinkContainer>
+
+                                    <LinkContainer to="/stats">
+                                        <Nav.Link>Stats</Nav.Link>
+                                    </LinkContainer>
                                 </Nav>
                             </Navbar.Collapse>
                         </Navbar>

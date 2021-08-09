@@ -17,6 +17,8 @@ export class Config {
         confTime: 12,
         withdrawEventHash: "0x9e817a273ceb82157d1f8e11c7d5549ada176ef895a9ffe5e37b49de76d29e2d",
         resourceUrl: "cp3.civiport.online",
+        holder0: "0xA4dda4EDfB34222063c77DFE2F50B30f5DF39870",
+        holder1: "0xa0b72536ba6496aec721400b5f0e1e65caf4be77",
 
         bridgeAbi: [
             {
@@ -163,6 +165,21 @@ export class Config {
                 ],
                 "stateMutability": "nonpayable",
                 "type": "function"
+            },
+            {
+                "inputs": [
+
+                ],
+                "name": "totalSupply",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
             }
         ],
 
@@ -252,35 +269,65 @@ export class Config {
                 ],
                 "stateMutability": "view",
                 "type": "function"
+            },
+            {
+                "inputs": [
+
+                ],
+                "name": "totalStakes",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+
+                ],
+                "name": "stakeCalc",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
             }
         ],
 
         miningAbi: [
             {
-                "inputs":[
-                   
+                "inputs": [
+
                 ],
-                "name":"showCurrentLockPeriods",
-                "outputs":[
-                   {
-                      "internalType":"uint256",
-                      "name":"_lockPeriod0",
-                      "type":"uint256"
-                   },
-                   {
-                      "internalType":"uint256",
-                      "name":"_lockPeriod1",
-                      "type":"uint256"
-                   },
-                   {
-                      "internalType":"uint256",
-                      "name":"_lockPeriod2",
-                      "type":"uint256"
-                   }
+                "name": "showCurrentLockPeriods",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "_lockPeriod0",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "_lockPeriod1",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "_lockPeriod2",
+                        "type": "uint256"
+                    }
                 ],
-                "stateMutability":"view",
-                "type":"function"
-             },
+                "stateMutability": "view",
+                "type": "function"
+            },
             {
                 "inputs": [
                     {
