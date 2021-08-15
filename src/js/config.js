@@ -19,6 +19,7 @@ export class Config {
         resourceUrl: "cp3.civiport.online",
         holder0: "0xA4dda4EDfB34222063c77DFE2F50B30f5DF39870",
         holder1: "0xa0b72536ba6496aec721400b5f0e1e65caf4be77",
+        holder2: "0x22a68bb25bf760d954c7e67ff06dc85297356068",
 
         bridgeAbi: [
             {

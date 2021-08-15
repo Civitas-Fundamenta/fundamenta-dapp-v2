@@ -61,8 +61,13 @@ export default class Stats extends React.Component {
 
                 var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, this.fmtaToken.tokenAddress);
                 var stakingContract = new web3.eth.Contract(config.app.stakeAbi, this.fmtaToken.stakingAddress);
+                var lpContract = new web3.eth.Contract(config.app.miningAbi, this.liquidityMining.address);
+
+                var poolInfo0 = await lpContract.methods.poolInfo(0).call();
+                var poolBalance0 = convert.fromAtomicUnits(poolInfo0.TotalRewardsPaidByPool, 18);
 
                 var exclude = 0;
+                var poolBalance = poolBalance0;
 
                 if (this.chainId === 1) {
                     var bal0 = await fmtaContract.methods.balanceOf(config.app.holder0).call();
@@ -71,7 +76,15 @@ export default class Stats extends React.Component {
                     var bal1 = await fmtaContract.methods.balanceOf(config.app.holder1).call();
                     var balance1 = convert.fromAtomicUnits(bal1, 18);
 
-                    exclude = balance0 + balance1;
+                    var bal2 = await fmtaContract.methods.balanceOf(config.app.holder2).call();
+                    var balance2 = convert.fromAtomicUnits(bal2, 18);
+
+                    exclude = balance0 + balance1 + balance2;
+
+                    var poolInfo1 = await lpContract.methods.poolInfo(1).call();
+                    var poolBalance1 = convert.fromAtomicUnits(poolInfo1.TotalRewardsPaidByPool, 18);
+
+                    poolBalance += poolBalance1;
                 }
 
                 var tot = await stakingContract.methods.totalStakes().call();
@@ -94,11 +107,13 @@ export default class Stats extends React.Component {
                                         '<div>Circulating:&nbsp;</div>' +
                                         '<div>Staked:&nbsp;</div>' +
                                         '<div>Market Cap:&nbsp;</div>' +
+                                        '<div>LP Rewards:&nbsp;</div>' +
                                     '</div>' +
                                     '<div class="text-start">' +
                                         '<div>' + circulating.toFixed(2) + ' FMTA</div>' +
                                         '<div>' + totalStaked.toFixed(2) + ' FMTA</div>' +
                                         '<div>' + mc.toFixed(2) + ' USD</div>' +
+                                        '<div>' + poolBalance.toFixed(2) + ' FMTA</div>' +
                                     '</div>' +
                                 '</div>' +
                             '</div>' +
