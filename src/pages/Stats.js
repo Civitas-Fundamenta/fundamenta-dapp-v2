@@ -62,6 +62,7 @@ export default class Stats extends React.Component {
                 var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, this.fmtaToken.tokenAddress);
                 var stakingContract = new web3.eth.Contract(config.app.stakeAbi, this.fmtaToken.stakingAddress);
                 var lpContract = new web3.eth.Contract(config.app.miningAbi, this.liquidityMining.address);
+                var lpOldContract = new web3.eth.Contract(config.app.oldMiningAbi, '0xB187c8E40b46Ae8fc19A6cC24bb60320a73b9abD');
 
                 var poolInfo0 = await lpContract.methods.poolInfo(0).call();
                 var poolBalance0 = convert.fromAtomicUnits(poolInfo0.TotalRewardsPaidByPool, 18);
@@ -84,7 +85,14 @@ export default class Stats extends React.Component {
                     var poolInfo1 = await lpContract.methods.poolInfo(1).call();
                     var poolBalance1 = convert.fromAtomicUnits(poolInfo1.TotalRewardsPaidByPool, 18);
 
-                    poolBalance += poolBalance1;
+                    var oldPoolInfo0 = await lpOldContract.methods.poolInfo(0).call();
+                    var oldPoolBalance0 = convert.fromAtomicUnits(oldPoolInfo0.TotalRewardsPaidByPool, 18);
+
+                    //var oldPoolInfo1 = await lpOldContract.methods.poolInfo(1).call();
+                    //var oldPoolBalance1 = convert.fromAtomicUnits(oldPoolInfo1.TotalRewardsPaidByPool, 18);
+                    var oldPoolBalance1 = 0;
+
+                    poolBalance += (poolBalance1 + oldPoolBalance0 + oldPoolBalance1);
                 }
 
                 var tot = await stakingContract.methods.totalStakes().call();
@@ -92,6 +100,9 @@ export default class Stats extends React.Component {
 
                 var sup = await fmtaContract.methods.totalSupply().call();
                 var totalSupply = convert.fromAtomicUnits(sup, 18);
+
+                var stRew = await stakingContract.methods.totalRewardsPaid().call();
+                var stakeRewards = convert.fromAtomicUnits(stRew, 18);
 
                 var circulating = (totalSupply + totalStaked) - exclude;
 
@@ -107,12 +118,14 @@ export default class Stats extends React.Component {
                                         '<div>Circulating:&nbsp;</div>' +
                                         '<div>Staked:&nbsp;</div>' +
                                         '<div>Market Cap:&nbsp;</div>' +
+                                        '<div>Stake Rewards:&nbsp;</div>' +
                                         '<div>LP Rewards:&nbsp;</div>' +
                                     '</div>' +
                                     '<div class="text-start">' +
                                         '<div>' + circulating.toFixed(2) + ' FMTA</div>' +
                                         '<div>' + totalStaked.toFixed(2) + ' FMTA</div>' +
                                         '<div>' + mc.toFixed(2) + ' USD</div>' +
+                                        '<div>' + stakeRewards.toFixed(2) + ' FMTA</div>' +
                                         '<div>' + poolBalance.toFixed(2) + ' FMTA</div>' +
                                     '</div>' +
                                 '</div>' +
