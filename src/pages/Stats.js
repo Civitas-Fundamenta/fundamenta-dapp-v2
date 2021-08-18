@@ -62,7 +62,6 @@ export default class Stats extends React.Component {
                 var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, this.fmtaToken.tokenAddress);
                 var stakingContract = new web3.eth.Contract(config.app.stakeAbi, this.fmtaToken.stakingAddress);
                 var lpContract = new web3.eth.Contract(config.app.miningAbi, this.liquidityMining.address);
-                var lpOldContract = new web3.eth.Contract(config.app.oldMiningAbi, '0xB187c8E40b46Ae8fc19A6cC24bb60320a73b9abD');
 
                 var poolInfo0 = await lpContract.methods.poolInfo(0).call();
                 var poolBalance0 = convert.fromAtomicUnits(poolInfo0.TotalRewardsPaidByPool, 18);
@@ -85,12 +84,11 @@ export default class Stats extends React.Component {
                     var poolInfo1 = await lpContract.methods.poolInfo(1).call();
                     var poolBalance1 = convert.fromAtomicUnits(poolInfo1.TotalRewardsPaidByPool, 18);
 
-                    var oldPoolInfo0 = await lpOldContract.methods.poolInfo(0).call();
-                    var oldPoolBalance0 = convert.fromAtomicUnits(oldPoolInfo0.TotalRewardsPaidByPool, 18);
+                    //0xF6de2B6eAB93d3A0AEC5863e3190b319602A1e70
+                    var oldPoolBalance0 = 234966.16;
 
-                    //var oldPoolInfo1 = await lpOldContract.methods.poolInfo(1).call();
-                    //var oldPoolBalance1 = convert.fromAtomicUnits(oldPoolInfo1.TotalRewardsPaidByPool, 18);
-                    var oldPoolBalance1 = 0;
+                    //0xB187c8E40b46Ae8fc19A6cC24bb60320a73b9abD
+                    var oldPoolBalance1 = 98566.84;
 
                     poolBalance += (poolBalance1 + oldPoolBalance0 + oldPoolBalance1);
                 }
