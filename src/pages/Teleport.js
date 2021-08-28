@@ -204,7 +204,7 @@ export default class Teleport extends React.Component {
                 var energizer = new Energizer(this.completedTeleport, this.cancellationToken);
                 energizer.on('error', (code, error) => {
                     if (code !== 100) {
-                        msg.hideWarn();
+                        msg.clear();
                         enable("#form");
                     }
 
@@ -305,7 +305,7 @@ export default class Teleport extends React.Component {
             }
             catch
             {
-                msg.hideWarn();
+                msg.clear();
                 msg.showError("Transaction signing failed");
                 enable("#form");
                 return

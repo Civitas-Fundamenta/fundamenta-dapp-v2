@@ -196,7 +196,7 @@ export default class Energize extends React.Component {
             var energizer = new Energizer(this.recoveredTeleport, this.cancellationToken);
             energizer.on('error', (code, error) => {
                 if (code !== 100) {
-                    msg.hideWarn();
+                    msg.clear();
                     enable("#form");
                 }
     
