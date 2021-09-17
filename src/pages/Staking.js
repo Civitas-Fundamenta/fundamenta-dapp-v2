@@ -119,7 +119,7 @@ export default class Staking extends React.Component {
             useGrouping: false,
             minimumFractionDigits: 2,
             maximumFractionDigits: 10
-          });
+        });
 
         $("#lblBalance").text(fmtr.format(balances.balance));
         $("#lblStake").text(fmtr.format(balances.stake));
@@ -367,77 +367,75 @@ export default class Staking extends React.Component {
     render() {
         return (
             <div className="ps-3 pe-3">
-                <div className="row">
-                    <div className="col-sm">
-                        <div>
-                            <form className="card">
-                                <div className="card-header">Staking</div>
-                                <div className="card-body">
-                                    <div id="form">
-                                        <Navbar collapseOnSelect expand="sm" className="navbar navbar-expand-sm pt-0">
-                                            <Navbar.Toggle />
-                                            <Navbar.Collapse>
-                                                <Nav>
-                                                    <button type="button" className="btn btn-link nav-link text-start ps-0"
-                                                        style={{ outline: "none", border: "none", boxShadow: "none" }} id="btnTake" onClick={async () => {
-                                                            msg.clear();
-                                                            this.showTab("#divTake");
-                                                        }}>Take</button>
-                                                    <button type="button" className="btn btn-link nav-link text-start"
-                                                        style={{ outline: "none", border: "none", boxShadow: "none" }} id="btnCompound" onClick={async () => {
-                                                            msg.clear();
-                                                            this.showTab("#divCompound");
-                                                        }}>Compound</button>
-                                                    <button type="button" className="btn btn-link nav-link text-start" id="btnAdd"
-                                                        style={{ outline: "none", border: "none", boxShadow: "none" }} onClick={async () => {
-                                                            msg.clear();
-                                                            this.showTab("#divAdd");
-                                                        }}>Add</button>
-                                                    <button type="button" className="btn btn-link nav-link text-start" id="btnRemove"
-                                                        style={{ outline: "none", border: "none", boxShadow: "none" }} onClick={async () => {
-                                                            msg.clear();
-                                                            this.showTab("#divRemove");
-                                                            disable("#btnRemove");
-                                                        }}>Remove</button>
-                                                </Nav>
-                                            </Navbar.Collapse>
-                                        </Navbar>
-                                        <div className="d-flex pb-3">
-                                            <div className="text-end">
-                                                <div>FMTA Balance:&nbsp;</div>
-                                                <div>Staked FMTA:&nbsp;</div>
-                                                <div>Rewards:&nbsp;</div>
-                                            </div>
-                                            <div className="text-start">
-                                                <div id="lblBalance">0</div>
-                                                <div id="lblStake">0</div>
-                                                <div id="lblReward">0</div>
-                                            </div>
+                <div className="page-flex-container d-flex flex-row justify-content-center align-items-center">
+                    <div className="page-content">
+                        <form className="card">
+                            <div className="card-header">Staking</div>
+                            <div className="card-body">
+                                <div id="form">
+                                    <Navbar collapseOnSelect expand="sm" className="navbar navbar-expand-sm pt-0">
+                                        <Navbar.Toggle />
+                                        <Navbar.Collapse>
+                                            <Nav>
+                                                <button type="button" className="btn btn-link nav-link text-start ps-0"
+                                                    style={{ outline: "none", border: "none", boxShadow: "none" }} id="btnTake" onClick={async () => {
+                                                        msg.clear();
+                                                        this.showTab("#divTake");
+                                                    }}>Take</button>
+                                                <button type="button" className="btn btn-link nav-link text-start"
+                                                    style={{ outline: "none", border: "none", boxShadow: "none" }} id="btnCompound" onClick={async () => {
+                                                        msg.clear();
+                                                        this.showTab("#divCompound");
+                                                    }}>Compound</button>
+                                                <button type="button" className="btn btn-link nav-link text-start" id="btnAdd"
+                                                    style={{ outline: "none", border: "none", boxShadow: "none" }} onClick={async () => {
+                                                        msg.clear();
+                                                        this.showTab("#divAdd");
+                                                    }}>Add</button>
+                                                <button type="button" className="btn btn-link nav-link text-start" id="btnRemove"
+                                                    style={{ outline: "none", border: "none", boxShadow: "none" }} onClick={async () => {
+                                                        msg.clear();
+                                                        this.showTab("#divRemove");
+                                                        disable("#btnRemove");
+                                                    }}>Remove</button>
+                                            </Nav>
+                                        </Navbar.Collapse>
+                                    </Navbar>
+                                    <div className="d-flex pb-3">
+                                        <div className="text-end">
+                                            <div>FMTA Balance:&nbsp;</div>
+                                            <div>Staked FMTA:&nbsp;</div>
+                                            <div>Rewards:&nbsp;</div>
                                         </div>
-
-                                        <div id="divTake">
-                                            <button className="btn btn-primary w-100" onClick={this.btnTake_Clicked}>Take</button>
-                                        </div>
-                                        <div id="divCompound">
-                                            <button className="btn btn-primary w-100" onClick={this.btnCompound_Clicked}>Compound</button>
-                                        </div>
-                                        <div id="divAdd">
-                                            <div className="input-group mb-3">
-                                                <input type="number" id="inAddAmount" className="form-control input-sm" placeholder="Enter amount" />
-                                                <button className="btn btn-primary" onClick={this.btnAdd_Clicked}>Add</button>
-                                            </div>
-                                        </div>
-                                        <div id="divRemove">
-                                            <div className="input-group mb-3">
-                                                <input type="number" id="inRemoveAmount" className="form-control input-sm" placeholder="Enter amount" />
-                                                <button className="btn btn-primary" onClick={this.btnRemove_Clicked}>Remove</button>
-                                            </div>
+                                        <div className="text-start">
+                                            <div id="lblBalance">0</div>
+                                            <div id="lblStake">0</div>
+                                            <div id="lblReward">0</div>
                                         </div>
                                     </div>
-                                    <MessagePanelComponent />
+
+                                    <div id="divTake">
+                                        <button className="btn btn-primary w-100" onClick={this.btnTake_Clicked}>Take</button>
+                                    </div>
+                                    <div id="divCompound">
+                                        <button className="btn btn-primary w-100" onClick={this.btnCompound_Clicked}>Compound</button>
+                                    </div>
+                                    <div id="divAdd">
+                                        <div className="input-group mb-3">
+                                            <input type="number" id="inAddAmount" className="form-control input-sm" placeholder="Enter amount" />
+                                            <button className="btn btn-primary" onClick={this.btnAdd_Clicked}>Add</button>
+                                        </div>
+                                    </div>
+                                    <div id="divRemove">
+                                        <div className="input-group mb-3">
+                                            <input type="number" id="inRemoveAmount" className="form-control input-sm" placeholder="Enter amount" />
+                                            <button className="btn btn-primary" onClick={this.btnRemove_Clicked}>Remove</button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </form>
-                        </div>
+                                <MessagePanelComponent />
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

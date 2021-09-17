@@ -107,7 +107,7 @@ export default class Stats extends React.Component {
                 var mc = circulating * Stats.prices.fundamenta.usd;
 
                 $("#stats").append(
-                    '<form class="card">' +
+                    '<form class="card mb-3">' +
                         '<div class="card-header">' + Stats.niceNames.get(this.chainId) + ' supply</div>' +
                         '<div className="card-body">' +
                             '<div class="ps-3 pt-3">' +
@@ -138,8 +138,8 @@ export default class Stats extends React.Component {
     render() {
         return (
             <div className="ps-3 pe-3">
-                <div className="row">
-                    <div className="col-sm">
+                <div className="page-flex-container d-flex flex-row justify-content-center align-items-center">
+                    <div className="page-content">
                         <div id="stats" />
                         <div>
                             <form className="card">

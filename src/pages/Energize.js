@@ -177,9 +177,9 @@ export default class Energize extends React.Component {
             msg.clear();
             disable("#form");
             msg.showWarn("Requesting signature...");
-    
+
             console.log("Transaction Data:", this.recoveredTeleport.transactionData);
-    
+
             try {
                 var signature = await wallet.web3.eth.personal.sign(this.recoveredTeleport.transactionData, wallet.web3.eth.defaultAccount);
                 this.recoveredTeleport.signature = signature;
@@ -191,7 +191,7 @@ export default class Energize extends React.Component {
                 msg.showError("Transaction signing failed");
                 return;
             }
-    
+
             this.cancellationToken = new CancellationToken();
             var energizer = new Energizer(this.recoveredTeleport, this.cancellationToken);
             energizer.on('error', (code, error) => {
@@ -199,10 +199,10 @@ export default class Energize extends React.Component {
                     msg.clear();
                     enable("#form");
                 }
-    
+
                 msg.showError(`Error ${code}: ${error}`);
             });
-    
+
             energizer.on('ok', async (serverSignatures) => {
                 msg.clear();
                 console.log(energizer.teleport);
@@ -223,9 +223,9 @@ export default class Energize extends React.Component {
                     return;
                 }
             });
-    
+
             msg.showWarn("Verifying teleport...");
-    
+
             await energizer.start();
         });
     }
@@ -238,26 +238,24 @@ export default class Energize extends React.Component {
     render() {
         return (
             <div className="ps-3 pe-3">
-                <div className="row">
-                    <div className="col-sm">
-                        <div>
-                            <form className="card">
-                                <div className="card-header">Energize</div>
-                                <div className="card-body">
-                                    <div id="form">
-                                        <div id="selectors">
-                                            <div className="mb-3">
-                                                <input id="hash" className="form-control input-sm" placeholder="Enter TX hash" />
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <button type="button" id="button" className="btn btn-primary w-100">Energize!</button>
+                <div className="page-flex-container d-flex flex-row justify-content-center align-items-center">
+                    <div className="page-content">
+                        <form className="card">
+                            <div className="card-header">Energize</div>
+                            <div className="card-body">
+                                <div id="form">
+                                    <div id="selectors">
+                                        <div className="mb-3">
+                                            <input id="hash" className="form-control input-sm" placeholder="Enter TX hash" />
                                         </div>
                                     </div>
-                                    <MessagePanelComponent />
+                                    <div>
+                                        <button type="button" id="button" className="btn btn-primary w-100">Energize!</button>
+                                    </div>
                                 </div>
-                            </form>
-                        </div>
+                                <MessagePanelComponent />
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

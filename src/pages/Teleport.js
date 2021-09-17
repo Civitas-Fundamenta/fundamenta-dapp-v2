@@ -27,7 +27,7 @@ export default class Teleport extends React.Component {
         $("#destination").append($("<option />").text("Select destination"));
 
         await this.validateUiState();
-        
+
         var network = ns.getFromMap(wallet.chainId);
 
         if (!network)
@@ -96,14 +96,13 @@ export default class Teleport extends React.Component {
 
     async validateUiState() {
         var net = ns.getFromMap(wallet.chainId);
-        
+
         msg.clear();
         disable("#button");
-        
+
         var balance = await this.getTokenBalance();
 
-        if (!net)
-        {
+        if (!net) {
             disable("#form");
             return;
         }
@@ -121,7 +120,7 @@ export default class Teleport extends React.Component {
             disable("#button");
             return;
         }
-        
+
         enable("#button");
     };
 
@@ -359,29 +358,27 @@ export default class Teleport extends React.Component {
     render() {
         return (
             <div className="ps-3 pe-3">
-                <div className="row">
-                    <div className="col-sm">
-                        <div>
-                            <form className="card">
-                                <div className="card-header">Teleport</div>
-                                <div className="card-body">
-                                    <div id="form">
-                                        <div className="input-group mb-3">
-                                            <select id="sourceToken" className="form-control form-select"></select>
-                                            <input type="number" id="amount" className="form-control input-sm numeric-input"
-                                                placeholder="Enter amount" />
-                                        </div>
-                                        <div className="mb-3">
-                                            <select id="destination" className="form-control form-select"></select>
-                                        </div>
-                                        <div>
-                                            <button type="button" id="button" className="btn btn-primary w-100">Teleport!</button>
-                                        </div>
+                <div className="page-flex-container d-flex flex-row justify-content-center align-items-center">
+                    <div className="page-content">
+                        <form className="card">
+                            <div className="card-header">Teleport</div>
+                            <div className="card-body">
+                                <div id="form">
+                                    <div className="input-group mb-3">
+                                        <select id="sourceToken" className="form-control form-select"></select>
+                                        <input type="number" id="amount" className="form-control input-sm numeric-input"
+                                            placeholder="Enter amount" />
                                     </div>
-                                    <MessagePanelComponent />
+                                    <div className="mb-3">
+                                        <select id="destination" className="form-control form-select"></select>
+                                    </div>
+                                    <div>
+                                        <button type="button" id="button" className="btn btn-primary w-100">Teleport!</button>
+                                    </div>
                                 </div>
-                            </form>
-                        </div>
+                                <MessagePanelComponent />
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

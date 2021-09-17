@@ -12,6 +12,9 @@ import Unwrap from './pages/Unwrap'
 import Energize from './pages/Energize'
 import Stats from './pages/Stats'
 
+//import './bootstrap.min.css';
+import './App.css';
+
 class App extends React.Component {
     render() {
         return (

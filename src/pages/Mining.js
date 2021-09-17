@@ -141,7 +141,7 @@ export default class Mining extends React.Component {
             useGrouping: false,
             minimumFractionDigits: 2,
             maximumFractionDigits: 10
-          });
+        });
 
         $("#lblUnlocked").text(fmtr.format(i.unlocked));
         $("#lblLocked").text(fmtr.format(i.locked));
@@ -369,78 +369,76 @@ export default class Mining extends React.Component {
     render() {
         return (
             <div className="ps-3 pe-3">
-                <div className="row">
-                    <div className="col-sm">
-                        <div>
-                            <form className="card">
-                                <div className="card-header">LP Mining</div>
-                                <div className="card-body">
-                                    <div id="form">
-                                        <div className="d-flex p-0">
-                                            <div className="w-100 justify-content-start">
-                                                <Navbar collapseOnSelect expand="sm" className="navbar navbar-expand-sm pt-0">
-                                                    <Navbar.Toggle />
-                                                    <Navbar.Collapse>
-                                                        <Nav>
-                                                            <button type="button" className="btn btn-link nav-link text-start ps-0"
-                                                                style={{ outline: "none", border: "none", boxShadow: "none" }} id="btnTake" onClick={async () => {
-                                                                    msg.clear();
-                                                                    this.showTab("#divTake");
-                                                                }}>Take</button>
-                                                            <button type="button" className="btn btn-link nav-link text-start" id="btnAdd"
-                                                                style={{ outline: "none", border: "none", boxShadow: "none" }} onClick={async () => {
-                                                                    msg.clear();
-                                                                    this.showTab("#divAdd");
-                                                                }}>Add</button>
-                                                            <button type="button" className="btn btn-link nav-link text-start" id="btnRemove"
-                                                                style={{ outline: "none", border: "none", boxShadow: "none" }} onClick={async () => {
-                                                                    msg.clear();
-                                                                    this.showTab("#divRemove");
-                                                                }}>Remove</button>
-                                                        </Nav>
-                                                    </Navbar.Collapse>
-                                                </Navbar>
-                                            </div>
-                                            <div className="justify-content-end">
-                                                <select id="selPool" className="form-select" style={{ width: "auto" }} onChange={this.selPool_Changed} />
-                                            </div>
+                <div className="page-flex-container d-flex flex-row justify-content-center align-items-center">
+                    <div className="page-content">
+                        <form className="card">
+                            <div className="card-header">LP Mining</div>
+                            <div className="card-body">
+                                <div id="form">
+                                    <div className="d-flex p-0">
+                                        <div className="w-100 justify-content-start">
+                                            <Navbar collapseOnSelect expand="sm" className="navbar navbar-expand-sm pt-0">
+                                                <Navbar.Toggle />
+                                                <Navbar.Collapse>
+                                                    <Nav>
+                                                        <button type="button" className="btn btn-link nav-link text-start ps-0"
+                                                            style={{ outline: "none", border: "none", boxShadow: "none" }} id="btnTake" onClick={async () => {
+                                                                msg.clear();
+                                                                this.showTab("#divTake");
+                                                            }}>Take</button>
+                                                        <button type="button" className="btn btn-link nav-link text-start" id="btnAdd"
+                                                            style={{ outline: "none", border: "none", boxShadow: "none" }} onClick={async () => {
+                                                                msg.clear();
+                                                                this.showTab("#divAdd");
+                                                            }}>Add</button>
+                                                        <button type="button" className="btn btn-link nav-link text-start" id="btnRemove"
+                                                            style={{ outline: "none", border: "none", boxShadow: "none" }} onClick={async () => {
+                                                                msg.clear();
+                                                                this.showTab("#divRemove");
+                                                            }}>Remove</button>
+                                                    </Nav>
+                                                </Navbar.Collapse>
+                                            </Navbar>
                                         </div>
-                                        <div className="d-flex pb-3">
-                                            <div className="text-end">
-                                                <div>Unlocked:&nbsp;</div>
-                                                <div>Locked:&nbsp;</div>
-                                                <div>Status:&nbsp;</div>
-                                            </div>
-                                            <div className="text-start">
-                                                <div id="lblUnlocked">0</div>
-                                                <div id="lblLocked">0</div>
-                                                <div id="lblStatus">N/A</div>
-                                            </div>
-                                        </div>
-
-                                        <div id="divTake">
-                                            <div className="input-group mb-3">
-                                                <input type="number" id="inTakeAmount" className="form-control input-sm" placeholder="Enter amount" />
-                                                <button className="btn btn-primary" onClick={this.btnTake_Clicked}>Take</button>
-                                            </div>
-                                        </div>
-                                        <div id="divAdd">
-                                            <div className="input-group mb-3">
-                                                <input type="number" id="inAddAmount" className="form-control input-sm" placeholder="Enter amount" />
-                                                <select id="selLockPeriod" className="form-select" style={{ width: "auto" }} />
-                                                <button className="btn btn-primary" onClick={this.btnAdd_Clicked}>Add</button>
-                                            </div>
-                                        </div>
-                                        <div id="divRemove">
-                                            <div className="input-group mb-3">
-                                                <button className="btn btn-primary w-100" onClick={this.btnRemove_Clicked}>Remove</button>
-                                            </div>
+                                        <div className="justify-content-end">
+                                            <select id="selPool" className="form-select" style={{ width: "auto" }} onChange={this.selPool_Changed} />
                                         </div>
                                     </div>
-                                    <MessagePanelComponent />
+                                    <div className="d-flex pb-3">
+                                        <div className="text-end">
+                                            <div>Unlocked:&nbsp;</div>
+                                            <div>Locked:&nbsp;</div>
+                                            <div>Status:&nbsp;</div>
+                                        </div>
+                                        <div className="text-start">
+                                            <div id="lblUnlocked">0</div>
+                                            <div id="lblLocked">0</div>
+                                            <div id="lblStatus">N/A</div>
+                                        </div>
+                                    </div>
+
+                                    <div id="divTake">
+                                        <div className="input-group mb-3">
+                                            <input type="number" id="inTakeAmount" className="form-control input-sm" placeholder="Enter amount" />
+                                            <button className="btn btn-primary" onClick={this.btnTake_Clicked}>Take</button>
+                                        </div>
+                                    </div>
+                                    <div id="divAdd">
+                                        <div className="input-group mb-3">
+                                            <input type="number" id="inAddAmount" className="form-control input-sm" placeholder="Enter amount" />
+                                            <select id="selLockPeriod" className="form-select" style={{ width: "auto" }} />
+                                            <button className="btn btn-primary" onClick={this.btnAdd_Clicked}>Add</button>
+                                        </div>
+                                    </div>
+                                    <div id="divRemove">
+                                        <div className="input-group mb-3">
+                                            <button className="btn btn-primary w-100" onClick={this.btnRemove_Clicked}>Remove</button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </form>
-                        </div>
+                                <MessagePanelComponent />
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
