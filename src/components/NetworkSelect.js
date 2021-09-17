@@ -44,6 +44,8 @@ export class NetworkSelect {
         }
         else
             hide("#_aInvNet");
+        
+        $("#_btnD").text(wallet.getNetworkName());
     }
 
     static openModal() {
@@ -154,16 +156,12 @@ export class NetworkSelect {
             return;
         }
 
-        $("#_sNs").off('change');
-
         $.each(this.networkMap, function (idx, val) {
             if (val.chainId === chainId) {
                 $("#_sNs").prop("selectedIndex", idx);
                 return false;
             }
         })
-
-        $("#_sNs").on('change', this._sNs_change);
     }
 
     static _sNs_change() {
@@ -281,7 +279,7 @@ export class NetworkSelectComponent extends React.Component {
                     ns.toggleNetworkWarning();
                 }
                 else {
-                    $("#_btnD").text(wallet.getNetworkName());
+                    enable("#_sNs");
                     hide("#_btnC");
                     show("#_btnD");
                     ns.toggleNetworkWarning();
@@ -289,8 +287,6 @@ export class NetworkSelectComponent extends React.Component {
             });
 
             em.on('chainChanged', async (chainId) => {
-                $("#_btnD").text(wallet.getNetworkName());
-
                 ns.set(chainId);
                 ns.toggleNetworkWarning();
             });
@@ -308,9 +304,9 @@ export class NetworkSelectComponent extends React.Component {
             ns.toggleNetworkWarning();
         }
         else {
-            $("#_btnD").text(wallet.getNetworkName());
             hide("#_btnC");
             show("#_btnD");
+            enable("#_sNs");
             ns.toggleNetworkWarning();
         }
     }
