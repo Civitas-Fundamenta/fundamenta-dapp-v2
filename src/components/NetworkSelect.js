@@ -199,6 +199,8 @@ export class NetworkSelect {
             console.log("Metamask not available. Defaulting to Wallet Connect");
             var connected = await wallet.walletConnect();
             if (connected) {
+                ns.set(wallet.chainId);
+                ns.toggleNetworkWarning();
                 hide("#_btnC");
                 show("#_btnD");
             }
