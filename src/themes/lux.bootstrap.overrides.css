@@ -56,3 +56,7 @@ body {
 .dropdown-toggle {
     color: #fff !important;
 }
+
+.nav-link {
+    text-align: left !important;
+}

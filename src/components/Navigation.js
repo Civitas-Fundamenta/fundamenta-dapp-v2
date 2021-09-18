@@ -12,36 +12,36 @@ export class Navigation extends React.Component {
                 </div>
                 <div className="d-flex p-0 ps-3 pe-3">
                     <div className="w-100 justify-content-start">
-                        <Navbar style={{ outline: "none", border: "none", boxShadow: "none" }} collapseOnSelect expand="md" className="navbar navbar-dark navbar-expand-md p-0">
+                        <Navbar collapseOnSelect expand="md" className="navbar navbar-dark navbar-expand-md p-0">
                             <Navbar.Toggle />
                             <Navbar.Collapse>
-                                <Nav >
-                                    <LinkContainer style={{ outline: "none", border: "none", boxShadow: "none" }} to="/staking">
+                                <Nav>
+                                    <LinkContainer to="/staking">
                                         <Nav.Link className="ps-0">Staking</Nav.Link>
                                     </LinkContainer>
 
-                                    <LinkContainer style={{ outline: "none", border: "none", boxShadow: "none" }} to="/mining">
+                                    <LinkContainer to="/mining">
                                         <Nav.Link >Mining</Nav.Link>
                                     </LinkContainer>
 
-                                    <LinkContainer style={{ outline: "none", border: "none", boxShadow: "none" }} to="/teleport">
+                                    <LinkContainer to="/teleport">
                                         <Nav.Link>Teleport</Nav.Link>
                                     </LinkContainer>
 
-                                    <LinkContainer style={{ outline: "none", border: "none", boxShadow: "none" }} to="/wrap">
+                                    <LinkContainer to="/wrap">
                                         <Nav.Link>Wrap</Nav.Link>
                                     </LinkContainer>
 
-                                    <LinkContainer style={{ outline: "none", border: "none", boxShadow: "none" }} to="/unwrap">
+                                    <LinkContainer to="/unwrap">
                                         <Nav.Link>Unwrap</Nav.Link>
                                     </LinkContainer>
 
-                                    <LinkContainer style={{ outline: "none", border: "none", boxShadow: "none" }} to="/energize">
+                                    <LinkContainer to="/energize">
                                         <Nav.Link>Energize</Nav.Link>
                                     </LinkContainer>
 
-                                    <LinkContainer style={{ outline: "none", border: "none", boxShadow: "none" }} to="/stats">
-                                        <Nav.Link>Stats</Nav.Link>
+                                    <LinkContainer className="text-left" to="/stats">
+                                        <Nav.Link className="text-left">Stats</Nav.Link>
                                     </LinkContainer>
                                 </Nav>
                             </Navbar.Collapse>

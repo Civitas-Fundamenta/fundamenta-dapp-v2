@@ -375,27 +375,27 @@ export default class Staking extends React.Component {
                                 <div id="form">
                                     <div className="d-flex p-0">
                                         <div className="w-100 justify-content-start">
-                                            <Navbar style={{ outline: "none", border: "none", boxShadow: "none" }} collapseOnSelect expand="sm" className="navbar navbar-dark navbar-expand-sm p-0 m-0">
+                                            <Navbar collapseOnSelect expand="sm" className="navbar navbar-dark navbar-expand-sm p-0 m-0">
                                                 <Navbar.Toggle />
                                                 <Navbar.Collapse>
                                                     <Nav>
                                                         <button type="button" className="btn btn-link nav-link text-start ps-0"
-                                                            style={{ outline: "none", border: "none", boxShadow: "none" }} id="btnTake" onClick={async () => {
+                                                            id="btnTake" onClick={async () => {
                                                                 msg.clear();
                                                                 this.showTab("#divTake");
                                                             }}>Take</button>
                                                         <button type="button" className="btn btn-link nav-link text-start"
-                                                            style={{ outline: "none", border: "none", boxShadow: "none" }} id="btnCompound" onClick={async () => {
+                                                            id="btnCompound" onClick={async () => {
                                                                 msg.clear();
                                                                 this.showTab("#divCompound");
                                                             }}>Compound</button>
                                                         <button type="button" className="btn btn-link nav-link text-start" id="btnAdd"
-                                                            style={{ outline: "none", border: "none", boxShadow: "none" }} onClick={async () => {
+                                                            onClick={async () => {
                                                                 msg.clear();
                                                                 this.showTab("#divAdd");
                                                             }}>Add</button>
                                                         <button type="button" className="btn btn-link nav-link text-start" id="btnRemove"
-                                                            style={{ outline: "none", border: "none", boxShadow: "none" }} onClick={async () => {
+                                                            onClick={async () => {
                                                                 msg.clear();
                                                                 this.showTab("#divRemove");
                                                                 disable("#btnRemove");
