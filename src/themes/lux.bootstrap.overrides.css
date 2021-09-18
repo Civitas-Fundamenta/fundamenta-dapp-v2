@@ -34,15 +34,17 @@ body {
 .round-left {
     border-top-left-radius: 15px !important;
     border-bottom-left-radius: 15px !important;
+
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
 }
 
 .round-right {
     border-top-right-radius: 15px !important;
     border-bottom-right-radius: 15px !important;
-}
 
-.alert {
-    border-radius: 25px !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
 }
 
 .card .alert {
@@ -57,6 +59,12 @@ body {
     color: #fff !important;
 }
 
-.nav-link {
+.nav-link, .text-left {
     text-align: left !important;
 }
+
+.btn-alert {
+    position: relative !important;
+    padding: 1rem 1rem !important;
+    margin-bottom: 1rem !important;
+  }

@@ -9,7 +9,6 @@ import { enable, disable } from '../js/ui';
 import { WalletProvider as wallet } from '../js/walletProvider'
 
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
-import { NetworkSelect as ns } from '../components/NetworkSelect';
 
 export default class Energize extends React.Component {
 
@@ -167,8 +166,6 @@ export default class Energize extends React.Component {
         else
             disable("#form");
 
-        ns.populateAll();
-
         $("#hash").on('change', async () => {
             await this.validateUiState();
         });
@@ -240,7 +237,7 @@ export default class Energize extends React.Component {
             <div className="ps-3 pe-3">
                 <div className="page-flex-container d-flex flex-row justify-content-center align-items-center">
                     <div className="page-content">
-                        <form autocomplete="off" className="card border border-primary shadow">
+                        <form autoComplete="off" className="card border border-primary shadow">
                             <div className="card-header">Energize</div>
                             <div className="card-body">
                                 <div id="form">

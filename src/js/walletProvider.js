@@ -85,7 +85,7 @@ export class WalletProvider {
                 this.chainId = payload.params[0].chainId;
                 console.log('chainChanged', this.chainId);
                 for (let e of WalletProvider.emitters.values())
-                    e.emit('chainChanged', payload.params[0].chainId);
+                    e.emit('chainChanged', this.chainId);
             }
         });
 
@@ -98,6 +98,11 @@ export class WalletProvider {
 
         //await this.provider.request({ method: 'eth_requestAccounts' });
         this.chainId = parseInt(await this.provider.request({ method: 'eth_chainId' }));
+        for (let e of WalletProvider.emitters.values())
+            e.emit('chainChanged', this.chainId);
+
+        for (let e of this.emitters.values())
+            e.emit('connect');
 
         return true;
     }
@@ -160,6 +165,10 @@ export class WalletProvider {
         });
 
         this.provider.on('disconnect', async function (disconnectInfo) {
+            WalletProvider.web3 = null;
+            WalletProvider.provider = null;
+            WalletProvider.isWalletConnect = false;
+            WalletProvider.isMetamask = false;
             for (let e of WalletProvider.emitters.values())
                 e.emit('disconnect', disconnectInfo);
         });

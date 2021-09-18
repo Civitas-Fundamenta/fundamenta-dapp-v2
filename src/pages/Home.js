@@ -1,11 +1,7 @@
 import React from 'react';
 
-import { NetworkSelect as ns } from '../components/NetworkSelect'
-
 export default class Home extends React.Component {
-    async componentDidMount() {
-        ns.populateAll();      
-    }
+    async componentDidMount() { }
 
     render() {
         return(

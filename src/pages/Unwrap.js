@@ -8,7 +8,6 @@ import { WalletProvider as wallet } from '../js/walletProvider'
 import { UiCommon } from '../js/wrapUi';
 
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
-import { NetworkSelect as ns } from '../components/NetworkSelect';
 
 export default class Unwrap extends React.Component {
 
@@ -27,12 +26,11 @@ export default class Unwrap extends React.Component {
         else
             disable("#form");
 
-        ns.populateWrappable();
-        this.common.populateTokenDropDown();
+        await this.common.populateTokenDropDown();
     }
 
     btnUnwrap_Clicked = async () => {
-        var data = this.common.getSelectedData();
+        var data = await this.common.getSelectedData();
         var amount = parseFloat($("#amount").val());
         var balance = await this.common.getTokenBalance();
 
@@ -85,7 +83,7 @@ export default class Unwrap extends React.Component {
             <div className="ps-3 pe-3">
                 <div className="page-flex-container d-flex flex-row justify-content-center align-items-center">
                     <div className="page-content">
-                        <form autocomplete="off" className="card border border-primary shadow">
+                        <form autoComplete="off" className="card border border-primary shadow">
                             <div className="card-header">Unwrap</div>
                             <div className="card-body">
                                 <div id="form">

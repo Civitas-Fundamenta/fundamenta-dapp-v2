@@ -10,7 +10,6 @@ import { enable, disable } from '../js/ui';
 import { WalletProvider as wallet } from '../js/walletProvider'
 
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
-import { NetworkSelect as ns } from '../components/NetworkSelect';
 
 export default class Teleport extends React.Component {
 
@@ -18,9 +17,17 @@ export default class Teleport extends React.Component {
         super(props);
         this.completedTeleport = null;
         this.cancellationToken = new CancellationToken();
+
+        this._populateTokenDropDownLock = false;
     }
 
     async populateTokenDropDown() {
+        if (this._populateTokenDropDownLock)
+            return;
+        
+        this._populateTokenDropDownLock = true;
+
+        console.log("populateTokenDropDown");
         $("#sourceToken").empty();
         $("#destination").empty();
         $("#sourceToken").append($("<option />").text("Select token"));
@@ -28,10 +35,13 @@ export default class Teleport extends React.Component {
 
         await this.validateUiState();
 
-        var network = ns.getFromMap(wallet.chainId);
+        var network = await config.getFromMap(wallet.chainId);
 
         if (!network)
+        {
+            this._populateTokenDropDownLock = false;
             return;
+        }
 
         $("#sourceToken").append($("<option />").text(network.fmtaToken.ticker));
 
@@ -39,10 +49,12 @@ export default class Teleport extends React.Component {
             if (this.bridgeAddress)
                 $("#sourceToken").append($("<option />").text(this.ticker));
         });
+
+        this._populateTokenDropDownLock = false;
     }
 
-    getSourceTokenFromDropdown() {
-        var network = ns.getFromMap(wallet.chainId);
+    async getSourceTokenFromDropdown() {
+        var network = await config.getFromMap(wallet.chainId);
         if (!network)
             return;
 
@@ -75,8 +87,8 @@ export default class Teleport extends React.Component {
         return network;
     }
 
-    getDestinationTokenFromDropDown() {
-        var sourceToken = this.getSourceTokenFromDropdown();
+    async getDestinationTokenFromDropDown() {
+        var sourceToken = await this.getSourceTokenFromDropdown();
         var network = this.getDestinationNetworkFromDropDown();
 
         var token;
@@ -95,7 +107,7 @@ export default class Teleport extends React.Component {
     }
 
     async validateUiState() {
-        var net = ns.getFromMap(wallet.chainId);
+        var net = await config.getFromMap(wallet.chainId);
 
         msg.clear();
         disable("#button");
@@ -125,8 +137,8 @@ export default class Teleport extends React.Component {
     };
 
     async getTokenBalance() {
-        var network = ns.getFromMap(wallet.chainId);
-        var token = this.getSourceTokenFromDropdown();
+        var network = await config.getFromMap(wallet.chainId);
+        var token = await this.getSourceTokenFromDropdown();
 
         if (!network || !token) {
             $("#amount").attr("placeholder", "Enter amount");
@@ -162,7 +174,9 @@ export default class Teleport extends React.Component {
         if (!wallet.hasListener('teleport')) {
             var em = new EventEmitter();
 
-            em.on('connect', () => {
+            em.on('connect', async () => {
+                msg.clear();
+                await this.populateTokenDropDown();
                 enable("#form");
             });
 
@@ -177,7 +191,9 @@ export default class Teleport extends React.Component {
                     disable("#form");
                     return;
                 }
-
+                
+                msg.clear();
+                await this.populateTokenDropDown();
                 enable("#form");
                 await this.validateUiState();
             });
@@ -190,7 +206,7 @@ export default class Teleport extends React.Component {
                     return;
                 }
 
-                var net = ns.getFromMap(wallet.chainId);
+                var net = await config.getFromMap(wallet.chainId);
 
                 if (this.completedTeleport.destination.chainId !== wallet.chainId) {
                     msg.showWarn("Switch to the " + net.network + " network to energize");
@@ -240,12 +256,11 @@ export default class Teleport extends React.Component {
         else
             disable("#form");
 
-        ns.populateAll();
         await this.populateTokenDropDown();
 
         $("#sourceToken").on('change', async () => {
-            var network = ns.getFromMap(wallet.chainId);
-            var token = this.getSourceTokenFromDropdown();
+            var network = await config.getFromMap(wallet.chainId);
+            var token = await this.getSourceTokenFromDropdown();
 
             $("#destination").empty();
             $("#destination").append($("<option />").text("Select destination"));
@@ -283,10 +298,10 @@ export default class Teleport extends React.Component {
         $("#button").on('click', async () => {
             msg.clear();
             disable("#form");
-            var source = ns.getFromMap(wallet.chainId);
-            var sourceToken = this.getSourceTokenFromDropdown();
-            var destination = this.getDestinationNetworkFromDropDown();
-            var destinationToken = this.getDestinationTokenFromDropDown();
+            var source = await config.getFromMap(wallet.chainId);
+            var sourceToken = await this.getSourceTokenFromDropdown();
+            var destination = await this.getDestinationNetworkFromDropDown();
+            var destinationToken = await this.getDestinationTokenFromDropDown();
             var amountAtomicUnitsHex = convert.toAtomicUnitsHex($("#amount").val(), sourceToken.decimals);
             var sourceId = convert.to32bitHex(source.id) + convert.to32bitHex(sourceToken.id);
             var destId = convert.to32bitHex(destination.id) + convert.to32bitHex(destinationToken.id);
@@ -360,7 +375,7 @@ export default class Teleport extends React.Component {
             <div className="ps-3 pe-3">
                 <div className="page-flex-container d-flex flex-row justify-content-center align-items-center">
                     <div className="page-content">
-                        <form autocomplete="off" className="card border border-primary shadow">
+                        <form autoComplete="off" className="card border border-primary shadow">
                             <div className="card-header">Teleport</div>
                             <div className="card-body">
                                 <div id="form">

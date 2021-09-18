@@ -6,7 +6,6 @@ import { Config as config } from '../js/config'
 import { Conversions as convert } from '../js/conversions';
 
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
-import { NetworkSelect as ns } from '../components/NetworkSelect'
 
 export default class Stats extends React.Component {
 
@@ -41,7 +40,6 @@ export default class Stats extends React.Component {
     };
 
     async componentDidMount() {
-        ns.populateAll();
         $("#stats").empty();
         msg.clear();
 
@@ -54,9 +52,10 @@ export default class Stats extends React.Component {
             cache: 'false'
         });
 
-        $.each(ns.networkMap, async function () {
+        await config.fetchNetworkConfig();
+
+        $.each(config.networkMap, async function () {
             if (this.fmtaToken) {
-                console.log(this);
                 var web3 = new Web3(new Web3.providers.HttpProvider(Stats.rpcUrls.get(this.chainId)));
 
                 var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, this.fmtaToken.tokenAddress);
@@ -142,7 +141,7 @@ export default class Stats extends React.Component {
                     <div className="page-content">
                         <div id="stats" />
                         <div>
-                            <form autocomplete="off" className="card border border-primary shadow">
+                            <form autoComplete="off" className="card border border-primary shadow">
                                 <div className="card-header">Stake Calculator</div>
                                 <div className="card-body">
                                     <div id="form">

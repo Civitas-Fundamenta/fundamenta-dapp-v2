@@ -8,6 +8,7 @@ import $ from 'jquery';
 export class Config {
 
     static network = null;
+    static networkMap = [];
 
     static app = {
 
@@ -302,20 +303,20 @@ export class Config {
                 "type": "function"
             },
             {
-                "inputs":[
-                   
+                "inputs": [
+
                 ],
-                "name":"totalRewardsPaid",
-                "outputs":[
-                   {
-                      "internalType":"uint256",
-                      "name":"",
-                      "type":"uint256"
-                   }
+                "name": "totalRewardsPaid",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
                 ],
-                "stateMutability":"view",
-                "type":"function"
-             }
+                "stateMutability": "view",
+                "type": "function"
+            }
         ],
 
         miningAbi: [
@@ -543,20 +544,65 @@ export class Config {
         }
     };
 
-    static fetchNetworkConfig(callback) {
+    static async getFromMap(chainId) {
+        if (this.networkMap.length === 0)
+            await this.fetchNetworkConfig();
+
+        if (chainId === 0)
+            return null;
+
+        var ret = null;
+        $.each(this.networkMap, function (idx, val) {
+            if (val.chainId === chainId) {
+                ret = val;
+                return false;
+            }
+        })
+
+        return ret;
+    }
+
+    /*static populateWrappable() {
+        Navigation.empty();
+        config.fetchNetworkConfig(function (data) {
+            sort.wrappable(data);
+            $.each(sort.wrapData, function () {
+                Navigation.networkMap.push(this);
+                //$("#_sNs").append(`<option value="${chainId}">${network}</option>`);
+            });
+        });
+        console.log("Network Map:", Navigation.networkMap);
+        Navigation.toggleNetworkWarning();
+    }
+
+    static populateMineable() {
+        Navigation.empty();
+        config.fetchNetworkConfig(function (data) {
+            $.each(data, function () {
+                if (this.liquidityMining.address !== Navigation.emptyAddress) {
+                    Navigation.networkMap.push(this);
+                    //$("#_sNs").append(`<option value="${chainId}">${network}</option>`);
+                }
+            });
+        });
+        console.log("Network Map:", Navigation.networkMap);
+        Navigation.toggleNetworkWarning();
+    }*/
+
+    static async fetchNetworkConfig() {
         if (!this.network) {
             console.log("Fetching network config");
-            $.ajax({
+            this.network = await $.ajax({
                 url: `https://${this.app.resourceUrl}/config/?x=${this.app.cpNet}`,
                 dataType: 'json',
                 cache: 'false',
-                success: function (data) {
-                    Config.network = data;
-                    callback(data);
-                }
+            });
+
+            $.each(this.network, function () {
+                Config.networkMap.push(this);
             });
         }
-        else
-            callback(this.network);
+
+        return this.network;
     }
 }

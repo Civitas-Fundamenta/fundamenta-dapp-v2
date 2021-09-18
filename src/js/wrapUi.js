@@ -4,18 +4,18 @@ import { enable, disable } from './ui';
 import { WalletProvider as wallet, WalletProvider } from './walletProvider'
 import { Config as config } from './config'
 import { Conversions as convert } from './conversions';
+import { Sorter as sort } from './sorter';
 import EventEmitter from 'events';
-
-import { NetworkSelect as ns } from '../components/NetworkSelect';
 
 export class UiCommon {
 
     constructor(wrap) {
         this.wrap = wrap;
+        this._populateTokenDropDownLock = false;
     }
 
     async getTokenBalance() {
-        var data = this.getSelectedData();
+        var data = await this.getSelectedData();
 
         if (!data) {
             $("#amount").attr("placeholder", "Enter amount");
@@ -44,8 +44,8 @@ export class UiCommon {
         }
     }
 
-    getSelectedData() {
-        var network = ns.getFromMap(WalletProvider.chainId);
+    async getSelectedData() {
+        var network = await config.getFromMap(WalletProvider.chainId);
         if (!network)
             return;
 
@@ -61,21 +61,49 @@ export class UiCommon {
         };
     }
 
-    populateTokenDropDown() {
+    async populateTokenDropDown() {
+        if (this._populateTokenDropDownLock)
+            return;
+        
+        this._populateTokenDropDownLock = true;
+
+        console.log("populateTokenDropDown");
         $("#token").empty();
         $("#token").append($("<option />").text("Select token"));
-        var chainId = ns.get().chainId;
-
+        var chainId = wallet.chainId;
+        
         if (isNaN(chainId)) {
             disable("#form");
+            this._populateTokenDropDownLock = false;
             return;
         }
 
         enable("#form");
+        await config.fetchNetworkConfig();
+        sort.wrappable(config.network);
 
-        var network = ns.getFromMap(chainId);
-        if (!network)
+        console.log("WrapData:", sort.wrapData);
+
+        if (isNaN(wallet.chainId) || wallet.chainId === 0)
+        {
+            disable("#form");
+            this._populateTokenDropDownLock = false;
             return;
+        }
+        
+        var network = null;
+        $.each(sort.wrapData, function () {
+            if (this.chainId === wallet.chainId) {
+                network = this;
+                return false;
+            }
+        });
+
+        if (!network)
+        {
+            this._populateTokenDropDownLock = false;
+            return;
+        }
 
         if (this.wrap)
         {
@@ -89,13 +117,17 @@ export class UiCommon {
                 $("#token").append($("<option />").text(this.wrappedTicker));
             });
         }
+
+        this._populateTokenDropDownLock = false;
     }
 
     registerWalletListeners(id) {
         if (!wallet.hasListener(id)) {
             var em = new EventEmitter();
 
-            em.on('connect', (connectInfo) => {
+            em.on('connect', async (connectInfo) => {
+                console.log("walletUi.connect: ", connectInfo);
+                await this.populateTokenDropDown();
                 enable("#form");
             });
 
@@ -109,12 +141,15 @@ export class UiCommon {
                     disable("#form");
                     return;
                 }
-
+                console.log("walletUi.accountsChanged: ", accounts);
+                await this.populateTokenDropDown();
                 enable("#form");
             });
 
             em.on('chainChanged', async (chainId) => {
-                this.populateTokenDropDown();
+                console.log("walletUi.chainChanged: ", chainId);
+                await this.populateTokenDropDown();
+                enable("#form");
             });
 
             wallet.addListener(id, em);

@@ -10,7 +10,6 @@ import { show, hide, disable, enable } from '../js/ui';
 import { WalletProvider as wallet } from '../js/walletProvider'
 
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
-import { NetworkSelect as ns } from '../components/NetworkSelect'
 
 export default class Mining extends React.Component {
     constructor(props) {
@@ -92,7 +91,7 @@ export default class Mining extends React.Component {
     }
 
     async validateUiState() {
-        var net = ns.getFromMap(wallet.chainId);
+        var net = await config.getFromMap(wallet.chainId);
         msg.clear();
 
         if (!net) {
@@ -187,7 +186,6 @@ export default class Mining extends React.Component {
 
     async componentDidMount() {
         msg.clear();
-        ns.populateMineable();
 
         this.hideAllTabs();
 
@@ -227,7 +225,7 @@ export default class Mining extends React.Component {
     }
 
     btnTake_Clicked = async () => {
-        var net = ns.getFromMap(wallet.chainId);
+        var net = await config.getFromMap(wallet.chainId);
 
         if (!net)
             return;
@@ -273,7 +271,7 @@ export default class Mining extends React.Component {
     };
 
     btnAdd_Clicked = async () => {
-        var net = ns.getFromMap(wallet.chainId);
+        var net = await config.getFromMap(wallet.chainId);
 
         if (!net)
             return;
@@ -328,7 +326,7 @@ export default class Mining extends React.Component {
     };
 
     btnRemove_Clicked = async () => {
-        var net = ns.getFromMap(wallet.chainId);
+        var net = await config.getFromMap(wallet.chainId);
 
         if (!net)
             return;
@@ -371,39 +369,33 @@ export default class Mining extends React.Component {
             <div className="ps-3 pe-3">
                 <div className="page-flex-container d-flex flex-row justify-content-center align-items-center">
                     <div className="page-content">
-                        <form autocomplete="off" className="card border border-primary shadow">
+                        <form autoComplete="off" className="card border border-primary shadow">
                             <div className="card-header">LP Mining</div>
                             <div className="card-body">
                                 <div id="form">
-                                    <div className="d-flex p-0 align-items-center">
-                                        <div className="w-100 justify-content-start">
-                                            <Navbar collapseOnSelect expand="sm" className="navbar navbar-dark navbar-expand-sm p-0 m-0">
-                                                <Navbar.Toggle />
-                                                <Navbar.Collapse>
-                                                    <Nav>
-                                                        <button type="button" className="btn btn-link nav-link text-start ps-0"
-                                                            id="btnTake" onClick={async () => {
-                                                                msg.clear();
-                                                                this.showTab("#divTake");
-                                                            }}>Take</button>
-                                                        <button type="button" className="btn btn-link nav-link text-start" id="btnAdd"
-                                                            onClick={async () => {
-                                                                msg.clear();
-                                                                this.showTab("#divAdd");
-                                                            }}>Add</button>
-                                                        <button type="button" className="btn btn-link nav-link text-start" id="btnRemove"
-                                                            onClick={async () => {
-                                                                msg.clear();
-                                                                this.showTab("#divRemove");
-                                                            }}>Remove</button>
-                                                    </Nav>
-                                                </Navbar.Collapse>
-                                            </Navbar>
-                                        </div>
-                                        <div className="justify-content-end">
-                                            <select id="selPool" className="round btn btn-outline-primary dropdown-toggle" type="button" data-toggle="dropdown" style={{ width: "auto" }} onChange={this.selPool_Changed} />
-                                        </div>
-                                    </div>
+                                    <Navbar collapseOnSelect expand="sm" className="navbar navbar-dark navbar-expand-sm p-0 m-0">
+                                        <Navbar.Toggle />
+                                        <Navbar.Collapse>
+                                            <Nav>
+                                                <button type="button" className="btn btn-link nav-link text-start ps-0"
+                                                    id="btnTake" onClick={async () => {
+                                                        msg.clear();
+                                                        this.showTab("#divTake");
+                                                    }}>Take</button>
+                                                <button type="button" className="btn btn-link nav-link text-start" id="btnAdd"
+                                                    onClick={async () => {
+                                                        msg.clear();
+                                                        this.showTab("#divAdd");
+                                                    }}>Add</button>
+                                                <button type="button" className="btn btn-link nav-link text-start" id="btnRemove"
+                                                    onClick={async () => {
+                                                        msg.clear();
+                                                        this.showTab("#divRemove");
+                                                    }}>Remove</button>
+                                                <select id="selPool" className="btn btn-link nav-link text-start" type="button" data-toggle="dropdown" onChange={this.selPool_Changed} />
+                                            </Nav>
+                                        </Navbar.Collapse>
+                                    </Navbar>
                                     <div className="d-flex pb-3">
                                         <div className="text-end">
                                             <div>Unlocked:&nbsp;</div>

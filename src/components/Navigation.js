@@ -1,9 +1,220 @@
 import React from 'react';
+import EventEmitter from 'events';
+import $ from 'jquery';
 import { Navbar, Nav } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap'
-import { NetworkSelectComponent } from './NetworkSelect'
+
+import { Config as config } from '../js/config'
+import { show, hide, disable, enable } from '../js/ui';
+import { WalletProvider as wallet } from '../js/walletProvider'
 
 export class Navigation extends React.Component {
+
+    static emptyAddress = "0x0000000000000000000000000000000000000000";
+
+    async toggleNetworkWarning() {
+        if (!wallet.isConnected()) {
+            hide("#_aInvNet");
+            hide('#_aAcc');
+            show('#_aNoAcc');
+            hide('#_btnS');
+            return;
+        }
+
+        if (wallet.web3.eth.defaultAccount == null) {
+            hide("#_aInvNet");
+            hide('#_aAcc');
+            show('#_aNoAcc');
+            hide('#_btnS');
+            return;
+        }
+        else
+        {
+            $("#_aAccText").text(wallet.web3.eth.defaultAccount);
+            hide('#_aNoAcc');
+            show('#_aAcc');
+        }
+
+        if (wallet.isWalletConnect)
+            show('#_btnS');
+        else
+            hide('#_btnS');
+
+        if (!wallet.chainId || wallet.chainId === 0) {
+            hide("#_aInvNet");
+            $("#_btnD").text("Unknown");
+            return;
+        }
+
+        var net = await config.getFromMap(wallet.chainId);
+
+        if (!net) {
+            $("#_aInvNetText").text(`Invalid network. Wallet set to chain ${wallet.chainId}`);
+            show("#_aInvNet");
+        }
+        else
+            hide("#_aInvNet");
+
+        $("#_btnD").text(wallet.getNetworkName());
+    }
+
+    openProviderModal() {
+        $("#_modSelectProvider").addClass("d-block")
+        $("#_modSelectProvider").addClass("show")
+    }
+
+    closeProviderModal() {
+        $("#_modSelectProvider").removeClass("d-block")
+        $("#_modSelectProvider").removeClass("show")
+    }
+
+    openNetworkSelectModal() {
+        $("#_modSelectNetwork").addClass("d-block")
+        $("#_modSelectNetwork").addClass("show")
+    }
+
+    closeNetworkSelectModal() {
+        $("#_modSelectNetwork").removeClass("d-block")
+        $("#_modSelectNetwork").removeClass("show")
+    }
+
+    /*static populateAll() {
+        Navigation.empty();
+        config.fetchNetworkConfig(function (data) {
+            $.each(data, function () {
+                Navigation.networkMap.push(this);
+                //$("#_sNs").append(`<option value="${chainId}">${network}</option>`);
+            });
+        });
+
+        console.log("Network Map:", Navigation.networkMap);
+        Navigation.toggleNetworkWarning();
+    }
+
+    static populateWrappable() {
+        Navigation.empty();
+        config.fetchNetworkConfig(function (data) {
+            sort.wrappable(data);
+            $.each(sort.wrapData, function () {
+                Navigation.networkMap.push(this);
+                //$("#_sNs").append(`<option value="${chainId}">${network}</option>`);
+            });
+        });
+        console.log("Network Map:", Navigation.networkMap);
+        Navigation.toggleNetworkWarning();
+    }
+
+    static populateMineable() {
+        Navigation.empty();
+        config.fetchNetworkConfig(function (data) {
+            $.each(data, function () {
+                if (this.liquidityMining.address !== Navigation.emptyAddress) {
+                    Navigation.networkMap.push(this);
+                    //$("#_sNs").append(`<option value="${chainId}">${network}</option>`);
+                }
+            });
+        });
+        console.log("Network Map:", Navigation.networkMap);
+        Navigation.toggleNetworkWarning();
+    }
+
+    getFromMap(chainId) {
+        if (chainId === 0)
+            return null;
+
+        var ret = null;
+        $.each(Navigation.networkMap, function (idx, val) {
+            if (val.chainId === chainId) {
+                ret = val;
+                return false;
+            }
+        })
+
+        return ret;
+    }*/
+
+    _btnC_clicked = async () => {
+        if (wallet.isMetamaskAvailable()) {
+            console.log("Metamask is available. Displaying modal");
+            this.openProviderModal();
+        }
+        else {
+            console.log("Metamask not available. Defaulting to Wallet Connect");
+            await wallet.walletConnect();
+        }
+
+        await this.toggleNetworkWarning();
+    }
+
+    _btnE_clicked = async () => {
+        this.closeProviderModal();
+        this.closeNetworkSelectModal();
+    }
+
+    _btnD_clicked = async () => {
+        await wallet.disconnect();
+    }
+
+    _btnS_clicked = async () => {
+        enable('#_btnEth');
+        $('#_btnEth').text("ETHEREUM");
+        enable('#_btnBsc');
+        $('#_btnBsc').text("BINANCE SMART CHAIN");
+        hide("#_aNetChange");
+
+        if (wallet.chainId === 1)
+        {
+            disable('#_btnEth');
+            $('#_btnEth').text("ETHEREUM (Current)");
+        }
+        else if (wallet.chainId === 56)
+        {
+            disable('#_btnBsc');
+            $('#_btnBsc').text("BINANCE SMART CHAIN (Current)");
+        }
+
+        this.openNetworkSelectModal();
+    }
+
+    _wc_clicked = async () => {
+        this.closeProviderModal();
+        await wallet.walletConnect();
+        await this.toggleNetworkWarning();
+    }
+
+    _mm_clicked = async () => {
+        this.closeProviderModal();
+        await wallet.metamask();
+        await this.toggleNetworkWarning();
+    }
+
+    async componentDidMount() {
+        if (!wallet.hasListener('networkSelect')) {
+            var em = new EventEmitter();
+
+            em.on('connect', async () => {
+                await this.toggleNetworkWarning();
+            });
+
+            em.on('disconnect', async () => {
+                await this.toggleNetworkWarning();
+            });
+
+            em.on('accountsChanged', async (accounts) => {
+                await this.toggleNetworkWarning();
+            });
+
+            em.on('chainChanged', async (chainId) => {
+                this.closeNetworkSelectModal();
+                await this.toggleNetworkWarning();
+            });
+
+            wallet.addListener('networkSelect', em);
+        }
+
+        await this.toggleNetworkWarning();
+    }
+
     render() {
         return (
             <div>
@@ -11,7 +222,7 @@ export class Navigation extends React.Component {
                     The CiviPort Web Teleporter is Beta software.
                 </div>
                 <div className="d-flex p-0 ps-3 pe-3">
-                    <div className="w-100 justify-content-start">
+                    <div className="flex-grow-1">
                         <Navbar collapseOnSelect expand="md" className="navbar navbar-dark navbar-expand-md p-0">
                             <Navbar.Toggle />
                             <Navbar.Collapse>
@@ -40,30 +251,106 @@ export class Navigation extends React.Component {
                                         <Nav.Link>Energize</Nav.Link>
                                     </LinkContainer>
 
-                                    <LinkContainer className="text-left" to="/stats">
-                                        <Nav.Link className="text-left">Stats</Nav.Link>
+                                    <LinkContainer to="/stats">
+                                        <Nav.Link>Stats</Nav.Link>
                                     </LinkContainer>
+
                                 </Nav>
                             </Navbar.Collapse>
+                            <button className="round btn btn-outline-success btn-sm" id="_btnS" onClick={this._btnS_clicked}>SWITCH NETWORK</button>
                         </Navbar>
-                    </div>
-                    <div className="justify-content-end pt-1">
-                        <NetworkSelectComponent />
                     </div>
                 </div>
                 <div className="p-0 ps-3 pe-3 pt-3">
-                    <div id="_aAcc" className="popup-div-margins alert alert-success d-flex align-items-center input-group" role="alert">
-                        <div id="_aAccText" className="text-truncate d-inline-block" />
+                    <div id="_aAcc" className="d-flex p-0">
+                        <button id="_aAccText" className="flex-grow-1 round-left alert alert-success text-left text-truncate d-inline-block" />
+                        <button className="round-right btn btn-alert btn-danger" id="_btnD" onClick={this._btnD_clicked} />
                     </div>
-                    <div id="_aNoAcc" className="popup-div-margins alert alert-danger d-flex align-items-center input-group" role="alert">
-                        <div className="text-truncate d-inline-block">
-                            No account connected.
-                        </div>
+                    <div id="_aNoAcc" className="d-flex p-0">
+                        <button id="_aAccText" className="flex-grow-1 round-left alert alert-danger text-left">No account connected</button>
+                        <button className="round-right btn btn-alert btn-success" id="_btnC" onClick={this._btnC_clicked}>Connect</button>
                     </div>
-                    <div id="_aInvNet" className="popup-div-margins alert alert-warning d-flex align-items-center input-group" role="alert">
+
+                    <div id="_aInvNet" className="round alert alert-warning d-flex align-items-center">
                         <div id="_aInvNetText" className="text-truncate d-inline-block" />
                     </div>
                 </div>
+
+
+                <div className="modal fade" id="_modSelectProvider" tabIndex="-1" role="dialog" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="exampleModalLongTitle">Select Wallet</h5>
+                            </div>
+                            <div className="modal-body">
+                                <div>
+                                    <button className="round btn btn-outline-info p-3 mb-3 w-100" onClick={this._wc_clicked}>
+                                        Wallet Connect
+                                    </button>
+                                </div>
+                                <div>
+                                    <button className="round btn btn-outline-warning p-3 w-100" onClick={this._mm_clicked}>
+                                        MetaMask
+                                    </button>
+                                </div>
+                                <br />
+                                <div>
+                                    <h4>Note to Wallet Connect users:</h4>
+                                    <div>
+                                        Fundamenta is a multi-chain system. Your ability to use this dapp may be impacted if your wallet does not
+                                        support network switching.
+                                    </div>
+                                    <br />
+                                    <div>
+                                        For the best experience it is recommended to use the Fundamenta mobile wallet, available for iOS and Android.
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="round btn btn-danger" onClick={this._btnE_clicked}>Exit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="modal fade" id="_modSelectNetwork" tabIndex="-1" role="dialog" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="exampleModalLongTitle">Select Network</h5>
+                            </div>
+                            <div className="modal-body">
+                                <button id="_btnEth" className="round btn btn-outline-secondary p-3 mb-3 w-100"
+                                    onClick={async () => {
+                                        $("#_btnEth").text('Sending request...');
+                                        wallet.switchNetwork(1);
+                                    }}>Ethereum</button>
+
+                                <button id="_btnBsc" className="round btn btn-outline-secondary p-3 mb-3 w-100"
+                                    onClick={async () => {
+                                        $("#_btnBsc").text('Sending request...');
+                                        wallet.switchNetwork(56);
+                                    }}>Binance Smart Chain</button>
+                                <br />
+                                <div>
+                                    <h4>Note to Wallet Connect users:</h4>
+                                    <div>
+                                        Selecting the network should prompt you on your wallet to accept the network change. Do not continue to use any wallet which does not provide this prompt.
+                                    </div>
+                                    <br />
+                                    <div>
+                                        For the best experience it is recommended to use the Fundamenta mobile wallet, available for iOS and Android.
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="round btn btn-danger" onClick={this._btnE_clicked}>Exit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         )
     }

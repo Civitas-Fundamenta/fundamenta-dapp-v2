@@ -9,7 +9,6 @@ import { show, hide, disable, enable } from '../js/ui';
 import { WalletProvider as wallet, WalletProvider } from '../js/walletProvider'
 
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
-import { NetworkSelect as ns } from '../components/NetworkSelect'
 
 export default class Staking extends React.Component {
     constructor(props) {
@@ -100,7 +99,7 @@ export default class Staking extends React.Component {
     }
 
     async validateUiState() {
-        var net = ns.getFromMap(WalletProvider.chainId);
+        var net = await config.getFromMap(WalletProvider.chainId);
         msg.clear();
 
         if (!net) {
@@ -165,7 +164,6 @@ export default class Staking extends React.Component {
 
     async componentDidMount() {
         msg.clear();
-        ns.populateAll();
 
         this.hideAllTabs();
 
@@ -199,7 +197,7 @@ export default class Staking extends React.Component {
     }
 
     btnTake_Clicked = async () => {
-        var net = ns.getFromMap(WalletProvider.chainId);
+        var net = await config.getFromMap(WalletProvider.chainId);
 
         if (!net)
             return;
@@ -232,7 +230,7 @@ export default class Staking extends React.Component {
     };
 
     btnCompound_Clicked = async () => {
-        var net = ns.getFromMap(WalletProvider.chainId);
+        var net = await config.getFromMap(WalletProvider.chainId);
 
         if (!net)
             return;
@@ -265,7 +263,7 @@ export default class Staking extends React.Component {
     };
 
     btnAdd_Clicked = async () => {
-        var net = ns.getFromMap(WalletProvider.chainId);
+        var net = await config.getFromMap(WalletProvider.chainId);
 
         if (!net)
             return;
@@ -314,7 +312,7 @@ export default class Staking extends React.Component {
     };
 
     btnRemove_Clicked = async () => {
-        var net = ns.getFromMap(WalletProvider.chainId);
+        var net = await config.getFromMap(WalletProvider.chainId);
 
         if (!net)
             return;
@@ -369,7 +367,7 @@ export default class Staking extends React.Component {
             <div className="ps-3 pe-3">
                 <div className="page-flex-container d-flex flex-row justify-content-center align-items-center">
                     <div className="page-content">
-                        <form autocomplete="off" className="card border border-primary shadow">
+                        <form autoComplete="off" className="card border border-primary shadow">
                             <div className="card-header">Staking</div>
                             <div className="card-body">
                                 <div id="form">
@@ -407,8 +405,8 @@ export default class Staking extends React.Component {
                                     </div>
                                     <div className="d-flex pb-3">
                                         <div className="text-end">
-                                            <div>FMTA Balance:&nbsp;</div>
-                                            <div>Staked FMTA:&nbsp;</div>
+                                            <div>Balance:&nbsp;</div>
+                                            <div>Staked:&nbsp;</div>
                                             <div>Rewards:&nbsp;</div>
                                         </div>
                                         <div className="text-start">
