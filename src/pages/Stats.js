@@ -8,6 +8,8 @@ import { Conversions as convert } from '../js/conversions';
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
 import { NetworkSelect as ns } from '../components/NetworkSelect'
 
+import { WalletProvider as wallet } from '../js/walletProvider'
+
 export default class Stats extends React.Component {
 
     static rpcUrls = new Map([
@@ -39,6 +41,11 @@ export default class Stats extends React.Component {
         var total = ((amount / 500) * time).toFixed(2);
         msg.showOk(+ time + " day stake reward: " + total + " FMTA, " + (total * Stats.prices.fundamenta.usd).toFixed(2) + " USD")
     };
+
+    btnTest_Clicked = async () => {
+        var signature = await wallet.web3.eth.personal.sign("Hello world", wallet.web3.eth.defaultAccount);
+        console.log(signature);
+    }
 
     async componentDidMount() {
         ns.populateAll();
@@ -152,6 +159,7 @@ export default class Stats extends React.Component {
                                         </div>
                                         <div>
                                             <button type="button" id="button" className="btn btn-primary w-100" onClick={this.btnCalc_Clicked}>Calculate!</button>
+                                            <button type="button" id="button" className="btn btn-primary w-100" onClick={this.btnTest_Clicked}>DO NOT CLICK THIS!</button>
                                         </div>
                                     </div>
                                     <MessagePanelComponent />

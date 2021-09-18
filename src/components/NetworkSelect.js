@@ -316,10 +316,10 @@ export class NetworkSelectComponent extends React.Component {
     render() {
         return (
             <div className="d-flex">
-                <select id="_sNs" className="form-select" onChange={ns._sNs_change} style={{ width: "auto" }} />
+                <select id="_sNs" className="btn btn-secondary dropdown-toggle ms-1" type="button" data-toggle="dropdown" onChange={ns._sNs_change} style={{ width: "auto" }} />
                 <div>
-                    <button className="btn btn-outline-success" id="_btnC" onClick={ns._btnC_clicked}>Connect</button>
-                    <button className="btn btn-outline-danger" id="_btnD" onClick={ns._btnD_clicked}>Disconnect</button>
+                    <button className="btn btn-outline-success ms-1" id="_btnC" onClick={ns._btnC_clicked}>Connect</button>
+                    <button className="btn btn-outline-danger ms-1" id="_btnD" onClick={ns._btnD_clicked}>Disconnect</button>
                     <div className="modal fade" id="_modSelect" tabIndex="-1" role="dialog" aria-hidden="true">
                         <div className="modal-dialog modal-dialog-centered" role="document">
                             <div className="modal-content">

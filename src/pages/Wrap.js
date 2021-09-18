@@ -128,7 +128,7 @@ export default class Wrap extends React.Component {
                             <div className="card-body">
                                 <div id="form">
                                     <div className="input-group mb-3">
-                                        <select id="token" className="form-control form-select" onChange={async () => {
+                                        <select id="token" className="btn btn-secondary dropdown-toggle form-control" type="button" data-toggle="dropdown"  onChange={async () => {
                                             await this.common.getTokenBalance();
                                         }}></select>
                                         <input type="number" id="amount" className="form-control input-sm" placeholder="Enter amount" />

@@ -377,7 +377,7 @@ export default class Mining extends React.Component {
                                 <div id="form">
                                     <div className="d-flex p-0">
                                         <div className="w-100 justify-content-start">
-                                            <Navbar collapseOnSelect expand="sm" className="navbar navbar-expand-sm pt-0">
+                                            <Navbar style={{ outline: "none", border: "none", boxShadow: "none" }} collapseOnSelect expand="sm" className="navbar navbar-dark navbar-expand-sm p-0 m-0">
                                                 <Navbar.Toggle />
                                                 <Navbar.Collapse>
                                                     <Nav>
@@ -400,8 +400,8 @@ export default class Mining extends React.Component {
                                                 </Navbar.Collapse>
                                             </Navbar>
                                         </div>
-                                        <div className="justify-content-end">
-                                            <select id="selPool" className="form-select" style={{ width: "auto" }} onChange={this.selPool_Changed} />
+                                        <div className="justify-content-end pt-1">
+                                            <select id="selPool" className="btn btn-secondary dropdown-toggle ms-1" type="button" data-toggle="dropdown" style={{ width: "auto" }} onChange={this.selPool_Changed} />
                                         </div>
                                     </div>
                                     <div className="d-flex pb-3">
@@ -426,7 +426,7 @@ export default class Mining extends React.Component {
                                     <div id="divAdd">
                                         <div className="input-group mb-3">
                                             <input type="number" id="inAddAmount" className="form-control input-sm" placeholder="Enter amount" />
-                                            <select id="selLockPeriod" className="form-select" style={{ width: "auto" }} />
+                                            <select id="selLockPeriod" className="btn btn-secondary dropdown-toggle ms-1" type="button" data-toggle="dropdown" style={{ width: "auto" }} />
                                             <button className="btn btn-primary" onClick={this.btnAdd_Clicked}>Add</button>
                                         </div>
                                     </div>

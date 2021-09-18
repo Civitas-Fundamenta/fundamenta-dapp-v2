@@ -365,12 +365,12 @@ export default class Teleport extends React.Component {
                             <div className="card-body">
                                 <div id="form">
                                     <div className="input-group mb-3">
-                                        <select id="sourceToken" className="form-control form-select"></select>
+                                        <select id="sourceToken" className="btn btn-secondary dropdown-toggle form-control" type="button" data-toggle="dropdown" ></select>
                                         <input type="number" id="amount" className="form-control input-sm numeric-input"
                                             placeholder="Enter amount" />
                                     </div>
                                     <div className="mb-3">
-                                        <select id="destination" className="form-control form-select"></select>
+                                        <select id="destination" className="btn btn-secondary dropdown-toggle form-control" type="button" data-toggle="dropdown" ></select>
                                     </div>
                                     <div>
                                         <button type="button" id="button" className="btn btn-primary w-100">Teleport!</button>
