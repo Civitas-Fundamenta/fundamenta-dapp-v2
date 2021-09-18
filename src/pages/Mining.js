@@ -371,7 +371,7 @@ export default class Mining extends React.Component {
             <div className="ps-3 pe-3">
                 <div className="page-flex-container d-flex flex-row justify-content-center align-items-center">
                     <div className="page-content">
-                        <form className="card">
+                        <form autocomplete="off" className="card border border-primary shadow">
                             <div className="card-header">LP Mining</div>
                             <div className="card-body">
                                 <div id="form">
@@ -400,8 +400,8 @@ export default class Mining extends React.Component {
                                                 </Navbar.Collapse>
                                             </Navbar>
                                         </div>
-                                        <div className="justify-content-end pt-1">
-                                            <select id="selPool" className="btn btn-secondary dropdown-toggle ms-1" type="button" data-toggle="dropdown" style={{ width: "auto" }} onChange={this.selPool_Changed} />
+                                        <div className="justify-content-end">
+                                            <select id="selPool" className="round btn btn-outline-primary dropdown-toggle" type="button" data-toggle="dropdown" style={{ width: "auto" }} onChange={this.selPool_Changed} />
                                         </div>
                                     </div>
                                     <div className="d-flex pb-3">
@@ -419,20 +419,20 @@ export default class Mining extends React.Component {
 
                                     <div id="divTake">
                                         <div className="input-group mb-3">
-                                            <input type="number" id="inTakeAmount" className="form-control input-sm" placeholder="Enter amount" />
-                                            <button className="btn btn-primary" onClick={this.btnTake_Clicked}>Take</button>
+                                            <input type="number" id="inTakeAmount" className="round-left btn-primary form-control" placeholder="Enter amount" />
+                                            <button className="round-right btn btn-primary" onClick={this.btnTake_Clicked}>Take</button>
                                         </div>
                                     </div>
                                     <div id="divAdd">
                                         <div className="input-group mb-3">
-                                            <input type="number" id="inAddAmount" className="form-control input-sm" placeholder="Enter amount" />
-                                            <select id="selLockPeriod" className="btn btn-secondary dropdown-toggle ms-1" type="button" data-toggle="dropdown" style={{ width: "auto" }} />
-                                            <button className="btn btn-primary" onClick={this.btnAdd_Clicked}>Add</button>
+                                            <input type="number" id="inAddAmount" className="round-left btn-primary form-control" placeholder="Enter amount" />
+                                            <select id="selLockPeriod" className="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" style={{ width: "auto" }} />
+                                            <button className="round-right btn btn-primary" onClick={this.btnAdd_Clicked}>Add</button>
                                         </div>
                                     </div>
                                     <div id="divRemove">
                                         <div className="input-group mb-3">
-                                            <button className="btn btn-primary w-100" onClick={this.btnRemove_Clicked}>Remove</button>
+                                            <button className="round btn btn-primary w-100" onClick={this.btnRemove_Clicked}>Remove</button>
                                         </div>
                                     </div>
                                 </div>

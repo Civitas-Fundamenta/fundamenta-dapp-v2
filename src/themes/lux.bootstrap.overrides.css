@@ -4,8 +4,55 @@ body {
 
 .card {
     background-color: #292a2d !important;
+    border-radius: 25px;
 }
 
-.card-header {
+.card-header, .modal-header {
     background-color: #353535 !important;
+    border-top-left-radius: 25px !important;
+    border-top-right-radius: 25px !important;
+    border: 0;
+}
+
+.card-footer, .modal-footer {
+    background-color: #353535 !important;
+    border-bottom-left-radius: 25px !important;
+    border-bottom-right-radius: 25px !important;
+    border: 0;
+}
+
+.modal-content {
+    background-color: #292a2d !important;
+    border-radius: 25px !important;
+    border: 0;
+}
+
+.round {
+    border-radius: 15px !important;
+}
+
+.round-left {
+    border-top-left-radius: 15px !important;
+    border-bottom-left-radius: 15px !important;
+}
+
+.round-right {
+    border-top-right-radius: 15px !important;
+    border-bottom-right-radius: 15px !important;
+}
+
+.alert {
+    border-radius: 25px !important;
+}
+
+.card .alert {
+    border-radius: 15px !important;
+}
+
+.no-round {
+    border-radius: 0 !important;
+}
+
+.dropdown-toggle {
+    color: #fff !important;
 }

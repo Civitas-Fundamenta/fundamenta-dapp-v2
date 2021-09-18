@@ -240,17 +240,17 @@ export default class Energize extends React.Component {
             <div className="ps-3 pe-3">
                 <div className="page-flex-container d-flex flex-row justify-content-center align-items-center">
                     <div className="page-content">
-                        <form className="card">
+                        <form autocomplete="off" className="card border border-primary shadow">
                             <div className="card-header">Energize</div>
                             <div className="card-body">
                                 <div id="form">
                                     <div id="selectors">
                                         <div className="mb-3">
-                                            <input id="hash" className="form-control input-sm" placeholder="Enter TX hash" />
+                                            <input id="hash" className="round btn-primary form-control input" placeholder="Enter TX hash" />
                                         </div>
                                     </div>
                                     <div>
-                                        <button type="button" id="button" className="btn btn-primary w-100">Energize!</button>
+                                        <button type="button" id="button" className="btn btn-primary round w-100">Energize!</button>
                                     </div>
                                 </div>
                                 <MessagePanelComponent />

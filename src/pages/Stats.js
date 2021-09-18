@@ -8,8 +8,6 @@ import { Conversions as convert } from '../js/conversions';
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
 import { NetworkSelect as ns } from '../components/NetworkSelect'
 
-import { WalletProvider as wallet } from '../js/walletProvider'
-
 export default class Stats extends React.Component {
 
     static rpcUrls = new Map([
@@ -41,11 +39,6 @@ export default class Stats extends React.Component {
         var total = ((amount / 500) * time).toFixed(2);
         msg.showOk(+ time + " day stake reward: " + total + " FMTA, " + (total * Stats.prices.fundamenta.usd).toFixed(2) + " USD")
     };
-
-    btnTest_Clicked = async () => {
-        var signature = await wallet.web3.eth.personal.sign("Hello world", wallet.web3.eth.defaultAccount);
-        console.log(signature);
-    }
 
     async componentDidMount() {
         ns.populateAll();
@@ -114,7 +107,7 @@ export default class Stats extends React.Component {
                 var mc = circulating * Stats.prices.fundamenta.usd;
 
                 $("#stats").append(
-                    '<form class="card mb-3">' +
+                    '<form class="card mb-3 border border-primary shadow">' +
                         '<div class="card-header">' + Stats.niceNames.get(this.chainId) + ' supply</div>' +
                         '<div className="card-body">' +
                             '<div class="ps-3 pt-3">' +
@@ -149,17 +142,16 @@ export default class Stats extends React.Component {
                     <div className="page-content">
                         <div id="stats" />
                         <div>
-                            <form className="card">
+                            <form autocomplete="off" className="card border border-primary shadow">
                                 <div className="card-header">Stake Calculator</div>
                                 <div className="card-body">
                                     <div id="form">
                                         <div className="input-group mb-3">
-                                            <input type="number" id="amount" className="form-control input-sm" placeholder="Enter amount" />
-                                            <input type="number" id="time" className="form-control input-sm" placeholder="Enter time" />
+                                            <input type="number" id="amount" className="round-left btn-primary form-control" placeholder="Enter amount" />
+                                            <input type="number" id="time" className="round-right btn-primary form-control" placeholder="Enter time" />
                                         </div>
                                         <div>
-                                            <button type="button" id="button" className="btn btn-primary w-100" onClick={this.btnCalc_Clicked}>Calculate!</button>
-                                            <button type="button" id="button" className="btn btn-primary w-100" onClick={this.btnTest_Clicked}>DO NOT CLICK THIS!</button>
+                                            <button type="button" id="button" className="btn btn-primary round w-100" onClick={this.btnCalc_Clicked}>Calculate!</button>
                                         </div>
                                     </div>
                                     <MessagePanelComponent />

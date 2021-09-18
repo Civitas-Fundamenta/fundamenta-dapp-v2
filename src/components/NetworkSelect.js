@@ -316,10 +316,10 @@ export class NetworkSelectComponent extends React.Component {
     render() {
         return (
             <div className="d-flex">
-                <select id="_sNs" className="btn btn-secondary dropdown-toggle ms-1" type="button" data-toggle="dropdown" onChange={ns._sNs_change} style={{ width: "auto" }} />
+                <select id="_sNs" className="round-left btn btn-outline-primary dropdown-toggle" type="button" data-toggle="dropdown" onChange={ns._sNs_change} style={{ width: "auto" }} />
                 <div>
-                    <button className="btn btn-outline-success ms-1" id="_btnC" onClick={ns._btnC_clicked}>Connect</button>
-                    <button className="btn btn-outline-danger ms-1" id="_btnD" onClick={ns._btnD_clicked}>Disconnect</button>
+                    <button className="round-right btn btn-outline-success" id="_btnC" onClick={ns._btnC_clicked}>Connect</button>
+                    <button className="round-right btn btn-outline-danger" id="_btnD" onClick={ns._btnD_clicked}>Disconnect</button>
                     <div className="modal fade" id="_modSelect" tabIndex="-1" role="dialog" aria-hidden="true">
                         <div className="modal-dialog modal-dialog-centered" role="document">
                             <div className="modal-content">
@@ -328,12 +328,12 @@ export class NetworkSelectComponent extends React.Component {
                                 </div>
                                 <div className="modal-body">
                                     <div>
-                                        <button className="btn btn-outline-primary p-3 mb-3 w-100" onClick={ns._wc_clicked}>
+                                        <button className="round btn btn-outline-info p-3 mb-3 w-100" onClick={ns._wc_clicked}>
                                             Wallet Connect
                                         </button>
                                     </div>
                                     <div>
-                                        <button className="btn btn-outline-warning p-3 w-100" onClick={ns._mm_clicked}>
+                                        <button className="round btn btn-outline-warning p-3 w-100" onClick={ns._mm_clicked}>
                                             MetaMask
                                         </button>
                                     </div>
@@ -351,7 +351,7 @@ export class NetworkSelectComponent extends React.Component {
                                     </div>
                                 </div>
                                 <div className="modal-footer">
-                                    <button type="button" className="btn btn-danger" onClick={ns._btnE_clicked}>Exit</button>
+                                    <button type="button" className="round btn btn-danger" onClick={ns._btnE_clicked}>Exit</button>
                                 </div>
                             </div>
                         </div>

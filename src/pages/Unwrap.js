@@ -85,18 +85,18 @@ export default class Unwrap extends React.Component {
             <div className="ps-3 pe-3">
                 <div className="page-flex-container d-flex flex-row justify-content-center align-items-center">
                     <div className="page-content">
-                        <form className="card">
+                        <form autocomplete="off" className="card border border-primary shadow">
                             <div className="card-header">Unwrap</div>
                             <div className="card-body">
                                 <div id="form">
                                     <div className="input-group mb-3">
-                                        <select id="token" className="btn btn-secondary dropdown-toggle form-control" type="button" data-toggle="dropdown"  onChange={async () => {
+                                        <select id="token" className="round-left btn-primary dropdown-toggle form-control" type="button" data-toggle="dropdown"  onChange={async () => {
                                             await this.common.getTokenBalance();
                                         }}></select>
-                                        <input type="number" id="amount" className="form-control input-sm" placeholder="Enter amount" />
+                                        <input type="number" id="amount" className="round-right btn-primary form-control" placeholder="Enter amount" />
                                     </div>
                                     <div>
-                                        <button type="button" id="button" className="btn btn-primary w-100" onClick={this.btnUnwrap_Clicked}>Unwrap!</button>
+                                        <button type="button" id="button" className="round btn btn-primary w-100" onClick={this.btnUnwrap_Clicked}>Unwrap!</button>
                                     </div>
                                 </div>
                                 <MessagePanelComponent />

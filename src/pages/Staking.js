@@ -369,7 +369,7 @@ export default class Staking extends React.Component {
             <div className="ps-3 pe-3">
                 <div className="page-flex-container d-flex flex-row justify-content-center align-items-center">
                     <div className="page-content">
-                        <form className="card">
+                        <form autocomplete="off" className="card border border-primary shadow">
                             <div className="card-header">Staking</div>
                             <div className="card-body">
                                 <div id="form">
@@ -419,21 +419,21 @@ export default class Staking extends React.Component {
                                     </div>
 
                                     <div id="divTake">
-                                        <button className="btn btn-primary w-100" onClick={this.btnTake_Clicked}>Take</button>
+                                        <button className="round btn btn-primary w-100" onClick={this.btnTake_Clicked}>Take</button>
                                     </div>
                                     <div id="divCompound">
-                                        <button className="btn btn-primary w-100" onClick={this.btnCompound_Clicked}>Compound</button>
+                                        <button className="round btn btn-primary w-100" onClick={this.btnCompound_Clicked}>Compound</button>
                                     </div>
                                     <div id="divAdd">
                                         <div className="input-group mb-3">
-                                            <input type="number" id="inAddAmount" className="form-control input-sm" placeholder="Enter amount" />
-                                            <button className="btn btn-primary" onClick={this.btnAdd_Clicked}>Add</button>
+                                            <input type="number" id="inAddAmount" className="round-left btn-primary form-control" placeholder="Enter amount" />
+                                            <button className="round-right btn btn-primary" onClick={this.btnAdd_Clicked}>Add</button>
                                         </div>
                                     </div>
                                     <div id="divRemove">
                                         <div className="input-group mb-3">
-                                            <input type="number" id="inRemoveAmount" className="form-control input-sm" placeholder="Enter amount" />
-                                            <button className="btn btn-primary" onClick={this.btnRemove_Clicked}>Remove</button>
+                                            <input type="number" id="inRemoveAmount" className="round-left btn-primary form-control" placeholder="Enter amount" />
+                                            <button className="round-right btn btn-primary" onClick={this.btnRemove_Clicked}>Remove</button>
                                         </div>
                                     </div>
                                 </div>

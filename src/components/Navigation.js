@@ -7,7 +7,7 @@ export class Navigation extends React.Component {
     render() {
         return (
             <div>
-                <div className="alert alert-warning p-0" role="alert">
+                <div className="alert alert-warning no-round p-0" role="alert">
                     The CiviPort Web Teleporter is Beta software.
                 </div>
                 <div className="d-flex p-0 ps-3 pe-3">
