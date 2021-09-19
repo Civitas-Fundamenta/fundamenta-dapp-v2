@@ -296,7 +296,7 @@ export class Navigation extends React.Component {
                                 </div>
                                 <br />
                                 <div>
-                                    <h4>Note to Wallet Connect users:</h4>
+                                    <h4 className="text-title">Note to Wallet Connect users:</h4>
                                     <div>
                                         Fundamenta is a multi-chain system. Your ability to use this dapp may be impacted if your wallet does not
                                         support network switching.
@@ -334,7 +334,7 @@ export class Navigation extends React.Component {
                                     }}>Binance Smart Chain</button>
                                 <br />
                                 <div>
-                                    <h4>Note to Wallet Connect users:</h4>
+                                    <h4 className="text-title">Note to Wallet Connect users:</h4>
                                     <div>
                                         Selecting the network should prompt you on your wallet to accept the network change. Do not continue to use any wallet which does not provide this prompt.
                                     </div>

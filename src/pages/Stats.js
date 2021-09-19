@@ -111,14 +111,14 @@ export default class Stats extends React.Component {
                         '<div className="card-body">' +
                             '<div class="ps-3 pt-3">' +
                                 '<div class="d-flex pb-3">' +
-                                    '<div class="text-end">' +
+                                    '<div class="text-end text-body">' +
                                         '<div>Circulating:&nbsp;</div>' +
                                         '<div>Staked:&nbsp;</div>' +
                                         '<div>Market Cap:&nbsp;</div>' +
                                         '<div>Stake Rewards:&nbsp;</div>' +
                                         '<div>LP Rewards:&nbsp;</div>' +
                                     '</div>' +
-                                    '<div class="text-start">' +
+                                    '<div class="text-start text-body">' +
                                         '<div>' + circulating.toFixed(2) + ' FMTA</div>' +
                                         '<div>' + totalStaked.toFixed(2) + ' FMTA</div>' +
                                         '<div>' + mc.toFixed(2) + ' USD</div>' +
