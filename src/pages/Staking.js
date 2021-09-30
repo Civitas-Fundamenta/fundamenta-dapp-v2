@@ -373,8 +373,8 @@ export default class Staking extends React.Component {
                                 <div id="form">
                                     <div className="d-flex p-0">
                                         <div className="w-100 justify-content-start">
-                                            <Navbar collapseOnSelect expand="sm" className="navbar navbar-dark navbar-expand-sm p-0 m-0">
-                                                <Navbar.Toggle />
+                                            <Navbar collapseOnSelect expand="sm" className="navbar navbar-dark navbar-expand-sm p-0">
+                                                <Navbar.Toggle className="w-100 round btn btn-menu"/>
                                                 <Navbar.Collapse>
                                                     <Nav>
                                                         <button type="button" className="btn btn-link nav-link text-start ps-0"
@@ -403,7 +403,7 @@ export default class Staking extends React.Component {
                                             </Navbar>
                                         </div>
                                     </div>
-                                    <div className="d-flex pb-3">
+                                    <div className="d-flex mt-3">
                                         <div className="text-end">
                                             <div>Balance:&nbsp;</div>
                                             <div>Staked:&nbsp;</div>

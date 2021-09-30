@@ -373,8 +373,8 @@ export default class Mining extends React.Component {
                             <div className="card-header">LP Mining</div>
                             <div className="card-body">
                                 <div id="form">
-                                    <Navbar collapseOnSelect expand="sm" className="navbar navbar-dark navbar-expand-sm p-0 m-0">
-                                        <Navbar.Toggle />
+                                    <Navbar collapseOnSelect expand="sm" className="navbar navbar-dark navbar-expand-sm p-0">
+                                        <Navbar.Toggle className="w-100 round btn btn-menu"/>
                                         <Navbar.Collapse>
                                             <Nav>
                                                 <button type="button" className="btn btn-link nav-link text-start ps-0"
@@ -396,7 +396,7 @@ export default class Mining extends React.Component {
                                             </Nav>
                                         </Navbar.Collapse>
                                     </Navbar>
-                                    <div className="d-flex pb-3">
+                                    <div className="d-flex mt-3">
                                         <div className="text-end">
                                             <div>Unlocked:&nbsp;</div>
                                             <div>Locked:&nbsp;</div>
