@@ -221,18 +221,18 @@ export class Navigation extends React.Component {
                 <div className="alert alert-warning no-round p-0" role="alert">
                     The CiviPort Web Teleporter is Beta software.
                 </div>
-                <div className="d-flex p-0 ps-3 pe-3">
-                    <div className="flex-grow-1">
-                        <Navbar collapseOnSelect expand="md" className="navbar navbar-dark navbar-expand-md p-0">
-                            <Navbar.Toggle />
+                <div className="p-0 ps-3 pe-3">
+                    <div>
+                        <Navbar collapseOnSelect expand="md" className="navbar navbar-nav navbar-dark navbar-expand-md p-0">
+                            <Navbar.Toggle className="w-100 round btn btn-menu" />
                             <Navbar.Collapse>
                                 <Nav>
                                     <LinkContainer to="/staking">
-                                        <Nav.Link className="ps-0">Staking</Nav.Link>
+                                        <Nav.Link>Staking</Nav.Link>
                                     </LinkContainer>
 
                                     <LinkContainer to="/mining">
-                                        <Nav.Link >Mining</Nav.Link>
+                                        <Nav.Link>Mining</Nav.Link>
                                     </LinkContainer>
 
                                     <LinkContainer to="/teleport">
@@ -254,10 +254,10 @@ export class Navigation extends React.Component {
                                     <LinkContainer to="/stats">
                                         <Nav.Link>Stats</Nav.Link>
                                     </LinkContainer>
-
+                                    <button className="round btn btn-outline-success btn-sm btn-net" id="_btnS" onClick={this._btnS_clicked}>SWITCH NETWORK</button>
                                 </Nav>
                             </Navbar.Collapse>
-                            <button className="round btn btn-outline-success btn-sm" id="_btnS" onClick={this._btnS_clicked}>SWITCH NETWORK</button>
+                            
                         </Navbar>
                     </div>
                 </div>

@@ -44,7 +44,6 @@ body {
 .round-left {
     border-top-left-radius: 15px !important;
     border-bottom-left-radius: 15px !important;
-
     border-top-right-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
 }
@@ -52,7 +51,6 @@ body {
 .round-right {
     border-top-right-radius: 15px !important;
     border-bottom-right-radius: 15px !important;
-
     border-top-left-radius: 0 !important;
     border-bottom-left-radius: 0 !important;
 }
@@ -69,7 +67,11 @@ body {
     color: #fff !important;
 }
 
-.nav-link, .text-left {
+.nav-link, .text-center {
+    text-align: center !important;
+}
+
+.text-left {
     text-align: left !important;
 }
 
@@ -77,4 +79,25 @@ body {
     position: relative !important;
     padding: 1rem 1rem !important;
     margin-bottom: 1rem !important;
-  }
+}
+
+.btn-net {
+    float: right;
+}
+
+.btn-menu {
+    background: linear-gradient(90deg, rgba(40,167,69,1) 0%, rgba(1,123,255,1) 50%, rgba(40,167,69,1) 100%);
+}
+
+.navbar-dark .navbar-toggler-icon {
+    background-image: url(../logo.svg) !important;
+}
+
+.navbar-dark .navbar-toggler {
+    border-color: rgba(40,167,69,1) !important;
+    box-shadow: none;
+}
+
+.navbar-dark .navbar-toggler:active {
+    border-color: rgba(1,123,255,1) !important;
+}

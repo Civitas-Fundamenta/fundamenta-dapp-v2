@@ -10,6 +10,8 @@ export class Config {
     static network = null;
     static networkMap = [];
 
+    static #_fetchNetworkConfigLock = false;
+
     static app = {
 
         cpNet: "mainnet",
@@ -590,6 +592,11 @@ export class Config {
     }*/
 
     static async fetchNetworkConfig() {
+        if (Config.#_fetchNetworkConfigLock)
+            return;
+
+        Config.#_fetchNetworkConfigLock = true;
+            
         if (!this.network) {
             console.log("Fetching network config");
             this.network = await $.ajax({
@@ -602,7 +609,8 @@ export class Config {
                 Config.networkMap.push(this);
             });
         }
-
+        
+        Config.#_fetchNetworkConfigLock = false;
         return this.network;
     }
 }

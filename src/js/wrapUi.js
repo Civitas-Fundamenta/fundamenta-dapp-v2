@@ -126,7 +126,6 @@ export class UiCommon {
             var em = new EventEmitter();
 
             em.on('connect', async (connectInfo) => {
-                console.log("walletUi.connect: ", connectInfo);
                 await this.populateTokenDropDown();
                 enable("#form");
             });
@@ -141,13 +140,11 @@ export class UiCommon {
                     disable("#form");
                     return;
                 }
-                console.log("walletUi.accountsChanged: ", accounts);
                 await this.populateTokenDropDown();
                 enable("#form");
             });
 
             em.on('chainChanged', async (chainId) => {
-                console.log("walletUi.chainChanged: ", chainId);
                 await this.populateTokenDropDown();
                 enable("#form");
             });

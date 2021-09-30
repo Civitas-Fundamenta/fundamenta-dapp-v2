@@ -122,11 +122,11 @@ export class WalletProvider {
             for (let e of this.emitters.values())
                 e.emit('accountsChanged', [window.ethereum.selectedAddress]);
 
-            this.chainId = parseInt(await this.provider.request({ method: 'eth_chainId' }));
+            this.chainId = parseInt(await this.provider.request({ method: 'eth_chainId' }), 16);
         }
         else {
             await this.provider.request({ method: 'eth_requestAccounts' });
-            this.chainId = parseInt(await this.provider.request({ method: 'eth_chainId' }));
+            this.chainId = parseInt(await this.provider.request({ method: 'eth_chainId' }), 16);
         }
 
         for (let e of this.emitters.values())
@@ -151,7 +151,7 @@ export class WalletProvider {
 
         this.provider.on('chainChanged', async function (chainId) {
             if (WalletProvider.isMetamask)
-                WalletProvider.chainId = parseInt(chainId);
+                WalletProvider.chainId = parseInt(chainId, 16);
             else
                 WalletProvider.chainId = chainId;
 
