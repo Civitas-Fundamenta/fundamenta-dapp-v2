@@ -81,14 +81,6 @@ body {
     margin-bottom: 1rem !important;
 }
 
-.btn-net {
-    float: right;
-}
-
-.btn-menu {
-    background: linear-gradient(90deg, rgba(40,167,69,1) 0%, rgba(1,123,255,1) 50%, rgba(40,167,69,1) 100%);
-}
-
 .navbar-dark .navbar-toggler-icon {
     background-image: url(../logo.svg) !important;
 }

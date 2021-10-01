@@ -224,9 +224,13 @@ export class Navigation extends React.Component {
                 <div className="p-0 ps-3 pe-3">
                     <div>
                         <Navbar collapseOnSelect expand="md" className="navbar navbar-nav navbar-dark navbar-expand-md p-0">
-                            <Navbar.Toggle className="w-100 round btn btn-menu" />
+                            <Navbar.Toggle className="w-100 round btn" />
                             <Navbar.Collapse>
                                 <Nav>
+                                    <LinkContainer to="/">
+                                        <Nav.Link>Home</Nav.Link>
+                                    </LinkContainer>
+
                                     <LinkContainer to="/staking">
                                         <Nav.Link>Staking</Nav.Link>
                                     </LinkContainer>
@@ -251,10 +255,7 @@ export class Navigation extends React.Component {
                                         <Nav.Link>Energize</Nav.Link>
                                     </LinkContainer>
 
-                                    <LinkContainer to="/stats">
-                                        <Nav.Link>Stats</Nav.Link>
-                                    </LinkContainer>
-                                    <button className="round btn btn-outline-success btn-sm btn-net" id="_btnS" onClick={this._btnS_clicked}>SWITCH NETWORK</button>
+                                    <button className="round btn btn-outline-success btn-sm" id="_btnS" onClick={this._btnS_clicked}>SWITCH NETWORK</button>
                                 </Nav>
                             </Navbar.Collapse>
                             
