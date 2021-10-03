@@ -7,6 +7,7 @@ import { Config as config } from '../js/config'
 import { Conversions as convert } from '../js/conversions';
 import { WalletProvider as wallet } from '../js/walletProvider'
 import { show, hide } from '../js/ui';
+import { Navigation } from '../components/Navigation';
 
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
 
@@ -16,14 +17,16 @@ export default class Home extends React.Component {
         [1, "https://mainnet.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
         [4, "https://rinkeby.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
         [5, "https://goerli.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
-        [56, "https://bsc-dataseed.binance.org/"]
+        [56, "https://bsc-dataseed.binance.org/"],
+        [80001, "https://icy-thrumming-violet.matic-testnet.quiknode.pro/9c463eb8c1b9cfb5f78cde780f58ba2892454d10/"]
     ]);
 
     static niceNames = new Map([
         [1, "Ethereum"],
         [4, "Rinkeby"],
         [5, "Goerli"],
-        [56, "Binance"]
+        [56, "Binance"],
+        [80001, "Mumbai"]
     ]);
 
     static prices = null;
@@ -110,8 +113,13 @@ export default class Home extends React.Component {
                 var stakingContract = new web3.eth.Contract(config.app.stakeAbi, this.fmtaToken.stakingAddress);
                 var lpContract = new web3.eth.Contract(config.app.miningAbi, this.liquidityMining.address);
 
-                var poolInfo0 = await lpContract.methods.poolInfo(0).call();
-                var poolBalance0 = convert.fromAtomicUnits(poolInfo0.TotalRewardsPaidByPool, 18);
+                var poolBalance0 = 0;
+
+                if (this.liquidityMining.address !== Navigation.emptyAddress)
+                {
+                    var poolInfo0 = await lpContract.methods.poolInfo(0).call();
+                    poolBalance0 = convert.fromAtomicUnits(poolInfo0.TotalRewardsPaidByPool, 18);
+                }
 
                 var exclude = 0;
                 var poolBalance = poolBalance0;
@@ -140,14 +148,20 @@ export default class Home extends React.Component {
                     poolBalance += (poolBalance1 + oldPoolBalance0 + oldPoolBalance1);
                 }
 
-                var tot = await stakingContract.methods.totalStakes().call();
-                var totalStaked = convert.fromAtomicUnits(tot, 18);
+                var totalStaked = 0;
+                var stakeRewards = 0;
+
+                if (this.fmtaToken.stakingAddress !== Navigation.emptyAddress)
+                {
+                    var tot = await stakingContract.methods.totalStakes().call();
+                    totalStaked = convert.fromAtomicUnits(tot, 18);
+
+                    var stRew = await stakingContract.methods.totalRewardsPaid().call();
+                    stakeRewards = convert.fromAtomicUnits(stRew, 18);
+                }
 
                 var sup = await fmtaContract.methods.totalSupply().call();
                 var totalSupply = convert.fromAtomicUnits(sup, 18);
-
-                var stRew = await stakingContract.methods.totalRewardsPaid().call();
-                var stakeRewards = convert.fromAtomicUnits(stRew, 18);
 
                 var circulating = (totalSupply + totalStaked) - exclude;
 

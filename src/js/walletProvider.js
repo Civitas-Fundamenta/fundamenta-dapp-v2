@@ -16,7 +16,8 @@ export class WalletProvider {
         [1, "ethereum"],
         [4, "rinkeby"],
         [5, "goerli"],
-        [56, "binance"]
+        [56, "binance"],
+        [80001, "mumbai"]
     ]);
 
     static getNetworkName() {
@@ -62,7 +63,8 @@ export class WalletProvider {
                 1: "https://mainnet.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783",
                 4: "https://rinkeby.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783",
                 5: "https://goerli.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783",
-                56: "https://bsc-dataseed.binance.org/"
+                56: "https://bsc-dataseed.binance.org/",
+                80001: "https://icy-thrumming-violet.matic-testnet.quiknode.pro/9c463eb8c1b9cfb5f78cde780f58ba2892454d10/"
             },
             chainId: config.cpNet === "testnet" ? 4 : 1,
             qrcodeModalOptions: {

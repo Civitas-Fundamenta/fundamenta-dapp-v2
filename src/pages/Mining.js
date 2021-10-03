@@ -396,7 +396,7 @@ export default class Mining extends React.Component {
                                             </Nav>
                                         </Navbar.Collapse>
                                     </Navbar>
-                                    <div className="d-flex mt-3">
+                                    <div className="d-flex mt-3 mb-3">
                                         <div className="text-end">
                                             <div>Unlocked:&nbsp;</div>
                                             <div>Locked:&nbsp;</div>

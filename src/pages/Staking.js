@@ -9,6 +9,7 @@ import { show, hide, disable, enable } from '../js/ui';
 import { WalletProvider as wallet, WalletProvider } from '../js/walletProvider'
 
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
+import { Navigation } from '../components/Navigation';
 
 export default class Staking extends React.Component {
     constructor(props) {
@@ -102,7 +103,7 @@ export default class Staking extends React.Component {
         var net = await config.getFromMap(WalletProvider.chainId);
         msg.clear();
 
-        if (!net) {
+        if (!net || net.fmtaToken.stakingAddress === Navigation.emptyAddress) {
             this.disableNavBar();
             this.hideAllTabs();
             $("#lblBalance").text("0.00");
@@ -403,7 +404,7 @@ export default class Staking extends React.Component {
                                             </Navbar>
                                         </div>
                                     </div>
-                                    <div className="d-flex mt-3">
+                                    <div className="d-flex mt-3 mb-3">
                                         <div className="text-end">
                                             <div>Balance:&nbsp;</div>
                                             <div>Staked:&nbsp;</div>

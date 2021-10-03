@@ -14,7 +14,7 @@ export class Config {
 
     static app = {
 
-        cpNet: "mainnet",
+        cpNet: "testnet",
         serverCount: 3,
         serverDomain: "civiport.online",
         confTime: 12,
