@@ -564,33 +564,6 @@ export class Config {
         return ret;
     }
 
-    /*static populateWrappable() {
-        Navigation.empty();
-        config.fetchNetworkConfig(function (data) {
-            sort.wrappable(data);
-            $.each(sort.wrapData, function () {
-                Navigation.networkMap.push(this);
-                //$("#_sNs").append(`<option value="${chainId}">${network}</option>`);
-            });
-        });
-        console.log("Network Map:", Navigation.networkMap);
-        Navigation.toggleNetworkWarning();
-    }
-
-    static populateMineable() {
-        Navigation.empty();
-        config.fetchNetworkConfig(function (data) {
-            $.each(data, function () {
-                if (this.liquidityMining.address !== Navigation.emptyAddress) {
-                    Navigation.networkMap.push(this);
-                    //$("#_sNs").append(`<option value="${chainId}">${network}</option>`);
-                }
-            });
-        });
-        console.log("Network Map:", Navigation.networkMap);
-        Navigation.toggleNetworkWarning();
-    }*/
-
     static async fetchNetworkConfig() {
         if (Config.#_fetchNetworkConfigLock)
             return;

@@ -17,6 +17,7 @@ export class WalletProvider {
         [4, "rinkeby"],
         [5, "goerli"],
         [56, "binance"],
+        [137, "polygon"],
         [80001, "mumbai"]
     ]);
 
@@ -64,12 +65,10 @@ export class WalletProvider {
                 4: "https://rinkeby.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783",
                 5: "https://goerli.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783",
                 56: "https://bsc-dataseed.binance.org/",
+                137: "https://nameless-spring-thunder.matic.quiknode.pro/31bde5b070c0a83c878ae0588646c253d6022f33/",
                 80001: "https://icy-thrumming-violet.matic-testnet.quiknode.pro/9c463eb8c1b9cfb5f78cde780f58ba2892454d10/"
             },
-            chainId: config.cpNet === "testnet" ? 4 : 1,
-            qrcodeModalOptions: {
-                mobileLinks: [],
-            }
+            chainId: config.cpNet === "testnet" ? 4 : 1
         });
 
         this.web3 = new Web3(this.provider);
