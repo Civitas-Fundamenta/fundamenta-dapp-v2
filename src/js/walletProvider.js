@@ -73,7 +73,7 @@ export class WalletProvider {
 
         this.web3 = new Web3(this.provider);
 
-        this.#registerProvider();
+        this._registerProvider();
 
         this.provider.wc.on('wc_sessionUpdate', (error, payload) => {
             if (error) {
@@ -115,7 +115,7 @@ export class WalletProvider {
         console.log("Using MetaMask provider");
         this.provider = window.ethereum;
         this.web3 = new Web3(this.provider);
-        this.#registerProvider();
+        this._registerProvider();
 
         if (window.ethereum.selectedAddress) {
             console.log("Metamask already approved for this site");
@@ -139,7 +139,7 @@ export class WalletProvider {
         return true;
     }
 
-    static #registerProvider() {
+    static _registerProvider() {
         this.provider.on('accountsChanged', async function (accounts) {
             if (accounts !== null && accounts.length > 0) {
                 WalletProvider.web3.eth.defaultAccount = accounts[0];
