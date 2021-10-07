@@ -6,28 +6,11 @@ import EventEmitter from 'events';
 import { Config as config } from '../js/config'
 import { Conversions as convert } from '../js/conversions';
 import { WalletProvider as wallet } from '../js/walletProvider'
-import { show, hide } from '../js/ui';
 import { Navigation } from '../components/Navigation';
 
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
 
 export default class Home extends React.Component {
-
-    static rpcUrls = new Map([
-        [1, "https://mainnet.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
-        [4, "https://rinkeby.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
-        [5, "https://goerli.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
-        [56, "https://bsc-dataseed.binance.org/"],
-        [80001, "https://icy-thrumming-violet.matic-testnet.quiknode.pro/9c463eb8c1b9cfb5f78cde780f58ba2892454d10/"]
-    ]);
-
-    static niceNames = new Map([
-        [1, "Ethereum"],
-        [4, "Rinkeby"],
-        [5, "Goerli"],
-        [56, "Binance"],
-        [80001, "Mumbai"]
-    ]);
 
     static prices = null;
 
@@ -41,12 +24,12 @@ export default class Home extends React.Component {
 
         $.each(config.networkMap, async function () {
             if (this.fmtaToken) {
-                var web3 = new Web3(new Web3.providers.HttpProvider(Home.rpcUrls.get(this.chainId)));
+                var web3 = new Web3(new Web3.providers.HttpProvider(wallet.rpcUrls.get(this.chainId)));
                 var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, this.fmtaToken.tokenAddress);
                 var bal = await fmtaContract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
                 var balance = convert.fromAtomicUnits(bal, 18);
                 console.log(balance);
-                networkNames += '<div>' + Home.niceNames.get(this.chainId) +':&nbsp;</div>';
+                networkNames += '<div>' + wallet.niceNames.get(this.chainId) +':&nbsp;</div>';
                 balances += '<div>' + balance.toFixed(2) + ' FMTA</div>'
                 ++counter;
             }
@@ -107,7 +90,7 @@ export default class Home extends React.Component {
 
         $.each(config.networkMap, async function () {
             if (this.fmtaToken) {
-                var web3 = new Web3(new Web3.providers.HttpProvider(Home.rpcUrls.get(this.chainId)));
+                var web3 = new Web3(new Web3.providers.HttpProvider(wallet.rpcUrls.get(this.chainId)));
 
                 var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, this.fmtaToken.tokenAddress);
                 var stakingContract = new web3.eth.Contract(config.app.stakeAbi, this.fmtaToken.stakingAddress);
@@ -169,7 +152,7 @@ export default class Home extends React.Component {
 
                 $("#stats").append(
                     '<form class="card mb-3 border border-primary shadow">' +
-                        '<div class="card-header">' + Home.niceNames.get(this.chainId) + ' supply</div>' +
+                        '<div class="card-header">' + wallet.niceNames.get(this.chainId) + ' supply</div>' +
                         '<div className="card-body">' +
                             '<div class="ps-3 pt-3">' +
                                 '<div class="d-flex pb-3">' +

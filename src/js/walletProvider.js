@@ -12,6 +12,38 @@ export class WalletProvider {
     static isWalletConnect = false;
     static isMetamask = false;
 
+    static rpcUrls = new Map([
+        [1, "https://mainnet.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
+        [4, "https://rinkeby.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
+        [5, "https://goerli.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
+        [56, "https://bsc-dataseed.binance.org/"],
+        [137, "https://nameless-spring-thunder.matic.quiknode.pro/31bde5b070c0a83c878ae0588646c253d6022f33/"],
+        [80001, "https://icy-thrumming-violet.matic-testnet.quiknode.pro/9c463eb8c1b9cfb5f78cde780f58ba2892454d10/"]
+    ]);
+
+    static explorerUrls = new Map([
+        [1, "https://etherscan.io"],
+        [4, "https://rinkeby.etherscan.io"],
+        [5, "https://goerli.etherscan.io"],
+        [56, "https://bscscan.com"],
+        [137, "https://polygonscan.com"],
+        [80001, "https://mumbai.polygonscan.com"]
+    ]);
+
+    static nativeCoins = new Map([
+        [56, "BNB"],
+        [137, "MATIC"]
+    ]);
+
+    static niceNames = new Map([
+        [1, "Ethereum"],
+        [4, "Rinkeby"],
+        [5, "Goerli"],
+        [56, "Binance"],
+        [137, "Polygon"],
+        [80001, "Mumbai"]
+    ]);
+
     static networkNames = new Map([
         [1, "ethereum"],
         [4, "rinkeby"],
@@ -24,7 +56,7 @@ export class WalletProvider {
     static getNetworkName() {
         if (this.networkNames.has(this.chainId))
             return this.networkNames.get(this.chainId);
-            
+
         return "unknown";
     }
 
@@ -60,14 +92,7 @@ export class WalletProvider {
 
         console.log("Using WalletConnect provider");
         this.provider = new WalletConnectProvider({
-            rpc: {
-                1: "https://mainnet.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783",
-                4: "https://rinkeby.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783",
-                5: "https://goerli.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783",
-                56: "https://bsc-dataseed.binance.org/",
-                137: "https://nameless-spring-thunder.matic.quiknode.pro/31bde5b070c0a83c878ae0588646c253d6022f33/",
-                80001: "https://icy-thrumming-violet.matic-testnet.quiknode.pro/9c463eb8c1b9cfb5f78cde780f58ba2892454d10/"
-            },
+            rpc: this.rpcUrls,
             chainId: config.cpNet === "testnet" ? 4 : 1
         });
 
@@ -97,7 +122,6 @@ export class WalletProvider {
             return false;
         }
 
-        //await this.provider.request({ method: 'eth_requestAccounts' });
         this.chainId = parseInt(await this.provider.request({ method: 'eth_chainId' }));
         for (let e of WalletProvider.emitters.values())
             e.emit('chainChanged', this.chainId);
@@ -176,21 +200,63 @@ export class WalletProvider {
     }
 
     static async switchNetwork(id) {
-        if (!this.isWalletConnect)
+        if (this.isWalletConnect) {
+            this.provider.chainId = id;
+            this.provider.networkId = id;
+
+            await this.provider.request({
+                method: "wc_sessionUpdate",
+                params: [
+                    {
+                        chainId: id,
+                        approved: true,
+                    }
+                ]
+            });
+
+            return;
+        }
+
+        if (this.isMetamask) {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0x' + id.toString(16) }]
+                });
+            } catch (switchError) {
+                console.log("unhandled switching error", switchError);
+            }
+        }
+    }
+
+    static async addMetamaskChain(id) {
+        if (!this.isMetamask)
             return;
 
-        this.provider.chainId = id;
-        this.provider.networkId = id;
-
-        await this.provider.request({
-            method: "wc_sessionUpdate",
-            params: [
-                {
-                    chainId: id,
-                    approved: true,
-                }
-            ]
-        });
+        try {
+            await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [
+                    {
+                        chainId: '0x' + id.toString(16),
+                        chainName: this.niceNames.get(id),
+                        nativeCurrency: {
+                            name: this.nativeCoins.get(id),
+                            symbol: this.nativeCoins.get(id),
+                            decimals: 18
+                        },
+                        rpcUrls: [
+                            this.rpcUrls.get(id)
+                        ],
+                        blockExplorerUrls: [
+                            this.explorerUrls.get(id)
+                        ]
+                    }
+                ]
+            });
+        } catch (e) {
+            console.log("unhandled error", e);
+        }
     }
 
     static async disconnect() {
