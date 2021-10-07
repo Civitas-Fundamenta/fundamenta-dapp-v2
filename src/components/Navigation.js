@@ -4,7 +4,7 @@ import $ from 'jquery';
 import { Navbar, Nav } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap'
 
-import { Config as config } from '../js/config'
+import { Config, Config as config } from '../js/config'
 import { show, hide, disable, enable } from '../js/ui';
 import { WalletProvider as wallet } from '../js/walletProvider'
 
@@ -12,12 +12,23 @@ export class Navigation extends React.Component {
 
     static emptyAddress = "0x0000000000000000000000000000000000000000";
 
-    async toggleNetworkWarning() {
+    static #_toggleNetworkWarningLock = false;
+
+    static async toggleNetworkWarning() {
+        if (!Config.network)
+            return;
+
+        if (Navigation.#_toggleNetworkWarningLock)
+            return;
+
+        Navigation.#_toggleNetworkWarningLock = true;
+
         if (!wallet.isConnected()) {
             hide("#_aInvNet");
             hide('#_aAcc');
             show('#_aNoAcc');
             hide('#_btnS');
+            Navigation.#_toggleNetworkWarningLock = false;
             return;
         }
 
@@ -26,6 +37,7 @@ export class Navigation extends React.Component {
             hide('#_aAcc');
             show('#_aNoAcc');
             hide('#_btnS');
+            Navigation.#_toggleNetworkWarningLock = false;
             return;
         }
         else {
@@ -39,6 +51,7 @@ export class Navigation extends React.Component {
         if (!wallet.chainId || wallet.chainId === 0) {
             hide("#_aInvNet");
             $("#_btnD").text("Unknown");
+            Navigation.#_toggleNetworkWarningLock = false;
             return;
         }
 
@@ -52,6 +65,7 @@ export class Navigation extends React.Component {
             hide("#_aInvNet");
 
         $("#_btnD").text(wallet.getNetworkName());
+        Navigation.#_toggleNetworkWarningLock = false;
     }
 
     openProviderModal() {
@@ -84,7 +98,7 @@ export class Navigation extends React.Component {
             await wallet.walletConnect();
         }
 
-        await this.toggleNetworkWarning();
+        await Navigation.toggleNetworkWarning();
     }
 
     _btnE_clicked = async () => {
@@ -127,13 +141,13 @@ export class Navigation extends React.Component {
     _wc_clicked = async () => {
         this.closeProviderModal();
         await wallet.walletConnect();
-        await this.toggleNetworkWarning();
+        await Navigation.toggleNetworkWarning();
     }
 
     _mm_clicked = async () => {
         this.closeProviderModal();
         await wallet.metamask();
-        await this.toggleNetworkWarning();
+        await Navigation.toggleNetworkWarning();
     }
 
     async componentDidMount() {
@@ -141,26 +155,26 @@ export class Navigation extends React.Component {
             var em = new EventEmitter();
 
             em.on('connect', async () => {
-                await this.toggleNetworkWarning();
+                await Navigation.toggleNetworkWarning();
             });
 
             em.on('disconnect', async () => {
-                await this.toggleNetworkWarning();
+                await Navigation.toggleNetworkWarning();
             });
 
             em.on('accountsChanged', async (accounts) => {
-                await this.toggleNetworkWarning();
+                await Navigation.toggleNetworkWarning();
             });
 
             em.on('chainChanged', async (chainId) => {
                 this.closeNetworkSelectModal();
-                await this.toggleNetworkWarning();
+                await Navigation.toggleNetworkWarning();
             });
 
             wallet.addListener('networkSelect', em);
         }
 
-        await this.toggleNetworkWarning();
+        await Navigation.toggleNetworkWarning();
     }
 
     render() {
@@ -203,7 +217,7 @@ export class Navigation extends React.Component {
                                         <Nav.Link>Energize</Nav.Link>
                                     </LinkContainer>
 
-                                    <button className="round btn btn-outline-success btn-sm" id="_btnS" onClick={this._btnS_clicked}>SWITCH NETWORK</button>
+                                    <button className="d-none round btn btn-outline-success btn-sm" id="_btnS" onClick={this._btnS_clicked}>SWITCH NETWORK</button>
                                 </Nav>
                             </Navbar.Collapse>
 
@@ -211,16 +225,16 @@ export class Navigation extends React.Component {
                     </div>
                 </div>
                 <div className="p-0 ps-3 pe-3 pt-3">
-                    <div id="_aAcc" className="d-flex p-0">
+                    <div id="_aAcc" className="d-none d-flex p-0">
                         <button id="_aAccText" className="flex-grow-1 round-left alert alert-success text-left text-truncate d-inline-block" />
                         <button className="round-right btn btn-alert btn-danger" id="_btnD" onClick={this._btnD_clicked} />
                     </div>
-                    <div id="_aNoAcc" className="d-flex p-0">
+                    <div id="_aNoAcc" className="d-none d-flex p-0">
                         <button id="_aAccText" className="flex-grow-1 round-left alert alert-danger text-left">No account connected</button>
                         <button className="round-right btn btn-alert btn-success" id="_btnC" onClick={this._btnC_clicked}>Connect</button>
                     </div>
 
-                    <div id="_aInvNet" className="round alert alert-warning d-flex align-items-center">
+                    <div id="_aInvNet" className="d-none round alert alert-warning d-flex align-items-center">
                         <div id="_aInvNetText" className="text-truncate d-inline-block" />
                     </div>
                 </div>
@@ -273,7 +287,7 @@ export class Navigation extends React.Component {
                                 <button id="_btnEth" className="round btn btn-outline-secondary p-3 mb-3 w-100"
                                     onClick={async () => {
                                         $("#_btnEth").text('Sending request...');
-                                        wallet.switchNetwork(1);
+                                        await wallet.switchNetwork(1);
                                     }}>Ethereum</button>
 
                                 <button id="_btnBsc" className="round btn btn-outline-secondary p-3 mb-3 w-100"
