@@ -28,7 +28,6 @@ export default class Home extends React.Component {
                 var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, this.fmtaToken.tokenAddress);
                 var bal = await fmtaContract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
                 var balance = convert.fromAtomicUnits(bal, 18);
-                console.log(balance);
                 networkNames += '<div>' + wallet.niceNames.get(this.chainId) +':&nbsp;</div>';
                 balances += '<div>' + balance.toFixed(2) + ' FMTA</div>'
                 ++counter;

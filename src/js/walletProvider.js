@@ -87,12 +87,22 @@ export class WalletProvider {
     }
 
     static async walletConnect() {
+        if (this.isConnected())
+            return;
+
         this.isMetamask = false;
         this.isWalletConnect = true;
 
         console.log("Using WalletConnect provider");
         this.provider = new WalletConnectProvider({
-            rpc: this.rpcUrls,
+            rpc: {
+                1: this.rpcUrls.get(1),
+                4: this.rpcUrls.get(4),
+                5: this.rpcUrls.get(5),
+                56: this.rpcUrls.get(56),
+                137: this.rpcUrls.get(137),
+                80001: this.rpcUrls.get(8001),
+            },
             chainId: config.cpNet === "testnet" ? 4 : 1
         });
 
@@ -119,6 +129,9 @@ export class WalletProvider {
             await this.provider.enable();
         } catch {
             this.isWalletConnect = false;
+            this.web3 = null;
+            this.provider = null;
+            localStorage.setItem('provider', 'none');
             return false;
         }
 
@@ -129,10 +142,15 @@ export class WalletProvider {
         for (let e of this.emitters.values())
             e.emit('connect');
 
+        localStorage.setItem('provider', 'walletConnect');
+
         return true;
     }
 
     static async metamask() {
+        if (this.isConnected())
+            return;
+
         this.isWalletConnect = false;
         this.isMetamask = true;
 
@@ -159,6 +177,8 @@ export class WalletProvider {
 
         for (let e of this.emitters.values())
             e.emit('connect');
+
+        localStorage.setItem('provider', 'metamask');
 
         return true;
     }
@@ -194,6 +214,7 @@ export class WalletProvider {
             WalletProvider.provider = null;
             WalletProvider.isWalletConnect = false;
             WalletProvider.isMetamask = false;
+            localStorage.setItem('provider', 'none');
             for (let e of WalletProvider.emitters.values())
                 e.emit('disconnect', disconnectInfo);
         });
@@ -261,6 +282,7 @@ export class WalletProvider {
 
     static async disconnect() {
         this.web3 = null;
+        localStorage.setItem('provider', 'none');
 
         if (this.provider) {
             if (this.isWalletConnect)
