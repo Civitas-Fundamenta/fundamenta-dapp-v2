@@ -28,17 +28,13 @@ export class Navigation extends React.Component {
             hide('#_btnS');
             return;
         }
-        else
-        {
+        else {
             $("#_aAccText").text(wallet.web3.eth.defaultAccount);
             hide('#_aNoAcc');
             show('#_aAcc');
         }
 
-        if (wallet.isWalletConnect)
-            show('#_btnS');
-        else
-            hide('#_btnS');
+        show('#_btnS');
 
         if (!wallet.chainId || wallet.chainId === 0) {
             hide("#_aInvNet");
@@ -78,61 +74,6 @@ export class Navigation extends React.Component {
         $("#_modSelectNetwork").removeClass("show")
     }
 
-    /*static populateAll() {
-        Navigation.empty();
-        config.fetchNetworkConfig(function (data) {
-            $.each(data, function () {
-                Navigation.networkMap.push(this);
-                //$("#_sNs").append(`<option value="${chainId}">${network}</option>`);
-            });
-        });
-
-        console.log("Network Map:", Navigation.networkMap);
-        Navigation.toggleNetworkWarning();
-    }
-
-    static populateWrappable() {
-        Navigation.empty();
-        config.fetchNetworkConfig(function (data) {
-            sort.wrappable(data);
-            $.each(sort.wrapData, function () {
-                Navigation.networkMap.push(this);
-                //$("#_sNs").append(`<option value="${chainId}">${network}</option>`);
-            });
-        });
-        console.log("Network Map:", Navigation.networkMap);
-        Navigation.toggleNetworkWarning();
-    }
-
-    static populateMineable() {
-        Navigation.empty();
-        config.fetchNetworkConfig(function (data) {
-            $.each(data, function () {
-                if (this.liquidityMining.address !== Navigation.emptyAddress) {
-                    Navigation.networkMap.push(this);
-                    //$("#_sNs").append(`<option value="${chainId}">${network}</option>`);
-                }
-            });
-        });
-        console.log("Network Map:", Navigation.networkMap);
-        Navigation.toggleNetworkWarning();
-    }
-
-    getFromMap(chainId) {
-        if (chainId === 0)
-            return null;
-
-        var ret = null;
-        $.each(Navigation.networkMap, function (idx, val) {
-            if (val.chainId === chainId) {
-                ret = val;
-                return false;
-            }
-        })
-
-        return ret;
-    }*/
-
     _btnC_clicked = async () => {
         if (wallet.isMetamaskAvailable()) {
             console.log("Metamask is available. Displaying modal");
@@ -158,19 +99,26 @@ export class Navigation extends React.Component {
     _btnS_clicked = async () => {
         enable('#_btnEth');
         $('#_btnEth').text("ETHEREUM");
+
         enable('#_btnBsc');
         $('#_btnBsc').text("BINANCE SMART CHAIN");
+
+        enable('#_btnPoly');
+        $('#_btnPoly').text("POLYGON");
+
         hide("#_aNetChange");
 
-        if (wallet.chainId === 1)
-        {
+        if (wallet.chainId === 1) {
             disable('#_btnEth');
             $('#_btnEth').text("ETHEREUM (Current)");
         }
-        else if (wallet.chainId === 56)
-        {
+        else if (wallet.chainId === 56) {
             disable('#_btnBsc');
             $('#_btnBsc').text("BINANCE SMART CHAIN (Current)");
+        }
+        else if (wallet.chainId === 137) {
+            disable('#_btnPoly');
+            $('#_btnPoly').text("POLYGON (Current)");
         }
 
         this.openNetworkSelectModal();
@@ -258,7 +206,7 @@ export class Navigation extends React.Component {
                                     <button className="round btn btn-outline-success btn-sm" id="_btnS" onClick={this._btnS_clicked}>SWITCH NETWORK</button>
                                 </Nav>
                             </Navbar.Collapse>
-                            
+
                         </Navbar>
                     </div>
                 </div>
@@ -331,8 +279,16 @@ export class Navigation extends React.Component {
                                 <button id="_btnBsc" className="round btn btn-outline-secondary p-3 mb-3 w-100"
                                     onClick={async () => {
                                         $("#_btnBsc").text('Sending request...');
-                                        wallet.switchNetwork(56);
+                                        await wallet.addMetamaskChain(56);
+                                        await wallet.switchNetwork(56);
                                     }}>Binance Smart Chain</button>
+
+                                <button id="_btnPoly" className="round btn btn-outline-secondary p-3 mb-3 w-100"
+                                    onClick={async () => {
+                                        $("#_btnPoly").text('Sending request...');
+                                        await wallet.addMetamaskChain(137);
+                                        await wallet.switchNetwork(137);
+                                    }}>Polygon</button>
                                 <br />
                                 <div>
                                     <h4 className="text-title">Note to Wallet Connect users:</h4>
