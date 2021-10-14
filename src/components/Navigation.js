@@ -12,23 +12,24 @@ export class Navigation extends React.Component {
 
     static emptyAddress = "0x0000000000000000000000000000000000000000";
 
-    static #_toggleNetworkWarningLock = false;
+    //static #_toggleNetworkWarningLock = false;
 
     static async toggleNetworkWarning() {
         if (!Config.network)
             return;
 
-        if (Navigation.#_toggleNetworkWarningLock)
-            return;
+        //if (Navigation.#_toggleNetworkWarningLock)
+        //    return;
 
-        Navigation.#_toggleNetworkWarningLock = true;
+        //Navigation.#_toggleNetworkWarningLock = true;
 
         if (!wallet.isConnected()) {
             hide("#_aInvNet");
             hide('#_aAcc');
             show('#_aNoAcc');
             hide('#_btnS');
-            Navigation.#_toggleNetworkWarningLock = false;
+            hide('#_btnNFT');
+            //Navigation.#_toggleNetworkWarningLock = false;
             return;
         }
 
@@ -37,7 +38,8 @@ export class Navigation extends React.Component {
             hide('#_aAcc');
             show('#_aNoAcc');
             hide('#_btnS');
-            Navigation.#_toggleNetworkWarningLock = false;
+            hide('#_btnNFT');
+            //Navigation.#_toggleNetworkWarningLock = false;
             return;
         }
         else {
@@ -50,9 +52,18 @@ export class Navigation extends React.Component {
 
         if (!wallet.chainId || wallet.chainId === 0) {
             hide("#_aInvNet");
+            hide('#_btnNFT');
             $("#_btnD").text("Unknown");
-            Navigation.#_toggleNetworkWarningLock = false;
+            //Navigation.#_toggleNetworkWarningLock = false;
             return;
+        }
+        else {
+            var nftMinter = config.app.nftMinters[wallet.chainId];
+
+            if (nftMinter)
+                show('#_btnNFT');
+            else
+                hide('#_btnNFT');
         }
 
         var net = await config.getFromMap(wallet.chainId);
@@ -65,7 +76,7 @@ export class Navigation extends React.Component {
             hide("#_aInvNet");
 
         $("#_btnD").text(wallet.getNetworkName());
-        Navigation.#_toggleNetworkWarningLock = false;
+        //Navigation.#_toggleNetworkWarningLock = false;
     }
 
     openProviderModal() {
@@ -111,43 +122,87 @@ export class Navigation extends React.Component {
     }
 
     _btnS_clicked = async () => {
-        enable('#_btnEth');
-        $('#_btnEth').text("ETHEREUM");
 
-        enable('#_btnBsc');
-        $('#_btnBsc').text("BINANCE SMART CHAIN");
+        if (config.network === "mainnet") {
+            hide('#testnetSwitch');
+            show('#mainnetSwitch');
+            hide("#_aNetChange");
 
-        enable('#_btnPoly');
-        $('#_btnPoly').text("POLYGON");
+            enable('#_btnEth');
+            $('#_btnEth').text("ETHEREUM");
 
-        hide("#_aNetChange");
+            enable('#_btnBsc');
+            $('#_btnBsc').text("BINANCE SMART CHAIN");
 
-        if (wallet.chainId === 1) {
-            disable('#_btnEth');
-            $('#_btnEth').text("ETHEREUM (Current)");
+            enable('#_btnPoly');
+            $('#_btnPoly').text("POLYGON");
+
+            if (wallet.chainId === 1) {
+                disable('#_btnEth');
+                $('#_btnEth').text("ETHEREUM (Current)");
+            }
+            else if (wallet.chainId === 56) {
+                disable('#_btnBsc');
+                $('#_btnBsc').text("BINANCE SMART CHAIN (Current)");
+            }
+            else if (wallet.chainId === 137) {
+                disable('#_btnPoly');
+                $('#_btnPoly').text("POLYGON (Current)");
+            }
         }
-        else if (wallet.chainId === 56) {
-            disable('#_btnBsc');
-            $('#_btnBsc').text("BINANCE SMART CHAIN (Current)");
-        }
-        else if (wallet.chainId === 137) {
-            disable('#_btnPoly');
-            $('#_btnPoly').text("POLYGON (Current)");
+        else
+        {
+            show('#testnetSwitch');
+            hide('#mainnetSwitch');
+            hide("#_aNetChange");
+
+            enable('#_btnRinkeby');
+            $('#_btnRinkeby').text("RINKEBY");
+
+            enable('#_btnGoerli');
+            $('#_btnGoerli').text("GOERLI");
+
+            enable('#_btnMumbai');
+            $('#_btnMumbai').text("MUMBAI");
+
+            if (wallet.chainId === 4) {
+                disable('#_btnRinkeby');
+                $('#_btnRinkeby').text("RINKEBY (Current)");
+            }
+            else if (wallet.chainId === 5) {
+                disable('#_btnGoerli');
+                $('#_btnGoerli').text("GOERLI (Current)");
+            }
+            else if (wallet.chainId === 80001) {
+                disable('#_btnMumbai');
+                $('#_btnMumbai').text("MUMBAI (Current)");
+            }
         }
 
         this.openNetworkSelectModal();
     }
 
+    _btnNFT_clicked = async () => {
+        var nftMinter = config.app.nftMinters[wallet.chainId];
+        var minterContract = new wallet.web3.eth.Contract(config.app.minterAbi, nftMinter);
+
+        await minterContract.methods.mint().send({ from: wallet.web3.eth.defaultAccount });
+    }
+
     _wc_clicked = async () => {
-        this.closeProviderModal();
-        await wallet.walletConnect();
-        await Navigation.toggleNetworkWarning();
+        try {
+            this.closeProviderModal();
+            await wallet.walletConnect();
+            await Navigation.toggleNetworkWarning();
+        } catch (e) { console.log(e); }
     }
 
     _mm_clicked = async () => {
-        this.closeProviderModal();
-        await wallet.metamask();
-        await Navigation.toggleNetworkWarning();
+        try {
+            this.closeProviderModal();
+            await wallet.metamask();
+            await Navigation.toggleNetworkWarning();
+        } catch (e) { console.log(e); }
     }
 
     async componentDidMount() {
@@ -155,18 +210,22 @@ export class Navigation extends React.Component {
             var em = new EventEmitter();
 
             em.on('connect', async () => {
+                console.log('networkSelect.connect');
                 await Navigation.toggleNetworkWarning();
             });
 
             em.on('disconnect', async () => {
+                console.log('networkSelect.disconnect');
                 await Navigation.toggleNetworkWarning();
             });
 
             em.on('accountsChanged', async (accounts) => {
+                console.log('networkSelect.accountsChanged');
                 await Navigation.toggleNetworkWarning();
             });
 
             em.on('chainChanged', async (chainId) => {
+                console.log('networkSelect.chainChanged');
                 this.closeNetworkSelectModal();
                 await Navigation.toggleNetworkWarning();
             });
@@ -217,7 +276,8 @@ export class Navigation extends React.Component {
                                         <Nav.Link>Energize</Nav.Link>
                                     </LinkContainer>
 
-                                    <button className="d-none round btn btn-outline-success btn-sm" id="_btnS" onClick={this._btnS_clicked}>SWITCH NETWORK</button>
+                                    <button className="d-none round btn btn-outline-success btn-sm ms-1 me-1" id="_btnS" onClick={this._btnS_clicked}>SWITCH NETWORK</button>
+                                    <button className="d-none round btn btn-outline-info btn-sm ms-1 me-1" id="_btnNFT" onClick={this._btnNFT_clicked}>FREE NFT!</button>
                                 </Nav>
                             </Navbar.Collapse>
 
@@ -283,7 +343,7 @@ export class Navigation extends React.Component {
                             <div className="modal-header">
                                 <h5 className="modal-title" id="exampleModalLongTitle">Select Network</h5>
                             </div>
-                            <div className="modal-body">
+                            <div id="mainnetSwitch" className="modal-body">
                                 <button id="_btnEth" className="round btn btn-outline-secondary p-3 mb-3 w-100"
                                     onClick={async () => {
                                         $("#_btnEth").text('Sending request...');
@@ -304,16 +364,27 @@ export class Navigation extends React.Component {
                                         await wallet.switchNetwork(137);
                                     }}>Polygon</button>
                                 <br />
-                                <div>
-                                    <h4 className="text-title">Note to Wallet Connect users:</h4>
-                                    <div>
-                                        Selecting the network should prompt you on your wallet to accept the network change. Do not continue to use any wallet which does not provide this prompt.
-                                    </div>
-                                    <br />
-                                    <div>
-                                        For the best experience it is recommended to use the Fundamenta mobile wallet, available for iOS and Android.
-                                    </div>
-                                </div>
+                            </div>
+                            <div id="testnetSwitch" className="modal-body">
+                                <button id="_btnRinkeby" className="round btn btn-outline-secondary p-3 mb-3 w-100"
+                                    onClick={async () => {
+                                        $("#_btnRinkeby").text('Sending request...');
+                                        await wallet.switchNetwork(4);
+                                    }}>Rinkeby</button>
+
+                                <button id="_btnGoerli" className="round btn btn-outline-secondary p-3 mb-3 w-100"
+                                    onClick={async () => {
+                                        $("#_btnGoerli").text('Sending request...');
+                                        await wallet.switchNetwork(5);
+                                    }}>Goerli</button>
+
+                                <button id="_btnMumbai" className="round btn btn-outline-secondary p-3 mb-3 w-100"
+                                    onClick={async () => {
+                                        $("#_btnMumbai").text('Sending request...');
+                                        await wallet.addMetamaskChain(80001);
+                                        await wallet.switchNetwork(80001);
+                                    }}>Mumbai</button>
+                                <br />
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="round btn btn-danger" onClick={this._btnE_clicked}>Exit</button>
