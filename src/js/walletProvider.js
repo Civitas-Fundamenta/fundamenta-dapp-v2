@@ -17,8 +17,8 @@ export class WalletProvider {
         [4, "https://rinkeby.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
         [5, "https://goerli.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
         [56, "https://bsc-dataseed.binance.org/"],
-        [137, "https://nameless-spring-thunder.matic.quiknode.pro/31bde5b070c0a83c878ae0588646c253d6022f33/"],
-        [80001, "https://icy-thrumming-violet.matic-testnet.quiknode.pro/9c463eb8c1b9cfb5f78cde780f58ba2892454d10/"]
+        [137, "https://nameless-spring-thunder.matic.quiknode.pro/"],
+        [80001, "https://icy-thrumming-violet.matic-testnet.quiknode.pro/"]
     ]);
 
     static explorerUrls = new Map([
@@ -31,8 +31,12 @@ export class WalletProvider {
     ]);
 
     static nativeCoins = new Map([
+        [1, "ETH"],
+        [4, "rETH"],
+        [5, "gETH"],
         [56, "BNB"],
-        [137, "MATIC"]
+        [137, "MATIC"],
+        [80001, "tMATIC"]
     ]);
 
     static niceNames = new Map([
@@ -103,7 +107,7 @@ export class WalletProvider {
                 137: this.rpcUrls.get(137),
                 80001: this.rpcUrls.get(8001),
             },
-            chainId: config.cpNet === "testnet" ? 4 : 1
+            chainId: config.app.net === "testnet" ? 4 : 1
         });
 
         this.web3 = new Web3(this.provider);
@@ -210,6 +214,10 @@ export class WalletProvider {
         });
 
         this.provider.on('disconnect', async function (disconnectInfo) {
+            
+            if (this.isMetamask)
+                return;
+
             WalletProvider.web3 = null;
             WalletProvider.provider = null;
             WalletProvider.isWalletConnect = false;
