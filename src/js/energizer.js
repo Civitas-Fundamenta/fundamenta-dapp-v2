@@ -101,7 +101,7 @@ export class Energizer {
     }
 
     async getServerApproval(index, block, txData, cSig) {
-        var url = `https://cp${index}.${config.app.serverDomain}/authorize/?n=${config.app.cpNet}&d=${txData}&s=${cSig}&b=${block}`;
+        var url = `https://cp${index}.${config.app.serverDomain}/authorize/?n=${config.app.net}&d=${txData}&s=${cSig}&b=${block}`;
 
         console.log("Contacting server:", index);
 
