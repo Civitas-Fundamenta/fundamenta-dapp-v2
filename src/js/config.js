@@ -14,8 +14,8 @@ export class Config {
 
     static app = {
 
-        cpNet: "mainnet",
-        serverCount: 3,
+        net: "mainnet",
+        serverCount: 10,
         serverDomain: "civiport.online",
         confTime: 12,
         withdrawEventHash: "0x9e817a273ceb82157d1f8e11c7d5549ada176ef895a9ffe5e37b49de76d29e2d",
@@ -532,6 +532,24 @@ export class Config {
             }
         ],
 
+        minterAbi: [
+            {
+                "inputs": [
+
+                ],
+                "name": "mint",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ],
+
         lpPools: {
             1: {
                 0: "FMTA/ETH",
@@ -543,6 +561,14 @@ export class Config {
             56: {
                 0: "FMTA/BNB"
             }
+        },
+
+        nftMinters: {
+            1: "0x",
+            4: "0x",
+            56: "0x",
+            137: "0x",
+            80001: "0x"
         }
     };
 
@@ -569,11 +595,11 @@ export class Config {
             return;
 
         Config.#_fetchNetworkConfigLock = true;
-            
+
         if (!this.network) {
             console.log("Fetching network config");
             this.network = await $.ajax({
-                url: `https://${this.app.resourceUrl}/config/?x=${this.app.cpNet}`,
+                url: `https://${this.app.resourceUrl}/config/?x=${this.app.net}`,
                 dataType: 'json',
                 cache: 'false',
             });
@@ -582,7 +608,7 @@ export class Config {
                 Config.networkMap.push(this);
             });
         }
-        
+
         Config.#_fetchNetworkConfigLock = false;
         return this.network;
     }
