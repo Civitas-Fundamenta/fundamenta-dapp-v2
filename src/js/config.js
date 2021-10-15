@@ -14,7 +14,7 @@ export class Config {
 
     static app = {
 
-        net: "mainnet",
+        net: "testnet",
         serverCount: 10,
         serverDomain: "civiport.online",
         confTime: 12,
@@ -547,6 +547,40 @@ export class Config {
                 ],
                 "stateMutability": "nonpayable",
                 "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "name": "hasMinted",
+                "outputs": [
+                    {
+                        "internalType": "bool",
+                        "name": "",
+                        "type": "bool"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+
+                ],
+                "name": "fmtaNeeded",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
             }
         ],
 
@@ -564,11 +598,7 @@ export class Config {
         },
 
         nftMinters: {
-            1: "0x",
-            4: "0x",
-            56: "0x",
-            137: "0x",
-            80001: "0x"
+            80001: "0x6C27123bb4B8B51393f0314a24d69E4bfCD3017c"
         }
     };
 

@@ -13,6 +13,7 @@ import Teleport from './pages/Teleport'
 import Wrap from './pages/Wrap'
 import Unwrap from './pages/Unwrap'
 import Energize from './pages/Energize'
+import NFT from './pages/NFT'
 
 import './App.css';
 import './themes/lux.bootstrap.css';
@@ -52,6 +53,7 @@ class App extends React.Component {
                     <Route path="/wrap" component={Wrap} />
                     <Route path="/unwrap" component={Unwrap} />
                     <Route path="/energize" component={Energize} />
+                    <Route path="/nft" component={NFT} />
                 </Switch>
             </div>
         )

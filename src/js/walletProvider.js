@@ -215,7 +215,7 @@ export class WalletProvider {
 
         this.provider.on('disconnect', async function (disconnectInfo) {
             
-            if (this.isMetamask)
+            if (WalletProvider.isMetamask)
                 return;
 
             WalletProvider.web3 = null;

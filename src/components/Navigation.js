@@ -18,18 +18,11 @@ export class Navigation extends React.Component {
         if (!Config.network)
             return;
 
-        //if (Navigation.#_toggleNetworkWarningLock)
-        //    return;
-
-        //Navigation.#_toggleNetworkWarningLock = true;
-
         if (!wallet.isConnected()) {
             hide("#_aInvNet");
             hide('#_aAcc');
             show('#_aNoAcc');
             hide('#_btnS');
-            hide('#_btnNFT');
-            //Navigation.#_toggleNetworkWarningLock = false;
             return;
         }
 
@@ -38,8 +31,6 @@ export class Navigation extends React.Component {
             hide('#_aAcc');
             show('#_aNoAcc');
             hide('#_btnS');
-            hide('#_btnNFT');
-            //Navigation.#_toggleNetworkWarningLock = false;
             return;
         }
         else {
@@ -52,18 +43,8 @@ export class Navigation extends React.Component {
 
         if (!wallet.chainId || wallet.chainId === 0) {
             hide("#_aInvNet");
-            hide('#_btnNFT');
             $("#_btnD").text("Unknown");
-            //Navigation.#_toggleNetworkWarningLock = false;
             return;
-        }
-        else {
-            var nftMinter = config.app.nftMinters[wallet.chainId];
-
-            if (nftMinter)
-                show('#_btnNFT');
-            else
-                hide('#_btnNFT');
         }
 
         var net = await config.getFromMap(wallet.chainId);
@@ -76,7 +57,6 @@ export class Navigation extends React.Component {
             hide("#_aInvNet");
 
         $("#_btnD").text(wallet.getNetworkName());
-        //Navigation.#_toggleNetworkWarningLock = false;
     }
 
     openProviderModal() {
@@ -182,12 +162,7 @@ export class Navigation extends React.Component {
         this.openNetworkSelectModal();
     }
 
-    _btnNFT_clicked = async () => {
-        var nftMinter = config.app.nftMinters[wallet.chainId];
-        var minterContract = new wallet.web3.eth.Contract(config.app.minterAbi, nftMinter);
-
-        await minterContract.methods.mint().send({ from: wallet.web3.eth.defaultAccount });
-    }
+    
 
     _wc_clicked = async () => {
         try {
@@ -276,8 +251,11 @@ export class Navigation extends React.Component {
                                         <Nav.Link>Energize</Nav.Link>
                                     </LinkContainer>
 
+                                    <LinkContainer to="/nft">
+                                        <Nav.Link>NFT!</Nav.Link>
+                                    </LinkContainer>
+
                                     <button className="d-none round btn btn-outline-success btn-sm ms-1 me-1" id="_btnS" onClick={this._btnS_clicked}>SWITCH NETWORK</button>
-                                    <button className="d-none round btn btn-outline-info btn-sm ms-1 me-1" id="_btnNFT" onClick={this._btnNFT_clicked}>FREE NFT!</button>
                                 </Nav>
                             </Navbar.Collapse>
 
