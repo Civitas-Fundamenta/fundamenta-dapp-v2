@@ -40,7 +40,7 @@ export default class NFT extends React.Component {
 
         if (hasMinted)
         {
-            msg.showWarn('This address alreadt has the NFT on this network');
+            msg.showWarn('This address already has the NFT on this network');
             return;
         }
 

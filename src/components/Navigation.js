@@ -335,12 +335,12 @@ export class Navigation extends React.Component {
                                         await wallet.switchNetwork(56);
                                     }}>Binance Smart Chain</button>
 
-                                <button id="_btnPoly" className="round btn btn-outline-secondary p-3 mb-3 w-100"
+                                {/*<button id="_btnPoly" className="round btn btn-outline-secondary p-3 mb-3 w-100"
                                     onClick={async () => {
                                         $("#_btnPoly").text('Sending request...');
                                         await wallet.addMetamaskChain(137);
                                         await wallet.switchNetwork(137);
-                                    }}>Polygon</button>
+                                    }}>Polygon</button>*/}
                                 <br />
                             </div>
                             <div id="testnetSwitch" className="modal-body">
