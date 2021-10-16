@@ -3,7 +3,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source ${dir}/credentials
 
-server=${servers[1]}
+server=${servers[2]}
 
 function _deploy_file() {
     HOST=$1

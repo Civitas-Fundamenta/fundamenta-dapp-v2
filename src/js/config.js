@@ -14,7 +14,7 @@ export class Config {
 
     static app = {
 
-        net: "testnet",
+        net: "mainnet",
         serverCount: 10,
         serverDomain: "civiport.online",
         confTime: 12,
@@ -598,6 +598,9 @@ export class Config {
         },
 
         nftMinters: {
+            1: "0xDab6DCa3AF0c4427F2b39B9106D4D316d5e48e72",
+            56: "0xDab6DCa3AF0c4427F2b39B9106D4D316d5e48e72",
+            137: "0xDab6DCa3AF0c4427F2b39B9106D4D316d5e48e72",
             80001: "0x6C27123bb4B8B51393f0314a24d69E4bfCD3017c"
         }
     };
