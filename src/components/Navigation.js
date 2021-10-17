@@ -255,7 +255,7 @@ export class Navigation extends React.Component {
                                         <Nav.Link>NFT!</Nav.Link>
                                     </LinkContainer>
 
-                                    <button className="d-none round btn btn-outline-success btn-sm ms-1 me-1" id="_btnS" onClick={this._btnS_clicked}>SWITCH NETWORK</button>
+                                    <button className="round btn btn-outline-success btn-sm ms-1 me-1" id="_btnS" onClick={this._btnS_clicked}>SWITCH NETWORK</button>
                                 </Nav>
                             </Navbar.Collapse>
 
