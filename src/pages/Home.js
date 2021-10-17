@@ -13,9 +13,16 @@ import { MessagePanel as msg, MessagePanelComponent } from '../components/Messag
 export default class Home extends React.Component {
 
     static prices = null;
+    static _lock1 = false;
+    static _lock2 = false;
 
     async displayUserBalances()
     {
+        return;
+        if (this._lock1) return;
+
+        this._lock1 = true;
+
         var networkNames = '';
         var balances = '';
 
@@ -23,11 +30,14 @@ export default class Home extends React.Component {
         var counter = 0;
 
         $.each(config.networkMap, async function () {
+
             if (this.fmtaToken) {
+                console.log(wallet.web3.eth.defaultAccount);
                 var web3 = new Web3(new Web3.providers.HttpProvider(wallet.rpcUrls.get(this.chainId)));
                 var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, this.fmtaToken.tokenAddress);
                 var bal = await fmtaContract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
                 var balance = convert.fromAtomicUnits(bal, 18);
+                console.log(bal, balance);
                 networkNames += '<div>' + wallet.niceNames.get(this.chainId) +':&nbsp;</div>';
                 balances += '<div>' + balance.toFixed(2) + ' FMTA</div>'
                 ++counter;
@@ -55,26 +65,17 @@ export default class Home extends React.Component {
                 $("#balances").html(balanceCard);
             }
         });
+
+        this._lock1 = false;
     }
 
-    btnCalc_Clicked = async () => {
-        msg.clear();
-        var amount = parseFloat($("#amount").val());
-        var time = parseFloat($("#time").val());
+    async displayNetworkStats()
+    {
+        if (this._lock2) return;
 
-        if (isNaN(amount) || isNaN(time) || amount === 0 || time === 0)
-        {
-            msg.showError("Invalid amounts entered");
-        }
+        this._lock2 = true;
 
-        var total = ((amount / 500) * time).toFixed(2);
-        msg.showOk(+ time + " day stake reward: " + total + " FMTA, " + (total * Home.prices.fundamenta.usd).toFixed(2) + " USD")
-    };
-
-    async componentDidMount() {
         $("#stats").empty();
-        $("#balances").empty();
-        msg.clear();
 
         var priceUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=fundamenta&vs_currencies=usd&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false'
 
@@ -177,12 +178,36 @@ export default class Home extends React.Component {
             }
         });
 
+        this._lock2 = false;
+    }
+
+    btnCalc_Clicked = async () => {
+        msg.clear();
+        var amount = parseFloat($("#amount").val());
+        var time = parseFloat($("#time").val());
+
+        if (isNaN(amount) || isNaN(time) || amount === 0 || time === 0)
+        {
+            msg.showError("Invalid amounts entered");
+        }
+
+        var total = ((amount / 500) * time).toFixed(2);
+        msg.showOk(+ time + " day stake reward: " + total + " FMTA, " + (total * Home.prices.fundamenta.usd).toFixed(2) + " USD")
+    };
+
+    async componentDidMount() {
+        $("#stats").empty();
+        $("#balances").empty();
+        msg.clear();
+
         if (!wallet.hasListener('home')) {
             var em = new EventEmitter();
 
             em.on('connect', async () => {
-                //if (wallet.web3.eth.defaultAccount !== null)
-                //    await this.displayUserBalances();
+                if (wallet.web3.eth.defaultAccount !== null)
+                    await this.displayUserBalances();
+
+                await this.displayNetworkStats();
             });
 
             em.on('disconnect', async () => {
@@ -192,10 +217,22 @@ export default class Home extends React.Component {
             em.on('accountsChanged', async (accounts) => {
                 if (wallet.web3.eth.defaultAccount !== null)
                     await this.displayUserBalances();
+
+                await this.displayNetworkStats();
+            });
+
+            em.on('chainChanged', async () => {
+                if (wallet.web3.eth.defaultAccount !== null)
+                    await this.displayUserBalances();
+
+                await this.displayNetworkStats();
             });
 
             wallet.addListener('home', em);
         }
+
+        await this.displayUserBalances();
+        await this.displayNetworkStats();
     }
 
     render() {
