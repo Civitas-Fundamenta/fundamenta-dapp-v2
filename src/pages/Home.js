@@ -65,6 +65,7 @@ export default class Home extends React.Component {
     async displayUserStakes()
     {
         if (!wallet.isConnected) return;
+        if (!wallet.web3) return;
 
         var networkNames = '';
         var balances = '';

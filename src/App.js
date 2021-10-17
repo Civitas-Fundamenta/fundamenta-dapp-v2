@@ -2,6 +2,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navigation } from './components/Navigation';
+import EventEmitter from 'events';
 
 import { Config as config } from './js/config'
 import { WalletProvider as wallet } from './js/walletProvider'
@@ -20,10 +21,17 @@ import './themes/lux.bootstrap.css';
 import './themes/lux.bootstrap.overrides.css';
 
 class App extends React.Component {
-
-    async componentDidMount() {
+    constructor() {
+        super();
+        this.em = new EventEmitter();
+        this.em.on('update', async () => {
+            console.log("app.update");
+            await this.update();
+        });
+    }
+    
+    async update() {
         await config.fetchNetworkConfig();
-        console.log("App loaded");
         var provider = localStorage.getItem('provider');
 
         if (provider === 'walletConnect')
@@ -42,9 +50,10 @@ class App extends React.Component {
     }
 
     render() {
+        this.em.emit('update');
         return (
             <div className="App">
-                <Navigation />
+                <Navigation id="conn"/>
                 <Switch>
                     <Route exact path="/" component={Home} />
                     <Route path="/staking" component={Staking} />
