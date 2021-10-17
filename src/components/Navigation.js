@@ -215,7 +215,7 @@ export class Navigation extends React.Component {
         return (
             <div>
                 <div className="alert alert-warning no-round p-0" role="alert">
-                    The CiviPort Web Teleporter is Beta software.
+                    The Fundamenta web dApp is Beta software.
                 </div>
                 <div className="p-0 ps-3 pe-3">
                     <div>

@@ -15,11 +15,12 @@ export default class Home extends React.Component {
     static prices = null;
     static _lock1 = false;
     static _lock2 = false;
+    static _lock3 = false;
 
     async displayUserBalances()
     {
-        return;
         if (this._lock1) return;
+        if (!wallet.isConnected) return;
 
         this._lock1 = true;
 
@@ -32,12 +33,12 @@ export default class Home extends React.Component {
         $.each(config.networkMap, async function () {
 
             if (this.fmtaToken) {
-                console.log(wallet.web3.eth.defaultAccount);
                 var web3 = new Web3(new Web3.providers.HttpProvider(wallet.rpcUrls.get(this.chainId)));
+                web3.eth.defaultAccount = wallet.web3.eth.defaultAccount;
                 var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, this.fmtaToken.tokenAddress);
-                var bal = await fmtaContract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
+                var bal = await fmtaContract.methods.balanceOf(web3.eth.defaultAccount).call();
                 var balance = convert.fromAtomicUnits(bal, 18);
-                console.log(bal, balance);
+
                 networkNames += '<div>' + wallet.niceNames.get(this.chainId) +':&nbsp;</div>';
                 balances += '<div>' + balance.toFixed(2) + ' FMTA</div>'
                 ++counter;
@@ -47,7 +48,7 @@ export default class Home extends React.Component {
             {
                 var balanceCard =
                 '<form class="card mb-3 border border-primary shadow">' +
-                    '<div class="card-header">Network balances</div>' +
+                    '<div class="card-header">Balances</div>' +
                     '<div className="card-body">' +
                         '<div class="ps-3 pt-3">' +
                             '<div class="d-flex pb-3">' +
@@ -67,6 +68,62 @@ export default class Home extends React.Component {
         });
 
         this._lock1 = false;
+    }
+
+    async displayUserStakes()
+    {
+        if (this._lock3) return;
+        if (!wallet.isConnected) return;
+
+        this._lock3 = true;
+
+        var networkNames = '';
+        var balances = '';
+
+        var netCount = config.networkMap.length;
+        var counter = 0;
+
+        $.each(config.networkMap, async function () {
+
+            if (this.fmtaToken) {
+                var web3 = new Web3(new Web3.providers.HttpProvider(wallet.rpcUrls.get(this.chainId)));
+                web3.eth.defaultAccount = wallet.web3.eth.defaultAccount;
+                var stakingContract = new web3.eth.Contract(config.app.stakeAbi, this.fmtaToken.stakingAddress);
+                var bal = await stakingContract.methods.stakeOf(web3.eth.defaultAccount).call();
+                var r = await stakingContract.methods.rewardsAccrued().call();
+                
+                var balance = convert.fromAtomicUnits(bal, 18);
+                var reward = convert.fromAtomicUnits(r, 18);
+
+                networkNames += '<div>' + wallet.niceNames.get(this.chainId) +':&nbsp;</div>';
+                balances += '<div>' + balance.toFixed(2) + ' (' + reward.toFixed(2) + ') FMTA</div>'
+                ++counter;
+            }
+
+            if (counter === netCount)
+            {
+                var balanceCard =
+                '<form class="card mb-3 border border-primary shadow">' +
+                    '<div class="card-header">Stakes</div>' +
+                    '<div className="card-body">' +
+                        '<div class="ps-3 pt-3">' +
+                            '<div class="d-flex pb-3">' +
+                                '<div class="text-end text-body">' +
+                                    networkNames +
+                                '</div>' +
+                                '<div class="text-start text-body">' +
+                                    balances +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</form>'
+
+                $("#stakes").html(balanceCard);
+            }
+        });
+
+        this._lock3 = false;
     }
 
     async displayNetworkStats()
@@ -205,7 +262,10 @@ export default class Home extends React.Component {
 
             em.on('connect', async () => {
                 if (wallet.web3.eth.defaultAccount !== null)
+                {
                     await this.displayUserBalances();
+                    await this.displayUserStakes();
+                }
 
                 await this.displayNetworkStats();
             });
@@ -216,14 +276,20 @@ export default class Home extends React.Component {
 
             em.on('accountsChanged', async (accounts) => {
                 if (wallet.web3.eth.defaultAccount !== null)
+                {
                     await this.displayUserBalances();
+                    await this.displayUserStakes();
+                }
 
                 await this.displayNetworkStats();
             });
 
             em.on('chainChanged', async () => {
                 if (wallet.web3.eth.defaultAccount !== null)
+                {
                     await this.displayUserBalances();
+                    await this.displayUserStakes();
+                }
 
                 await this.displayNetworkStats();
             });
@@ -232,6 +298,7 @@ export default class Home extends React.Component {
         }
 
         await this.displayUserBalances();
+        await this.displayUserStakes();
         await this.displayNetworkStats();
     }
 
@@ -241,6 +308,7 @@ export default class Home extends React.Component {
                 <div className="page-flex-container d-flex flex-row justify-content-center align-items-center">
                     <div className="page-content">
                         <div id="balances" />
+                        <div id="stakes" />
                         <div id="stats" />
                         <div>
                             <form autoComplete="off" className="card border border-primary shadow">
