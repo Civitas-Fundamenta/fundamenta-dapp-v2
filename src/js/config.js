@@ -14,11 +14,11 @@ export class Config {
 
     static app = {
 
-        net: "mainnet",
+        net: "testnet",
         serverCount: 10,
         serverDomain: "civiport.online",
         confTime: 12,
-        withdrawEventHash: "0x9e817a273ceb82157d1f8e11c7d5549ada176ef895a9ffe5e37b49de76d29e2d",
+        withdrawEventHash: "0xf041d18460e8444b78f944ad4de3c6cf13f1912a1eb46f4c8de656fb627b4733",
         resourceUrl: "cp3.civiport.online",
         holder0: "0xA4dda4EDfB34222063c77DFE2F50B30f5DF39870",
         holder1: "0xa0b72536ba6496aec721400b5f0e1e65caf4be77",
@@ -68,6 +68,57 @@ export class Config {
 
                 ],
                 "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "tokenId",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "queryToken",
+                "outputs": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "id",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "bool",
+                                "name": "isWrappedToken",
+                                "type": "bool"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "numSigners",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "bool",
+                                "name": "canWithdraw",
+                                "type": "bool"
+                            },
+                            {
+                                "internalType": "bool",
+                                "name": "canDeposit",
+                                "type": "bool"
+                            },
+                            {
+                                "internalType": "contract TokenInterface",
+                                "name": "token",
+                                "type": "address"
+                            }
+                        ],
+                        "internalType": "struct TokenInfo",
+                        "name": "",
+                        "type": "tuple"
+                    }
+                ],
+                "stateMutability": "view",
                 "type": "function"
             }
         ],
@@ -618,7 +669,37 @@ export class Config {
                 ret = val;
                 return false;
             }
-        })
+        });
+
+        return ret;
+    }
+
+    static async getFmtaToken(net) {
+        var ret = null;
+        if (net == null)
+            return;
+
+        $.each(net.tokens, function (idx, val) {
+            if (val.id === 0) {
+                ret = val;
+                return false;
+            }
+        });
+
+        return ret;
+    }
+
+    static async getToken(net, id) {
+        var ret = null;
+        if (net == null)
+            return;
+
+        $.each(net.tokens, function (idx, val) {
+            if (val.id === id) {
+                ret = val;
+                return false;
+            }
+        });
 
         return ret;
     }
@@ -637,8 +718,24 @@ export class Config {
                 cache: 'false',
             });
 
+            console.log("Fetching network token config");
+
+            var tokens = await $.ajax({
+                url: `https://${this.app.resourceUrl}/config/?x=${this.app.net}.tokens`,
+                dataType: 'json',
+                cache: 'false',
+            });
+
+            var tokenMap = new Map(Object.entries(tokens));
+
             $.each(this.network, function () {
                 Config.networkMap.push(this);
+            });
+
+            tokenMap.forEach(async (value, key) => {
+                var net = await this.getFromMap(parseInt(key));
+                for (var i = 0; i < value.length; i++)
+                    net.tokens.push(value[i]);
             });
         }
 

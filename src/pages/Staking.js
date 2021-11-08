@@ -19,8 +19,9 @@ export default class Staking extends React.Component {
 
     async getStake(network) {
         try {
+            var fmtaToken = await config.getFmtaToken(network);
             var stake = 0;
-            var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, network.fmtaToken.stakingAddress);
+            var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, fmtaToken.stakingAddress);
             if (wallet.web3.eth.defaultAccount) {
                 var s = await stakingContract.methods.stakeOf(wallet.web3.eth.defaultAccount).call();
                 if (!s) s = 0;
@@ -37,8 +38,9 @@ export default class Staking extends React.Component {
 
     async getBalance(network) {
         try {
+            var fmtaToken = await config.getFmtaToken(network);
             var balance = 0;
-            var tokenContract = new wallet.web3.eth.Contract(config.app.tokenAbi, network.fmtaToken.tokenAddress);
+            var tokenContract = new wallet.web3.eth.Contract(config.app.tokenAbi, fmtaToken.address);
             if (wallet.web3.eth.defaultAccount) {
                 var b = await tokenContract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
                 if (!b) b = 0;
@@ -59,8 +61,10 @@ export default class Staking extends React.Component {
             var balance = 0;
             var reward = 0;
 
-            var tokenContract = new wallet.web3.eth.Contract(config.app.tokenAbi, network.fmtaToken.tokenAddress);
-            var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, network.fmtaToken.stakingAddress);
+            var fmtaToken = await config.getFmtaToken(network);
+
+            var tokenContract = new wallet.web3.eth.Contract(config.app.tokenAbi, fmtaToken.address);
+            var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, fmtaToken.stakingAddress);
 
             if (wallet.web3.eth.defaultAccount) {
                 var b = await tokenContract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
@@ -101,9 +105,10 @@ export default class Staking extends React.Component {
 
     async validateUiState() {
         var net = await config.getFromMap(WalletProvider.chainId);
+        var fmtaToken = await config.getFmtaToken(net);
         msg.clear();
 
-        if (!net || net.fmtaToken.stakingAddress === Navigation.emptyAddress) {
+        if (!net || fmtaToken.stakingAddress === Navigation.emptyAddress) {
             this.disableNavBar();
             this.hideAllTabs();
             $("#lblBalance").text("0.00");
@@ -203,7 +208,9 @@ export default class Staking extends React.Component {
         if (!net)
             return;
 
-        var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, net.fmtaToken.stakingAddress);
+        var fmtaToken = await config.getFmtaToken(net);
+
+        var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, fmtaToken.stakingAddress);
 
         msg.clear();
         msg.showWarn("Processing. Please wait...");
@@ -236,7 +243,9 @@ export default class Staking extends React.Component {
         if (!net)
             return;
 
-        var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, net.fmtaToken.stakingAddress);
+        var fmtaToken = await config.getFmtaToken(net);
+
+        var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, fmtaToken.stakingAddress);
 
         msg.clear();
         msg.showWarn("Processing. Please wait...");
@@ -282,8 +291,10 @@ export default class Staking extends React.Component {
             return;
         }
 
-        var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, net.fmtaToken.stakingAddress);
-        var au = convert.toAtomicUnitsHexPrefixed(amount, net.fmtaToken.decimals);
+        var fmtaToken = await config.getFmtaToken(net);
+
+        var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, fmtaToken.stakingAddress);
+        var au = convert.toAtomicUnitsHexPrefixed(amount, fmtaToken.decimals);
 
         msg.clear();
         msg.showWarn("Processing. Please wait...");
@@ -331,8 +342,10 @@ export default class Staking extends React.Component {
             return;
         }
 
-        var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, net.fmtaToken.stakingAddress);
-        var au = convert.toAtomicUnitsHexPrefixed(amount, net.fmtaToken.decimals);
+        var fmtaToken = await config.getFmtaToken(net);
+
+        var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, fmtaToken.stakingAddress);
+        var au = convert.toAtomicUnitsHexPrefixed(amount, fmtaToken.decimals);
 
         msg.clear();
         msg.showWarn("Processing. Please wait...");

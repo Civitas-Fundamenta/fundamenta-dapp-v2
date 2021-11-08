@@ -12,15 +12,6 @@ export class WalletProvider {
     static isWalletConnect = false;
     static isMetamask = false;
 
-    static rpcUrls = new Map([
-        [1, "https://mainnet.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
-        [4, "https://rinkeby.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
-        [5, "https://goerli.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
-        [56, "https://bsc-dataseed.binance.org/"],
-        [137, "https://nameless-spring-thunder.matic.quiknode.pro/"],
-        [80001, "https://icy-thrumming-violet.matic-testnet.quiknode.pro/"]
-    ]);
-
     static explorerUrls = new Map([
         [1, "https://etherscan.io"],
         [4, "https://rinkeby.etherscan.io"],
@@ -30,38 +21,12 @@ export class WalletProvider {
         [80001, "https://mumbai.polygonscan.com"]
     ]);
 
-    static nativeCoins = new Map([
-        [1, "ETH"],
-        [4, "rETH"],
-        [5, "gETH"],
-        [56, "BNB"],
-        [137, "MATIC"],
-        [80001, "tMATIC"]
-    ]);
+    static async getNetworkName() {
+        var net = await config.getFromMap(this.chainId)
+        if (!net)
+            return "Unknown";
 
-    static niceNames = new Map([
-        [1, "Ethereum"],
-        [4, "Rinkeby"],
-        [5, "Goerli"],
-        [56, "Binance"],
-        [137, "Polygon"],
-        [80001, "Mumbai"]
-    ]);
-
-    static networkNames = new Map([
-        [1, "ethereum"],
-        [4, "rinkeby"],
-        [5, "goerli"],
-        [56, "binance"],
-        [137, "polygon"],
-        [80001, "mumbai"]
-    ]);
-
-    static getNetworkName() {
-        if (this.networkNames.has(this.chainId))
-            return this.networkNames.get(this.chainId);
-
-        return "unknown";
+        return net.name;
     }
 
     static addListener(key, emitter) {
@@ -262,20 +227,22 @@ export class WalletProvider {
         if (!this.isMetamask)
             return;
 
+        var net = await config.getFromMap(id);
+
         try {
             await window.ethereum.request({
                 method: 'wallet_addEthereumChain',
                 params: [
                     {
                         chainId: '0x' + id.toString(16),
-                        chainName: this.niceNames.get(id),
+                        chainName: net.name,
                         nativeCurrency: {
-                            name: this.nativeCoins.get(id),
-                            symbol: this.nativeCoins.get(id),
+                            name: net.ticker,
+                            symbol: net.ticker,
                             decimals: 18
                         },
                         rpcUrls: [
-                            this.rpcUrls.get(id)
+                            net.rpc
                         ],
                         blockExplorerUrls: [
                             this.explorerUrls.get(id)

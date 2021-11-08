@@ -33,7 +33,9 @@ export default class NFT extends React.Component {
             return;
         }
 
-        var tokenContract = new wallet.web3.eth.Contract(config.app.tokenAbi, network.fmtaToken.tokenAddress);
+        var fmtaToken = await config.getFmtaToken(network);
+
+        var tokenContract = new wallet.web3.eth.Contract(config.app.tokenAbi, fmtaToken.address);
         var minterContract = new wallet.web3.eth.Contract(config.app.minterAbi, nftMinter);
 
         var hasMinted = await minterContract.methods.hasMinted(wallet.web3.eth.defaultAccount).call();

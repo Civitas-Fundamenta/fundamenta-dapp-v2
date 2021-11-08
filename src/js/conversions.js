@@ -4,6 +4,10 @@ export class Conversions {
         return ('00' + value.toString(16)).slice(-2);
     }
 
+    static to16bitHex(value) {
+        return ('0000' + value.toString(16)).slice(-4);
+    }
+
     static to32bitHex(value) {
         return ('00000000' + value.toString(16)).slice(-8);
     }
@@ -20,13 +24,6 @@ export class Conversions {
 
         return hex;
     }
-
-    static async toBigIntHex(hex) {
-        var padded = hex.toString(16).padStart(64, "0");
-
-        var reverse = await padded.match(/[a-fA-F0-9]{2}/g).reverse().join("");
-        return reverse;
-    };
 
     static toAtomicUnitsHex(value, decimals) {
         if (isNaN(decimals)) decimals = 18;

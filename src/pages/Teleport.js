@@ -43,10 +43,12 @@ export default class Teleport extends React.Component {
             return;
         }
 
-        $("#sourceToken").append($("<option />").text(network.fmtaToken.ticker));
+        var fmtaToken = await config.getFmtaToken(network);
 
+        $("#sourceToken").append($("<option />").text(fmtaToken.ticker));
+        
         $.each(network.tokens, function () {
-            if (this.bridgeAddress)
+            if (this.id)
                 $("#sourceToken").append($("<option />").text(this.ticker));
         });
 
@@ -60,16 +62,12 @@ export default class Teleport extends React.Component {
 
         var sourceTokenTicker = $("#sourceToken option:selected").text();
         var token;
-        if (sourceTokenTicker === network.fmtaToken.ticker) {
-            token = network.fmtaToken;
-        } else {
-            $.each(network.tokens, function () {
-                if (this.ticker === sourceTokenTicker) {
-                    token = this;
-                    return false;
-                }
-            });
-        }
+        $.each(network.tokens, function () {
+            if (this.ticker === sourceTokenTicker) {
+                token = this;
+                return false;
+            }
+        });
 
         return token;
     }
@@ -79,7 +77,7 @@ export default class Teleport extends React.Component {
         var network;
 
         $.each(config.network, function () {
-            if (this.network === destNetworkName) {
+            if (this.name === destNetworkName) {
                 network = this;
                 return false;
             }
@@ -92,16 +90,12 @@ export default class Teleport extends React.Component {
         var network = this.getDestinationNetworkFromDropDown();
 
         var token;
-        if (sourceToken.ticker === network.fmtaToken.ticker) {
-            token = network.fmtaToken;
-        } else {
-            $.each(network.tokens, function () {
-                if (this.ticker === sourceToken.ticker) {
-                    token = this;
-                    return false;
-                }
-            });
-        }
+        $.each(network.tokens, function () {
+            if (this.ticker === sourceToken.ticker) {
+                token = this;
+                return false;
+            }
+        });
 
         return token;
     }
@@ -146,7 +140,7 @@ export default class Teleport extends React.Component {
         }
 
         if (wallet.chainId === network.chainId && wallet.web3.eth.defaultAccount) {
-            var contract = new wallet.web3.eth.Contract(config.app.tokenAbi, token.tokenAddress);
+            var contract = new wallet.web3.eth.Contract(config.app.tokenAbi, token.address);
             var bal = await contract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
             if (!bal)
                 bal = 0;
@@ -162,7 +156,6 @@ export default class Teleport extends React.Component {
         var address = wallet.web3.eth.defaultAccount.toString().slice(-40);
         var timestamp = convert.to32bitHex(Date.now());
 
-        //todo: proper hex conversion from 8 bytes to 8 hex digits
         var array = new Uint8Array(8);
         window.crypto.getRandomValues(array);
         var hex = convert.bin2hex(array);
@@ -209,7 +202,7 @@ export default class Teleport extends React.Component {
                 var net = await config.getFromMap(wallet.chainId);
 
                 if (this.completedTeleport.destination.chainId !== wallet.chainId) {
-                    msg.showWarn("Switch to the " + net.network + " network to energize");
+                    msg.showWarn("Switch to the " + net.name + " network to energize");
                     return;
                 }
 
@@ -230,16 +223,17 @@ export default class Teleport extends React.Component {
                     msg.clear();
                     msg.showWarn("Energized confirmed. Processing transaction...");
                     try {
-                        var destBridgeContract = new wallet.web3.eth.Contract(config.app.bridgeAbi, energizer.teleport.destinationToken.bridgeAddress);
+                        var destBridgeContract = new wallet.web3.eth.Contract(config.app.bridgeAbi, energizer.teleport.destination.bridge);
                         var tx = await destBridgeContract.methods.deposit(energizer.teleport.signature, serverSignatures, energizer.teleport.transactionData).send({ from: wallet.web3.eth.defaultAccount });
                         console.log("Transaction: ", tx);
                         enable("#form");
+                        msg.clear();
                         msg.showOk("Energize success!");
                     }
                     catch
                     {
                         msg.clear();
-                        msg.showError("Energize faile!");
+                        msg.showError("Energize failed!");
                         enable("#form");
                         return;
                     }
@@ -274,15 +268,11 @@ export default class Teleport extends React.Component {
                 var destNetwork = this;
                 var destTokens = this.tokens;
                 if (destNetwork !== network) {
-                    if (token.ticker === destNetwork.fmtaToken.ticker)
-                        $("#destination").append($("<option />").text(destNetwork.network));
-                    else {
-                        $.each(destTokens, function () {
-                            if (this.ticker === token.ticker) {
-                                $("#destination").append($("<option />").text(destNetwork.network));
-                            }
-                        });
-                    }
+                    $.each(destTokens, function () {
+                        if (this.ticker === token.ticker) {
+                            $("#destination").append($("<option />").text(destNetwork.name));
+                        }
+                    });
                 }
             });
         });
@@ -303,13 +293,15 @@ export default class Teleport extends React.Component {
             var destination = await this.getDestinationNetworkFromDropDown();
             var destinationToken = await this.getDestinationTokenFromDropDown();
             var amountAtomicUnitsHex = convert.toAtomicUnitsHex($("#amount").val(), sourceToken.decimals);
-            var sourceId = convert.to32bitHex(source.id) + convert.to32bitHex(sourceToken.id);
-            var destId = convert.to32bitHex(destination.id) + convert.to32bitHex(destinationToken.id);
-            var uuid = sourceId + destId;
-            var nonce = this.createNonce();
-            var address = wallet.web3.eth.defaultAccount.toString().slice(-40).padStart(64, '0');
 
-            var transactionData = "0x" + amountAtomicUnitsHex + uuid + nonce + address;
+            var srcNet = convert.to32bitHex(source.chainId);
+            var srcTok = convert.to16bitHex(sourceToken.id);
+            var dstNet = convert.to32bitHex(destination.chainId);
+            var dstTok = convert.to16bitHex(destinationToken.id);
+            var nonce = this.createNonce();
+            var address = wallet.web3.eth.defaultAccount.toString().slice(-40).padStart(64, 0);
+
+            var transactionData = "0x" + amountAtomicUnitsHex + srcNet + dstNet + srcTok + dstTok + address + nonce;
 
             msg.showWarn("Requesting signature...");
             var signature;
@@ -327,12 +319,12 @@ export default class Teleport extends React.Component {
 
             try {
                 msg.showWarn("Processing teleport. Please wait...");
-                var sourceBridgeContract = new wallet.web3.eth.Contract(config.app.bridgeAbi, sourceToken.bridgeAddress);
+                var sourceBridgeContract = new wallet.web3.eth.Contract(config.app.bridgeAbi, source.bridge);
                 var withdrawTx = await sourceBridgeContract.methods.withdraw(signature, transactionData).send({ from: wallet.web3.eth.defaultAccount });
                 console.log("Withdraw: ", withdrawTx);
 
                 var txHash = withdrawTx.transactionHash;
-                var blockNumber = withdrawTx.blockNumber;
+                var blockNumber = withdrawTx.blockNumber.toString(16);
 
                 this.completedTeleport = {
                     txHash,
@@ -348,9 +340,9 @@ export default class Teleport extends React.Component {
                 msg.showOk("Teleport completed.");
 
                 if (wallet.isMetamask)
-                    msg.showWarn("Switch to " + destination.network + " to energize");
+                    msg.showWarn("Switch to " + destination.name + " to energize");
                 else if (wallet.isWalletConnect) {
-                    msg.showWarn("Requesting netework switch to " + destination.network + " to energize");
+                    msg.showWarn("Requesting netework switch to " + destination.name + " to energize");
                     await wallet.switchNetwork(destination.chainId);
                 }
             }

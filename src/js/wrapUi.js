@@ -28,9 +28,9 @@ export class UiCommon {
 
         if (wallet.chainId === network.chainId && wallet.web3.eth.defaultAccount) {
             if (this.wrap)
-                contract = new wallet.web3.eth.Contract(config.app.tokenAbi, token.tokenAddress);
+                contract = new wallet.web3.eth.Contract(config.app.tokenAbi, token.backingToken.address);
             else
-                contract = new wallet.web3.eth.Contract(config.app.tokenAbi, token.wrappedTokenAddress);
+                contract = new wallet.web3.eth.Contract(config.app.tokenAbi, token.address);
 
             var bal = await contract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
 
@@ -53,7 +53,17 @@ export class UiCommon {
         if (tokIndex < 0)
             return;
 
-        var token = network.tokens[tokIndex];
+        var wrapData = sort.wrappable(config.network);
+
+        var wrapNet = null;
+        $.each(wrapData, function () {
+            if (this.chainId === wallet.chainId) {
+                wrapNet = this;
+                return false;
+            }
+        });
+
+        var token = wrapNet.tokens[tokIndex];
 
         return {
             network: network,
@@ -64,14 +74,14 @@ export class UiCommon {
     async populateTokenDropDown() {
         if (this._populateTokenDropDownLock)
             return;
-        
+
         this._populateTokenDropDownLock = true;
 
         console.log("populateTokenDropDown");
         $("#token").empty();
         $("#token").append($("<option />").text("Select token"));
         var chainId = wallet.chainId;
-        
+
         if (isNaN(chainId)) {
             disable("#form");
             this._populateTokenDropDownLock = false;
@@ -80,41 +90,36 @@ export class UiCommon {
 
         enable("#form");
         await config.fetchNetworkConfig();
-        sort.wrappable(config.network);
 
-        console.log("WrapData:", sort.wrapData);
-
-        if (isNaN(wallet.chainId) || wallet.chainId === 0)
-        {
+        if (isNaN(wallet.chainId) || wallet.chainId === 0) {
             disable("#form");
             this._populateTokenDropDownLock = false;
             return;
         }
-        
+
+        var wrapData = sort.wrappable(config.network);
+
         var network = null;
-        $.each(sort.wrapData, function () {
+        $.each(wrapData, function () {
             if (this.chainId === wallet.chainId) {
                 network = this;
                 return false;
             }
         });
 
-        if (!network)
-        {
+        if (!network) {
             this._populateTokenDropDownLock = false;
             return;
         }
 
-        if (this.wrap)
-        {
+        if (this.wrap) {
             $.each(network.tokens, function () {
-                $("#token").append($("<option />").text(this.ticker));
+                $("#token").append($("<option />").text(this.backingToken.ticker));
             });
         }
-        else
-        {
+        else {
             $.each(network.tokens, function () {
-                $("#token").append($("<option />").text(this.wrappedTicker));
+                $("#token").append($("<option />").text(this.ticker));
             });
         }
 

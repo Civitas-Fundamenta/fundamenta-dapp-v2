@@ -305,7 +305,8 @@ export default class Mining extends React.Component {
         var ok = false;
 
         try {
-            var au = convert.toAtomicUnitsHexPrefixed(amount, net.fmtaToken.decimals);
+            var fmtaToken = await config.getFmtaToken(net);
+            var au = convert.toAtomicUnitsHexPrefixed(amount, fmtaToken.decimals);
             var tx = await lpContract.methods.addPosition(au, lockPeriod, this.currentInfo.poolIndex).send({ from: wallet.web3.eth.defaultAccount });
             console.log("Transaction: ", tx);
             ok = tx.status;

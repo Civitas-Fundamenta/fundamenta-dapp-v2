@@ -56,7 +56,7 @@ export class Navigation extends React.Component {
         else
             hide("#_aInvNet");
 
-        $("#_btnD").text(wallet.getNetworkName());
+        $("#_btnD").text(await wallet.getNetworkName());
     }
 
     openProviderModal() {
@@ -251,9 +251,9 @@ export class Navigation extends React.Component {
                                         <Nav.Link>Energize</Nav.Link>
                                     </LinkContainer>
 
-                                    <LinkContainer to="/nft">
+                                    {/*<LinkContainer to="/nft">
                                         <Nav.Link>NFT!</Nav.Link>
-                                    </LinkContainer>
+                                    </LinkContainer>*/}
 
                                     <button className="round btn btn-outline-success btn-sm ms-1 me-1" id="_btnS" onClick={this._btnS_clicked}>SWITCH NETWORK</button>
                                 </Nav>

@@ -31,9 +31,9 @@ export default class Energize extends React.Component {
             }
             else {
                 if (wallet.isMetamask)
-                    msg.showWarn(`Switch MetaMask to the ${this.recoveredTeleport.destination.network} network to energize`);
+                    msg.showWarn(`Switch MetaMask to the ${this.recoveredTeleport.destination.name} network to energize`);
                 else if (wallet.isWalletConnect) {
-                    msg.showWarn(`Sending request to change to the ${this.recoveredTeleport.destination.network} network to energize`);
+                    msg.showWarn(`Sending request to change to the ${this.recoveredTeleport.destination.name} network to energize`);
                     wallet.switchNetwork(this.recoveredTeleport.destination.chainId);
                 }
             }
@@ -62,9 +62,9 @@ export default class Energize extends React.Component {
             enable("#button");
 
             if (wallet.isMetamask)
-                msg.showWarn(`Switch MetaMask to the ${this.recoveredTeleport.destination.network} network to energize`);
+                msg.showWarn(`Switch MetaMask to the ${this.recoveredTeleport.destination.name} network to energize`);
             else if (wallet.isWalletConnect) {
-                msg.showWarn(`Sending request to change to the ${this.recoveredTeleport.destination.network} network to energize`);
+                msg.showWarn(`Sending request to change to the ${this.recoveredTeleport.destination.name} network to energize`);
                 wallet.switchNetwork(this.recoveredTeleport.destination.chainId);
             }
         }
@@ -79,51 +79,42 @@ export default class Energize extends React.Component {
             return;
         }
 
-        var blockNumber = receipt.blockNumber;
-        var transactionData;
-        var source;
-        var destination;
-        var destinationToken;
+        var blockNumber = receipt.blockNumber.toString(16);
+
+        var sn, dn, st, dt, sender, amount, nonce;
 
         $.each(receipt.logs, async function () {
             if (this.topics[0] === config.app.withdrawEventHash) {
-                transactionData = this.data.slice(130, 354);
+                var data = this.data.slice(2);
 
-                var sourceNetId = parseInt(transactionData.slice(64, 72), 16);
-                var destNetId = parseInt(transactionData.slice(80, 88), 16);
-                var destTokenId = parseInt(transactionData.slice(88, 96), 16);
+                sender = data.slice(24, 64);
 
-                $.each(config.network, function () {
-                    if (this.id === sourceNetId)
-                        source = this;
+                sn = data.slice(120, 128);
+                st = data.slice(188, 192);
+                amount = data.slice(192);
 
-                    if (this.id === destNetId) {
-                        destination = this;
-                        if (destTokenId === 0)
-                            destinationToken = this.fmtaToken
-                        else {
-                            $.each(this.tokens, function () {
-                                if (this.id === destTokenId)
-                                    destinationToken = this;
-                            });
-                        }
-                    }
-                });
+                nonce = this.topics[1].slice(2);
+                dn = this.topics[2].slice(58);
+                dt = this.topics[3].slice(62);
 
                 return false;
             }
         });
 
-        if (!source || !destination || !transactionData || transactionData.length === 0 || !destinationToken)
-            return;
+        var address = sender.toString().slice(-40).padStart(64, 0);
 
-        transactionData = "0x" + transactionData;
+        var transactionData = '0x' + amount + sn + dn + st + dt + address + nonce;
+
+        var did = parseInt(dn, 16);
+        var tid = parseInt(dt, 16);
+
+        var destination = await config.getFromMap(did);
+        var destinationToken = await config.getToken(destination, tid);
 
         return {
             txHash,
             blockNumber,
             transactionData,
-            source,
             destination,
             destinationToken
         };
@@ -205,7 +196,7 @@ export default class Energize extends React.Component {
                 console.log(energizer.teleport);
                 msg.showWarn("Energize confirmed. Processing transaction...");
                 try {
-                    var destBridgeContract = new wallet.web3.eth.Contract(config.app.bridgeAbi, energizer.teleport.destinationToken.bridgeAddress);
+                    var destBridgeContract = new wallet.web3.eth.Contract(config.app.bridgeAbi, energizer.teleport.destination.bridge);
                     var tx = await destBridgeContract.methods.deposit(energizer.teleport.signature, serverSignatures, energizer.teleport.transactionData).send({ from: wallet.web3.eth.defaultAccount });
                     console.log("Transaction:", tx);
                     enable("#form");

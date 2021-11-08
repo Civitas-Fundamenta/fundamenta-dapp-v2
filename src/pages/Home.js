@@ -26,14 +26,16 @@ export default class Home extends React.Component {
 
         $.each(config.networkMap, async function () {
 
-            if (this.fmtaToken) {
-                var web3 = new Web3(new Web3.providers.HttpProvider(wallet.rpcUrls.get(this.chainId)));
+            var fmtaToken = await config.getFmtaToken(this);
+
+            if (fmtaToken) {
+                var web3 = new Web3(new Web3.providers.HttpProvider(this.rpc));
                 web3.eth.defaultAccount = wallet.web3.eth.defaultAccount;
-                var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, this.fmtaToken.tokenAddress);
+                var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, fmtaToken.address);
                 var bal = await fmtaContract.methods.balanceOf(web3.eth.defaultAccount).call();
                 var balance = convert.fromAtomicUnits(bal, 18);
 
-                networkNames += '<div>' + wallet.niceNames.get(this.chainId) +':&nbsp;</div>';
+                networkNames += '<div>' + this.name +':&nbsp;</div>';
                 balances += '<div>' + balance.toFixed(2) + ' FMTA</div>'
                 ++counter;
             }
@@ -74,20 +76,28 @@ export default class Home extends React.Component {
         var counter = 0;
 
         $.each(config.networkMap, async function () {
+            
+            var fmtaToken = await config.getFmtaToken(this);
 
-            if (this.fmtaToken) {
-                var web3 = new Web3(new Web3.providers.HttpProvider(wallet.rpcUrls.get(this.chainId)));
+            ++counter;
+
+            if (fmtaToken) {
+                var web3 = new Web3(new Web3.providers.HttpProvider(this.rpc));
                 web3.eth.defaultAccount = wallet.web3.eth.defaultAccount;
-                var stakingContract = new web3.eth.Contract(config.app.stakeAbi, this.fmtaToken.stakingAddress);
-                var bal = await stakingContract.methods.stakeOf(web3.eth.defaultAccount).call();
-                var r = await stakingContract.methods.rewardsAccrued().call();
-                
-                var balance = convert.fromAtomicUnits(bal, 18);
-                var reward = convert.fromAtomicUnits(r, 18);
 
-                networkNames += '<div>' + wallet.niceNames.get(this.chainId) +':&nbsp;</div>';
+                var balance = 0;
+                var reward = 0;
+                if (fmtaToken.stakingAddress) {
+                    var stakingContract = new web3.eth.Contract(config.app.stakeAbi, fmtaToken.stakingAddress);
+                    var bal = await stakingContract.methods.stakeOf(web3.eth.defaultAccount).call();
+                    var r = await stakingContract.methods.rewardsAccrued().call();
+                    
+                    balance = convert.fromAtomicUnits(bal, 18);
+                    reward = convert.fromAtomicUnits(r, 18);
+                }
+
+                networkNames += '<div>' + this.name +':&nbsp;</div>';
                 balances += '<div>' + balance.toFixed(2) + ' (' + reward.toFixed(2) + ') FMTA</div>'
-                ++counter;
             }
 
             if (counter === netCount)
@@ -120,12 +130,14 @@ export default class Home extends React.Component {
 
         if (!net) return;
 
-        if (net.fmtaToken)
-        {
-            var web3 = new Web3(new Web3.providers.HttpProvider(wallet.rpcUrls.get(chainId)));
+        var fmtaToken = await config.getFmtaToken(net);
 
-            var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, net.fmtaToken.tokenAddress);
-            var stakingContract = new web3.eth.Contract(config.app.stakeAbi, net.fmtaToken.stakingAddress);
+        if (fmtaToken)
+        {
+            var web3 = new Web3(new Web3.providers.HttpProvider(this.rpc));
+
+            var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, fmtaToken.address);
+            var stakingContract = new web3.eth.Contract(config.app.stakeAbi, fmtaToken.stakingAddress);
             var lpContract = new web3.eth.Contract(config.app.miningAbi, net.liquidityMining.address);
 
             var poolBalance0 = 0;
@@ -166,7 +178,7 @@ export default class Home extends React.Component {
             var totalStaked = 0;
             var stakeRewards = 0;
 
-            if (net.fmtaToken.stakingAddress !== Navigation.emptyAddress)
+            if (fmtaToken.stakingAddress !== Navigation.emptyAddress)
             {
                 var tot = await stakingContract.methods.totalStakes().call();
                 totalStaked = convert.fromAtomicUnits(tot, 18);
@@ -184,7 +196,7 @@ export default class Home extends React.Component {
 
             $(container).html(
                 '<form class="card mb-3 border border-primary shadow">' +
-                    '<div class="card-header">' + wallet.niceNames.get(chainId) + ' supply</div>' +
+                    '<div class="card-header">' + this.name + ' supply</div>' +
                     '<div className="card-body">' +
                         '<div class="ps-3 pt-3">' +
                             '<div class="d-flex pb-3">' +

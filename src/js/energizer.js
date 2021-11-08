@@ -1,6 +1,6 @@
 
 import { Config as config } from './config'
-import { Conversions as convert } from './conversions';
+import { WalletProvider as wallet } from './walletProvider'
 
 import EventEmitter from 'events';
 import $ from 'jquery';
@@ -39,7 +39,11 @@ export class Energizer {
     async energize() {
         var transactionData = this.teleport.transactionData;
         var blockNumber = this.teleport.blockNumber;
-        var confs = this.teleport.destinationToken.confs;
+
+        var destBridgeContract = new wallet.web3.eth.Contract(config.app.bridgeAbi, this.teleport.destination.bridge);
+        var tokenInfo = await destBridgeContract.methods.queryToken(this.teleport.destinationToken.id).call();
+
+        var confs = tokenInfo.numSigners;
 
         var approval = await this.getApproval(this.teleport.signature, blockNumber, transactionData, confs);
 
@@ -73,12 +77,10 @@ export class Energizer {
     }
 
     async getApproval(cSig, block, txData, confs) {
-        var bigIntBlock = await convert.toBigIntHex(block);
-
         var responses = [];
 
         for (var i = 1; i <= config.app.serverCount; i++) {
-            var response = await this.getServerApproval(i, bigIntBlock, txData, cSig);
+            var response = await this.getServerApproval(i, block, txData, cSig);
 
             if (response == null) {
                 console.log("No response");

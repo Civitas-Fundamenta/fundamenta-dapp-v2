@@ -26,8 +26,8 @@ export default class Wrap extends React.Component {
         var token = data.token;
 
         if (wallet.chainId === network.chainId && wallet.web3.eth.defaultAccount) {
-            var contract = new wallet.web3.eth.Contract(config.app.tokenAbi, token.tokenAddress);
-            var al = await contract.methods.allowance(wallet.web3.eth.defaultAccount, data.token.wrappedTokenAddress).call();
+            var contract = new wallet.web3.eth.Contract(config.app.tokenAbi, token.backingToken.address);
+            var al = await contract.methods.allowance(wallet.web3.eth.defaultAccount, data.token.address).call();
             if (!al)
                 return 0;
 
@@ -64,8 +64,8 @@ export default class Wrap extends React.Component {
             return;
         }
 
-        var tContract = new wallet.web3.eth.Contract(config.app.tokenAbi, data.token.tokenAddress);
-        var wtContract = new wallet.web3.eth.Contract(config.app.tokenAbi, data.token.wrappedTokenAddress);
+        var tContract = new wallet.web3.eth.Contract(config.app.tokenAbi, data.token.backingToken.address);
+        var wtContract = new wallet.web3.eth.Contract(config.app.tokenAbi, data.token.address);
         msg.clear();
         msg.showWarn("Processing. Please wait...");
         disable("#form");
@@ -76,7 +76,7 @@ export default class Wrap extends React.Component {
             var allowance = await this.getTokenAllowance();
             if (allowance < amount) {
                 var au2 = convert.toAtomicUnitsHexPrefixed(100000000, data.token.decimals);
-                var at = await tContract.methods.approve(data.token.wrappedTokenAddress, au2).send({ from: wallet.web3.eth.defaultAccount });
+                var at = await tContract.methods.approve(data.token.address, au2).send({ from: wallet.web3.eth.defaultAccount });
                 console.log("Transaction: ", at);
                 ok = at.status;
             }

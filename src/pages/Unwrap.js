@@ -44,7 +44,7 @@ export default class Unwrap extends React.Component {
             return;
         }
 
-        var contract = new wallet.web3.eth.Contract(config.app.tokenAbi, data.token.wrappedTokenAddress);
+        var contract = new wallet.web3.eth.Contract(config.app.tokenAbi, data.token.address);
         msg.clear();
         msg.showWarn("Processing. Please wait...");
         disable("#form");
