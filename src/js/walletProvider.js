@@ -21,6 +21,15 @@ export class WalletProvider {
         [80001, "https://mumbai.polygonscan.com"]
     ]);
 
+    static rpcUrls = new Map([
+        [1, "https://mainnet.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
+        [4, "https://rinkeby.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
+        [5, "https://goerli.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
+        [56, "https://bsc-dataseed.binance.org/"],
+        [137, "https://nameless-spring-thunder.matic.quiknode.pro/"],
+        [80001, "https://polygon-mumbai.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"]
+    ]);
+
     static async getNetworkName() {
         var net = await config.getFromMap(this.chainId)
         if (!net)
