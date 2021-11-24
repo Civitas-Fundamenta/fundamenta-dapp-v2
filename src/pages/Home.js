@@ -2,11 +2,11 @@ import React from 'react';
 import $ from 'jquery';
 import Web3 from "web3";
 import EventEmitter from 'events';
+import BigDecimal from 'js-big-decimal'
 
 import { Config as config } from '../js/config'
 import { Conversions as convert } from '../js/conversions';
 import { WalletProvider as wallet } from '../js/walletProvider'
-import { Navigation } from '../components/Navigation';
 
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
 
@@ -33,7 +33,7 @@ export default class Home extends React.Component {
                 web3.eth.defaultAccount = wallet.web3.eth.defaultAccount;
                 var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, fmtaToken.address);
                 var bal = await fmtaContract.methods.balanceOf(web3.eth.defaultAccount).call();
-                var balance = convert.fromAtomicUnits(bal, 18);
+                var balance = convert.fromAu(bal, 18);
 
                 networkNames += '<div>' + this.name +':&nbsp;</div>';
                 balances += '<div>' + balance.toFixed(2) + ' FMTA</div>'
@@ -92,8 +92,8 @@ export default class Home extends React.Component {
                     var bal = await stakingContract.methods.stakeOf(web3.eth.defaultAccount).call();
                     var r = await stakingContract.methods.rewardsAccrued().call();
                     
-                    balance = convert.fromAtomicUnits(bal, 18);
-                    reward = convert.fromAtomicUnits(r, 18);
+                    balance = convert.fromAu(bal, 18);
+                    reward = convert.fromAu(r, 18);
                 }
 
                 networkNames += '<div>' + this.name +':&nbsp;</div>';
@@ -134,69 +134,77 @@ export default class Home extends React.Component {
 
         if (fmtaToken)
         {
-            var web3 = new Web3(new Web3.providers.HttpProvider(this.rpc));
+            var web3 = new Web3(new Web3.providers.HttpProvider(net.rpc));
 
             var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, fmtaToken.address);
             var stakingContract = new web3.eth.Contract(config.app.stakeAbi, fmtaToken.stakingAddress);
-            var lpContract = new web3.eth.Contract(config.app.miningAbi, net.liquidityMining.address);
+            var lpContract = undefined;
+            
+            var poolBalance0 = new BigDecimal(0);
 
-            var poolBalance0 = 0;
-
-            if (net.liquidityMining.address !== Navigation.emptyAddress)
+            if (net.liquidityMining)
             {
-                var poolInfo0 = await lpContract.methods.poolInfo(0).call();
-                poolBalance0 = convert.fromAtomicUnits(poolInfo0.TotalRewardsPaidByPool, 18);
+                lpContract = new web3.eth.Contract(config.app.miningAbi, net.liquidityMining.address);
+
+                if (net.liquidityMining.address)
+                {
+                    var poolInfo0 = await lpContract.methods.poolInfo(0).call();
+                    poolBalance0 = convert.fromAuBigDecimal(poolInfo0.TotalRewardsPaidByPool, 18);
+                }
             }
 
-            var exclude = 0;
+            var exclude = new BigDecimal(0);
             var poolBalance = poolBalance0;
 
             if (chainId === 1) {
                 var bal0 = await fmtaContract.methods.balanceOf(config.app.holder0).call();
-                var balance0 = convert.fromAtomicUnits(bal0, 18);
+                var balance0 = convert.fromAuBigDecimal(bal0, 18);
 
                 var bal1 = await fmtaContract.methods.balanceOf(config.app.holder1).call();
-                var balance1 = convert.fromAtomicUnits(bal1, 18);
+                var balance1 = convert.fromAuBigDecimal(bal1, 18);
 
                 var bal2 = await fmtaContract.methods.balanceOf(config.app.holder2).call();
-                var balance2 = convert.fromAtomicUnits(bal2, 18);
+                var balance2 = convert.fromAuBigDecimal(bal2, 18);
 
                 exclude = balance0 + balance1 + balance2;
 
                 var poolInfo1 = await lpContract.methods.poolInfo(1).call();
-                var poolBalance1 = convert.fromAtomicUnits(poolInfo1.TotalRewardsPaidByPool, 18);
+                var poolBalance1 = convert.fromAuBigDecimal(poolInfo1.TotalRewardsPaidByPool, 18);
 
                 //0xF6de2B6eAB93d3A0AEC5863e3190b319602A1e70
-                var oldPoolBalance0 = 234966.16;
+                var oldPoolBalance0 = new BigDecimal(234966.16);
 
                 //0xB187c8E40b46Ae8fc19A6cC24bb60320a73b9abD
-                var oldPoolBalance1 = 98566.84;
+                var oldPoolBalance1 = new BigDecimal(98566.84);
 
                 poolBalance += (poolBalance1 + oldPoolBalance0 + oldPoolBalance1);
             }
 
-            var totalStaked = 0;
-            var stakeRewards = 0;
+            var totalStaked = new BigDecimal(0);
+            var stakeRewards = new BigDecimal(0);
 
-            if (fmtaToken.stakingAddress !== Navigation.emptyAddress)
+            if (fmtaToken.stakingAddress)
             {
-                var tot = await stakingContract.methods.totalStakes().call();
-                totalStaked = convert.fromAtomicUnits(tot, 18);
-
-                var stRew = await stakingContract.methods.totalRewardsPaid().call();
-                stakeRewards = convert.fromAtomicUnits(stRew, 18);
+                totalStaked = convert.fromAuBigDecimal(await stakingContract.methods.totalStakes().call());
+                stakeRewards = convert.fromAuBigDecimal(await stakingContract.methods.totalRewardsPaid().call());
             }
 
-            var sup = await fmtaContract.methods.totalSupply().call();
-            var totalSupply = convert.fromAtomicUnits(sup, 18);
+            var totalSupply = new BigDecimal(0);
 
-            var circulating = (totalSupply + totalStaked) - exclude;
+            try {
+                totalSupply = convert.fromAuBigDecimal(await fmtaContract.methods.totalSupply().call());
+            } catch (e) { console.log(e); }
 
-            var mc = circulating * Home.prices.fundamenta.usd;
+            var circulating = totalSupply.add(totalStaked).subtract(exclude);
+
+            var mc = new BigDecimal(0);
+            
+            if (config.app.net === 'mainnet')
+                mc = circulating.multiply(Home.prices.fundamenta.usd.toString());
 
             $(container).html(
                 '<form class="card mb-3 border border-primary shadow">' +
-                    '<div class="card-header">' + this.name + ' supply</div>' +
+                    '<div class="card-header">' + net.name + ' supply</div>' +
                     '<div className="card-body">' +
                         '<div class="ps-3 pt-3">' +
                             '<div class="d-flex pb-3">' +
@@ -208,11 +216,11 @@ export default class Home extends React.Component {
                                     '<div>LP Rewards:&nbsp;</div>' +
                                 '</div>' +
                                 '<div class="text-start text-body">' +
-                                    '<div>' + circulating.toFixed(2) + ' FMTA</div>' +
-                                    '<div>' + totalStaked.toFixed(2) + ' FMTA</div>' +
-                                    '<div>' + mc.toFixed(2) + ' USD</div>' +
-                                    '<div>' + stakeRewards.toFixed(2) + ' FMTA</div>' +
-                                    '<div>' + poolBalance.toFixed(2) + ' FMTA</div>' +
+                                    '<div>' + Number(circulating.value).toFixed(2) + ' FMTA</div>' +
+                                    '<div>' + Number(totalStaked.value).toFixed(2) + ' FMTA</div>' +
+                                    '<div>' + Number(mc.value).toFixed(2) + ' USD</div>' +
+                                    '<div>' + Number(stakeRewards.value).toFixed(2) + ' FMTA</div>' +
+                                    '<div>' + Number(poolBalance.value).toFixed(2) + ' FMTA</div>' +
                                 '</div>' +
                             '</div>' +
                         '</div>' +
@@ -235,9 +243,15 @@ export default class Home extends React.Component {
 
         await config.fetchNetworkConfig();
 
-        this.displayTokenomics(1, '#ethStats');
-        this.displayTokenomics(56, '#bscStats');
-        this.displayTokenomics(137, '#polyStats');
+        if (config.app.net === 'mainnet') {
+            this.displayTokenomics(1, '#ethStats');
+            this.displayTokenomics(56, '#bscStats');
+            this.displayTokenomics(137, '#polyStats');
+        } else {
+            this.displayTokenomics(4, '#ethStats');
+            this.displayTokenomics(5, '#bscStats');
+            this.displayTokenomics(80001, '#polyStats');
+        }
     }
 
     btnCalc_Clicked = async () => {
