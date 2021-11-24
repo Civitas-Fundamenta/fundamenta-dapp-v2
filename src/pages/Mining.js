@@ -28,7 +28,7 @@ export default class Mining extends React.Component {
                 var tokenContract = new wallet.web3.eth.Contract(config.app.tokenAbi, poolInfo.ContractAddress);
                 var u = await tokenContract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
                 if (!u) u = 0;
-                var unlocked = convert.fromAtomicUnits(u, 18);
+                var unlocked = convert.fromAu(u, 18);
                 var pos = await lpContract.methods.accountPosition(wallet.web3.eth.defaultAccount, poolIndex).call();
                 var l = 0
                 if (!pos)
@@ -36,7 +36,7 @@ export default class Mining extends React.Component {
                 else
                     l = pos._lockedAmount;
 
-                var locked = convert.fromAtomicUnits(l, 18);
+                var locked = convert.fromAu(l, 18);
                 var block = await wallet.web3.eth.getBlockNumber();
                 var lockPeriods = await lpContract.methods.showCurrentLockPeriods().call();
                 var remaining = pos._unlockHeight - block;
@@ -250,7 +250,7 @@ export default class Mining extends React.Component {
         var ok = false;
 
         try {
-            var au = convert.toAtomicUnitsHexPrefixed(amount, 18);
+            var au = convert.toAuHexPrefixed(amount, 18);
             var tx = await lpContract.methods.withdrawAccruedYieldAndAdd(this.currentInfo.poolIndex, au).send({ from: wallet.web3.eth.defaultAccount });
             console.log("Transaction: ", tx);
             ok = tx.status;
@@ -306,7 +306,7 @@ export default class Mining extends React.Component {
 
         try {
             var fmtaToken = await config.getFmtaToken(net);
-            var au = convert.toAtomicUnitsHexPrefixed(amount, fmtaToken.decimals);
+            var au = convert.toAuHexPrefixed(amount, fmtaToken.decimals);
             var tx = await lpContract.methods.addPosition(au, lockPeriod, this.currentInfo.poolIndex).send({ from: wallet.web3.eth.defaultAccount });
             console.log("Transaction: ", tx);
             ok = tx.status;

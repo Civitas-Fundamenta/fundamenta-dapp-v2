@@ -12,8 +12,7 @@ export class LpApprove {
             if (!al)
                 return;
 
-            var allowance = convert.fromAtomicUnits(al, 18).toString();
-            return parseFloat(allowance);
+            return convert.fromAu(al, 18);
         }
         catch (ex)
         {
@@ -27,7 +26,7 @@ export class LpApprove {
         var tokenContract = new wallet.web3.eth.Contract(config.app.tokenAbi, info.ContractAddress);
 
         try {
-            var au2 = convert.toAtomicUnitsHexPrefixed(100000000, 18);
+            var au2 = convert.toAuHexPrefixed(100000000, 18);
             await tokenContract.methods.approve(net.liquidityMining.address, au2).send({ from: wallet.web3.eth.defaultAccount });
         }
         catch (ex)

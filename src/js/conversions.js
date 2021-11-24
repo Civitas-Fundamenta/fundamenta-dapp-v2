@@ -1,48 +1,37 @@
+import BigDecimal from 'js-big-decimal';
+
 export class Conversions {
+    static to8bitHex = (value) => { return ('00' + value.toString(16)).slice(-2); }
+    static to32bitHex = (value) => { return ('00000000' + value.toString(16)).slice(-8); }
 
-    static to8bitHex(value) {
-        return ('00' + value.toString(16)).slice(-2);
-    }
-
-    static to16bitHex(value) {
-        return ('0000' + value.toString(16)).slice(-4);
-    }
-
-    static to32bitHex(value) {
-        return ('00000000' + value.toString(16)).slice(-8);
-    }
-
-    static to64bitHex(value) {
-        return ('0000000000000000' + value.toString(16)).slice(-16);
-    }
-
-    static bin2hex(arr) {
+    static bin2hex = (arr) => {
         var hex = "";
-        for (var i = 0; i < arr.length; i++) {
-            hex += Conversions.to8bitHex(arr[i]);
-        }
-
+        for (var i = 0; i < arr.length; i++)
+            hex += this.to8bitHex(arr[i]);
+    
         return hex;
     }
-
-    static toAtomicUnitsHex(value, decimals) {
+    
+    static fromAuBigDecimal = (value, decimals) => {
         if (isNaN(decimals)) decimals = 18;
-        return (value * Math.pow(10, decimals)).toString(16).padStart(64, '0');
+        return new BigDecimal(value).divide(new BigDecimal(Math.pow(10, decimals)));
     }
 
-    static toAtomicUnitsHexPrefixed(value, decimals) {
+    static fromAu = (value, decimals) => {
         if (isNaN(decimals)) decimals = 18;
-        return `0x${(value * Math.pow(10, decimals)).toString(16).padStart(64, '0')}`;
+        var b = new BigDecimal(value).divide(new BigDecimal(Math.pow(10, decimals)));
+        return Number(b.value);
+    }
+    
+    static toAuHex = (value, decimals) => {
+        if (isNaN(decimals)) decimals = 18;
+        var b = new BigDecimal(value).multiply(new BigDecimal(Math.pow(10, decimals)));
+        return (Number(b.floor().getValue())).toString(16).padStart(64, '0');
     }
 
-    static toAtomicUnits(value, decimals) {
+    static toAuHexPrefixed = (value, decimals) => {
         if (isNaN(decimals)) decimals = 18;
-        return (value * Math.pow(10, decimals));
+        var b = new BigDecimal(value).multiply(new BigDecimal(Math.pow(10, decimals)));
+        return '0x' + (Number(b.floor().getValue())).toString(16).padStart(64, '0');
     }
-
-    static fromAtomicUnits(value, decimals) {
-        if (isNaN(decimals)) decimals = 18;
-        return (value / Math.pow(10, decimals));
-    }
-
 }

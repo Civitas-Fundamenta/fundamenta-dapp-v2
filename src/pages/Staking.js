@@ -9,7 +9,6 @@ import { show, hide, disable, enable } from '../js/ui';
 import { WalletProvider as wallet, WalletProvider } from '../js/walletProvider'
 
 import { MessagePanel as msg, MessagePanelComponent } from '../components/MessagePanel'
-import { Navigation } from '../components/Navigation';
 
 export default class Staking extends React.Component {
     constructor(props) {
@@ -25,7 +24,7 @@ export default class Staking extends React.Component {
             if (wallet.web3.eth.defaultAccount) {
                 var s = await stakingContract.methods.stakeOf(wallet.web3.eth.defaultAccount).call();
                 if (!s) s = 0;
-                stake = convert.fromAtomicUnits(s, 18);
+                stake = convert.fromAu(s, 18);
             }
 
             return stake;
@@ -44,7 +43,7 @@ export default class Staking extends React.Component {
             if (wallet.web3.eth.defaultAccount) {
                 var b = await tokenContract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
                 if (!b) b = 0;
-                balance = convert.fromAtomicUnits(b, 18);
+                balance = convert.fromAu(b, 18);
             }
 
             return balance;
@@ -69,15 +68,15 @@ export default class Staking extends React.Component {
             if (wallet.web3.eth.defaultAccount) {
                 var b = await tokenContract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
                 if (!b) b = 0;
-                balance = convert.fromAtomicUnits(b, 18);
+                balance = convert.fromAu(b, 18);
 
                 var s = await stakingContract.methods.stakeOf(wallet.web3.eth.defaultAccount).call();
                 if (!s) s = 0;
-                stake = convert.fromAtomicUnits(s, 18);
+                stake = convert.fromAu(s, 18);
 
                 var r = await stakingContract.methods.rewardsAccrued().call();
                 if (!r) r = 0;
-                reward = convert.fromAtomicUnits(r, 18);
+                reward = convert.fromAu(r, 18);
             }
 
             return {
@@ -108,12 +107,13 @@ export default class Staking extends React.Component {
         var fmtaToken = await config.getFmtaToken(net);
         msg.clear();
 
-        if (!net || fmtaToken.stakingAddress === Navigation.emptyAddress) {
+        if (!net || !fmtaToken.stakingAddress) {
             this.disableNavBar();
             this.hideAllTabs();
             $("#lblBalance").text("0.00");
             $("#lblStake").text("0.00");
             $("#lblReward").text("0.00");
+            msg.showWarn("Staking is not available on this network");
             return;
         }
 
@@ -294,7 +294,7 @@ export default class Staking extends React.Component {
         var fmtaToken = await config.getFmtaToken(net);
 
         var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, fmtaToken.stakingAddress);
-        var au = convert.toAtomicUnitsHexPrefixed(amount, fmtaToken.decimals);
+        var au = convert.toAuHexPrefixed(amount, fmtaToken.decimals);
 
         msg.clear();
         msg.showWarn("Processing. Please wait...");
@@ -345,7 +345,7 @@ export default class Staking extends React.Component {
         var fmtaToken = await config.getFmtaToken(net);
 
         var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, fmtaToken.stakingAddress);
-        var au = convert.toAtomicUnitsHexPrefixed(amount, fmtaToken.decimals);
+        var au = convert.toAuHexPrefixed(amount, fmtaToken.decimals);
 
         msg.clear();
         msg.showWarn("Processing. Please wait...");

@@ -37,10 +37,11 @@ export class UiCommon {
             if (!bal)
                 bal = 0;
 
-            var balance = convert.fromAtomicUnits(bal, token.decimals).toString();
+            var balance = convert.fromAu(bal, token.decimals)
 
-            $("#amount").attr('placeholder', `Enter amount (max ${balance})`);
-            return parseFloat(balance);
+            $("#amount").attr('placeholder', `Enter amount (max ${balance.toString()})`);
+
+            return balance;
         }
     }
 

@@ -48,11 +48,11 @@ export default class NFT extends React.Component {
 
         var req = await minterContract.methods.fmtaNeeded().call();
         if (!req) req = 0;
-        var required = convert.fromAtomicUnits(req, 18).toString();
+        var required = convert.fromAu(req, 18).toString();
 
         var bal = await tokenContract.methods.balanceOf(wallet.web3.eth.defaultAccount).call();
         if (!bal) bal = 0;
-        var balance = convert.fromAtomicUnits(bal, 18).toString();
+        var balance = convert.fromAu(bal, 18).toString();
 
         if (balance < required)
         {

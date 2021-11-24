@@ -52,7 +52,7 @@ export default class Unwrap extends React.Component {
         var ok = false;
 
         try {
-            var au = convert.toAtomicUnitsHexPrefixed(amount, data.token.decimals);
+            var au = convert.toAuHexPrefixed(amount, data.token.decimals);
             var tx = await contract.methods.unwrap(au).send({ from: wallet.web3.eth.defaultAccount });
             console.log("Transaction: ", tx);
             ok = tx.status;

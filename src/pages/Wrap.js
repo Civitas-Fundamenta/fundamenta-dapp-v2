@@ -31,8 +31,7 @@ export default class Wrap extends React.Component {
             if (!al)
                 return 0;
 
-            var allowance = convert.fromAtomicUnits(al, token.decimals).toString();
-            return parseFloat(allowance);
+            return convert.fromAu(al, token.decimals).toString();
         }
     }
 
@@ -75,7 +74,7 @@ export default class Wrap extends React.Component {
         try {
             var allowance = await this.getTokenAllowance();
             if (allowance < amount) {
-                var au2 = convert.toAtomicUnitsHexPrefixed(100000000, data.token.decimals);
+                var au2 = convert.toAuHexPrefixed(100000000, data.token.decimals);
                 var at = await tContract.methods.approve(data.token.address, au2).send({ from: wallet.web3.eth.defaultAccount });
                 console.log("Transaction: ", at);
                 ok = at.status;
@@ -89,7 +88,7 @@ export default class Wrap extends React.Component {
 
         if (ok) {
             try {
-                var au = convert.toAtomicUnitsHexPrefixed(amount, data.token.decimals);
+                var au = convert.toAuHexPrefixed(amount, data.token.decimals);
                 var tx = await wtContract.methods.wrap(au).send({ from: wallet.web3.eth.defaultAccount });
                 console.log("Transaction: ", tx);
                 ok = tx.status;
