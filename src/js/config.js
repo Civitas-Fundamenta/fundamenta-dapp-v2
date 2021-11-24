@@ -18,7 +18,7 @@ export class Config {
         serverCount: 10,
         serverDomain: "civiport.online",
         confTime: 12,
-        withdrawEventHash: "0xf041d18460e8444b78f944ad4de3c6cf13f1912a1eb46f4c8de656fb627b4733",
+        withdrawEventHash: "0xc1a6280eefe33f118e2ab28074ac0a44f953d5e5101c755bf744881a5a812434",
         resourceUrl: "cp3.civiport.online",
         holder0: "0xA4dda4EDfB34222063c77DFE2F50B30f5DF39870",
         holder1: "0xa0b72536ba6496aec721400b5f0e1e65caf4be77",
@@ -27,11 +27,6 @@ export class Config {
         bridgeAbi: [
             {
                 "inputs": [
-                    {
-                        "internalType": "bytes",
-                        "name": "clientSignature",
-                        "type": "bytes"
-                    },
                     {
                         "internalType": "bytes[]",
                         "name": "serverSignatures",
@@ -53,19 +48,38 @@ export class Config {
             {
                 "inputs": [
                     {
-                        "internalType": "bytes",
-                        "name": "clientSignature",
-                        "type": "bytes"
+                        "internalType": "uint256",
+                        "name": "nonce",
+                        "type": "uint256"
                     },
                     {
-                        "internalType": "bytes",
-                        "name": "transactionData",
-                        "type": "bytes"
+                        "internalType": "uint256",
+                        "name": "srcNetwork",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "destNetwork",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "tokenId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
                     }
                 ],
                 "name": "withdraw",
                 "outputs": [
-
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
                 ],
                 "stateMutability": "nonpayable",
                 "type": "function"

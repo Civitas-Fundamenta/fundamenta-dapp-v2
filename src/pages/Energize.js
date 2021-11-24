@@ -49,7 +49,7 @@ export default class Energize extends React.Component {
                 return;
             }
 
-            this.recoveredTeleport = await this.recoverTeleport(tx);
+            this.recoveredTeleport = await Energizer.recover(tx);
             console.log(this.recoveredTeleport);
 
             if (!this.recoveredTeleport) {
@@ -68,56 +68,6 @@ export default class Energize extends React.Component {
                 wallet.switchNetwork(this.recoveredTeleport.destination.chainId);
             }
         }
-    }
-
-    async recoverTeleport(txHash) {
-        console.log("Attempting recovery:", txHash);
-        var receipt = await wallet.web3.eth.getTransactionReceipt(txHash);
-
-        if (!receipt) {
-            console.log("Receipt not found");
-            return;
-        }
-
-        var blockNumber = receipt.blockNumber.toString(16);
-
-        var sn, dn, st, dt, sender, amount, nonce;
-
-        $.each(receipt.logs, async function () {
-            if (this.topics[0] === config.app.withdrawEventHash) {
-                var data = this.data.slice(2);
-
-                sender = data.slice(24, 64);
-
-                sn = data.slice(120, 128);
-                st = data.slice(188, 192);
-                amount = data.slice(192);
-
-                nonce = this.topics[1].slice(2);
-                dn = this.topics[2].slice(58);
-                dt = this.topics[3].slice(62);
-
-                return false;
-            }
-        });
-
-        var address = sender.toString().slice(-40).padStart(64, 0);
-
-        var transactionData = '0x' + amount + sn + dn + st + dt + address + nonce;
-
-        var did = parseInt(dn, 16);
-        var tid = parseInt(dt, 16);
-
-        var destination = await config.getFromMap(did);
-        var destinationToken = await config.getToken(destination, tid);
-
-        return {
-            txHash,
-            blockNumber,
-            transactionData,
-            destination,
-            destinationToken
-        };
     }
 
     componentDidMount() {
@@ -163,22 +113,7 @@ export default class Energize extends React.Component {
 
         $("#button").on('click', async () => {
             msg.clear();
-            disable("#form");
-            msg.showWarn("Requesting signature...");
-
             console.log("Transaction Data:", this.recoveredTeleport.transactionData);
-
-            try {
-                var signature = await wallet.web3.eth.personal.sign(this.recoveredTeleport.transactionData, wallet.web3.eth.defaultAccount);
-                this.recoveredTeleport.signature = signature;
-            }
-            catch
-            {
-                msg.clear();
-                enable("#form");
-                msg.showError("Transaction signing failed");
-                return;
-            }
 
             this.cancellationToken = new CancellationToken();
             var energizer = new Energizer(this.recoveredTeleport, this.cancellationToken);
@@ -197,7 +132,7 @@ export default class Energize extends React.Component {
                 msg.showWarn("Energize confirmed. Processing transaction...");
                 try {
                     var destBridgeContract = new wallet.web3.eth.Contract(config.app.bridgeAbi, energizer.teleport.destination.bridge);
-                    var tx = await destBridgeContract.methods.deposit(energizer.teleport.signature, serverSignatures, energizer.teleport.transactionData).send({ from: wallet.web3.eth.defaultAccount });
+                    var tx = await destBridgeContract.methods.deposit(serverSignatures, energizer.teleport.transactionData).send({ from: wallet.web3.eth.defaultAccount });
                     console.log("Transaction:", tx);
                     enable("#form");
                     msg.clear();

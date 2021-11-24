@@ -10,8 +10,6 @@ import { WalletProvider as wallet } from '../js/walletProvider'
 
 export class Navigation extends React.Component {
 
-    static emptyAddress = "0x0000000000000000000000000000000000000000";
-
     //static #_toggleNetworkWarningLock = false;
 
     static async toggleNetworkWarning() {
