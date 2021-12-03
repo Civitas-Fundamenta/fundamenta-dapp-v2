@@ -54,11 +54,6 @@ export class Config {
                     },
                     {
                         "internalType": "uint256",
-                        "name": "srcNetwork",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
                         "name": "destNetwork",
                         "type": "uint256"
                     },

@@ -297,7 +297,7 @@ export default class Teleport extends React.Component {
             try {
                 msg.showWarn('Processing teleport. Please wait...');
                 var sourceBridgeContract = new wallet.web3.eth.Contract(config.app.bridgeAbi, source.bridge);
-                var withdrawTx = await sourceBridgeContract.methods.withdraw(this.createNonce(), source.chainId, destination.chainId, destinationToken.id, '0x' + amountAtomicUnitsHex).send({ from: wallet.web3.eth.defaultAccount });
+                var withdrawTx = await sourceBridgeContract.methods.withdraw(this.createNonce(), destination.chainId, destinationToken.id, '0x' + amountAtomicUnitsHex).send({ from: wallet.web3.eth.defaultAccount });
                 console.log('Withdraw: ', withdrawTx);
 
                 this.completedTeleport = await Energizer.recover(withdrawTx.transactionHash);
