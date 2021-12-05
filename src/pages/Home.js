@@ -28,6 +28,8 @@ export default class Home extends React.Component {
 
             var fmtaToken = await config.getFmtaToken(this);
 
+            ++counter;
+
             if (fmtaToken) {
                 var web3 = new Web3(new Web3.providers.HttpProvider(this.rpc));
                 web3.eth.defaultAccount = wallet.web3.eth.defaultAccount;
@@ -37,7 +39,6 @@ export default class Home extends React.Component {
 
                 networkNames += '<div>' + this.name +':&nbsp;</div>';
                 balances += '<div>' + balance.toFixed(2) + ' FMTA</div>'
-                ++counter;
             }
 
             if (counter === netCount)
@@ -166,7 +167,7 @@ export default class Home extends React.Component {
                 var bal2 = await fmtaContract.methods.balanceOf(config.app.holder2).call();
                 var balance2 = convert.fromAuBigDecimal(bal2, 18);
 
-                exclude = balance0 + balance1 + balance2;
+                exclude = balance0.add(balance1).add(balance2);
 
                 var poolInfo1 = await lpContract.methods.poolInfo(1).call();
                 var poolBalance1 = convert.fromAuBigDecimal(poolInfo1.TotalRewardsPaidByPool, 18);
@@ -177,7 +178,7 @@ export default class Home extends React.Component {
                 //0xB187c8E40b46Ae8fc19A6cC24bb60320a73b9abD
                 var oldPoolBalance1 = new BigDecimal(98566.84);
 
-                poolBalance += (poolBalance1 + oldPoolBalance0 + oldPoolBalance1);
+                poolBalance = poolBalance.add(poolBalance1).add(oldPoolBalance0).add(oldPoolBalance1);
             }
 
             var totalStaked = new BigDecimal(0);
@@ -199,12 +200,12 @@ export default class Home extends React.Component {
 
             var mc = new BigDecimal(0);
             
-            if (config.app.net === 'mainnet')
-                mc = circulating.multiply(Home.prices.fundamenta.usd.toString());
+            if (config.app.net === 'mainnet' || config.app.net === 'mainnet.next')
+                mc = circulating.multiply(new BigDecimal(Home.prices.fundamenta.usd.toString()));
 
             $(container).html(
                 '<form class="card mb-3 border border-primary shadow">' +
-                    '<div class="card-header">' + net.name + ' supply</div>' +
+                    '<div class="card-header">' + net.name + '</div>' +
                     '<div className="card-body">' +
                         '<div class="ps-3 pt-3">' +
                             '<div class="d-flex pb-3">' +
@@ -243,10 +244,11 @@ export default class Home extends React.Component {
 
         await config.fetchNetworkConfig();
 
-        if (config.app.net === 'mainnet') {
+        if (config.app.net === 'mainnet' || config.app.net === 'mainnet.next') {
             this.displayTokenomics(1, '#ethStats');
             this.displayTokenomics(56, '#bscStats');
             this.displayTokenomics(137, '#polyStats');
+            this.displayTokenomics(25, '#croStats');
         } else {
             this.displayTokenomics(4, '#ethStats');
             this.displayTokenomics(5, '#bscStats');
@@ -327,6 +329,7 @@ export default class Home extends React.Component {
                         <div id="ethStats" />
                         <div id="bscStats" />
                         <div id="polyStats" />
+                        <div id="croStats" />
                         <div>
                             <form autoComplete="off" className="card border border-primary shadow">
                                 <div className="card-header">Stake Calculator</div>
