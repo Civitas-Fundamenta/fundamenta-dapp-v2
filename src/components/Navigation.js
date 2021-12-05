@@ -101,7 +101,7 @@ export class Navigation extends React.Component {
 
     _btnS_clicked = async () => {
 
-        if (config.app.net === "mainnet") {
+        if (config.app.net === 'mainnet' || config.app.net === 'mainnet.next') {
             hide('#testnetSwitch');
             show('#mainnetSwitch');
             hide("#_aNetChange");

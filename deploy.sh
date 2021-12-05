@@ -3,8 +3,10 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 reset
 
+rm -rf ${dir}/build
+
 source ${dir}/credentials
-server=${servers[2]}
+server=${servers[1]}
 
 function _deploy_file() {
     HOST=$1
