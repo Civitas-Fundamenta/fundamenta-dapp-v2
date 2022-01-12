@@ -248,10 +248,9 @@ export default class Home extends React.Component {
             this.displayTokenomics(1, '#ethStats');
             this.displayTokenomics(56, '#bscStats');
             this.displayTokenomics(137, '#polyStats');
-            this.displayTokenomics(25, '#croStats');
+            this.displayTokenomics(43114, '#avaxStats');
         } else {
             this.displayTokenomics(4, '#ethStats');
-            this.displayTokenomics(5, '#bscStats');
             this.displayTokenomics(80001, '#polyStats');
         }
     }
@@ -329,7 +328,7 @@ export default class Home extends React.Component {
                         <div id="ethStats" />
                         <div id="bscStats" />
                         <div id="polyStats" />
-                        <div id="croStats" />
+                        <div id="avaxStats" />
                         <div>
                             <form autoComplete="off" className="card border border-primary shadow">
                                 <div className="card-header">Stake Calculator</div>

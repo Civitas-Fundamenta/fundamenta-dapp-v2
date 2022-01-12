@@ -18,6 +18,7 @@ export class WalletProvider {
         [5, "https://goerli.etherscan.io"],
         [56, "https://bscscan.com"],
         [137, "https://polygonscan.com"],
+        [43114, "https://snowtrace.io"],
         [80001, "https://mumbai.polygonscan.com"]
     ]);
 
@@ -27,6 +28,7 @@ export class WalletProvider {
         [5, "https://goerli.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
         [56, "https://bsc-dataseed.binance.org/"],
         [137, "https://nameless-spring-thunder.matic.quiknode.pro/"],
+        [43114, "https://api.avax.network/ext/bc/C/rpc"],
         [80001, "https://polygon-mumbai.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"]
     ]);
 
@@ -79,6 +81,7 @@ export class WalletProvider {
                 5: this.rpcUrls.get(5),
                 56: this.rpcUrls.get(56),
                 137: this.rpcUrls.get(137),
+                43114: this.rpcUrls.get(43114),
                 80001: this.rpcUrls.get(8001),
             },
             chainId: config.app.net === "testnet" ? 4 : 1

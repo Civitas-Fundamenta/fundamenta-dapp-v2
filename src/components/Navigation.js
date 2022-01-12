@@ -115,6 +115,9 @@ export class Navigation extends React.Component {
             enable('#_btnPoly');
             $('#_btnPoly').text("POLYGON");
 
+            enable('#_btnAvax');
+            $('#_btnAvax').text("AVALANCHE");
+
             if (wallet.chainId === 1) {
                 disable('#_btnEth');
                 $('#_btnEth').text("ETHEREUM (Current)");
@@ -126,6 +129,10 @@ export class Navigation extends React.Component {
             else if (wallet.chainId === 137) {
                 disable('#_btnPoly');
                 $('#_btnPoly').text("POLYGON (Current)");
+            }
+            else if (wallet.chainId === 43114) {
+                disable('#_btnAvax');
+                $('#_btnPoly').text("AVALANCHE (Current)");
             }
         }
         else
@@ -339,6 +346,13 @@ export class Navigation extends React.Component {
                                         await wallet.addMetamaskChain(137);
                                         await wallet.switchNetwork(137);
                                     }}>Polygon</button>
+
+                                <button id="_btnAvax" className="round btn btn-outline-secondary p-3 mb-3 w-100"
+                                    onClick={async () => {
+                                        $("#_btnAvax").text('Sending request...');
+                                        await wallet.addMetamaskChain(43114);
+                                        await wallet.switchNetwork(43114);
+                                    }}>Avalanche</button>
                                 <br />
                             </div>
                             <div id="testnetSwitch" className="modal-body">
