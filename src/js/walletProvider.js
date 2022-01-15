@@ -16,8 +16,11 @@ export class WalletProvider {
         [1, "https://etherscan.io"],
         [4, "https://rinkeby.etherscan.io"],
         [5, "https://goerli.etherscan.io"],
+        [25, "https://cronos.crypto.org/explorer"],
         [56, "https://bscscan.com"],
+        [100, "https://blockscout.com/xdai/mainnet"],
         [137, "https://polygonscan.com"],
+        [250, "https://ftmscan.com"],
         [43114, "https://snowtrace.io"],
         [80001, "https://mumbai.polygonscan.com"]
     ]);
@@ -26,8 +29,11 @@ export class WalletProvider {
         [1, "https://mainnet.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
         [4, "https://rinkeby.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
         [5, "https://goerli.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
+        [25, "https://evm-cronos.crypto.org"],
         [56, "https://bsc-dataseed.binance.org/"],
+        [100, "https://rpc.xdaichain.com"],
         [137, "https://nameless-spring-thunder.matic.quiknode.pro/"],
+        [250, "https://rpc.ftm.tools"],
         [43114, "https://api.avax.network/ext/bc/C/rpc"],
         [80001, "https://polygon-mumbai.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"]
     ]);
@@ -79,8 +85,11 @@ export class WalletProvider {
                 1: this.rpcUrls.get(1),
                 4: this.rpcUrls.get(4),
                 5: this.rpcUrls.get(5),
+                25: this.rpcUrls.get(25),
                 56: this.rpcUrls.get(56),
+                100: this.rpcUrls.get(100),
                 137: this.rpcUrls.get(137),
+                250: this.rpcUrls.get(250),
                 43114: this.rpcUrls.get(43114),
                 80001: this.rpcUrls.get(8001),
             },

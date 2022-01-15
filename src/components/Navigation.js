@@ -118,6 +118,15 @@ export class Navigation extends React.Component {
             enable('#_btnAvax');
             $('#_btnAvax').text("AVALANCHE");
 
+            enable('#_btnXdai');
+            $('#_btnXdai').text("GNOSIS CHAIN");
+
+            enable('#_btnFtm');
+            $('#_btnFtm').text("FANTOM");
+
+            enable('#_btnCro');
+            $('#_btnCro').text("CRONOS");
+
             if (wallet.chainId === 1) {
                 disable('#_btnEth');
                 $('#_btnEth').text("ETHEREUM (Current)");
@@ -132,11 +141,22 @@ export class Navigation extends React.Component {
             }
             else if (wallet.chainId === 43114) {
                 disable('#_btnAvax');
-                $('#_btnPoly').text("AVALANCHE (Current)");
+                $('#_btnAvax').text("AVALANCHE (Current)");
+            }
+            else if (wallet.chainId === 100) {
+                disable('#_btnXdai');
+                $('#_btnXdai').text("GNOSIS CHAIN (Current)");
+            }
+            else if (wallet.chainId === 250) {
+                disable('#_btnFtm');
+                $('#_btnFtm').text("FANTOM (Current)");
+            }
+            else if (wallet.chainId === 25) {
+                disable('#_btnCro');
+                $('#_btnCro').text("CRONOS (Current)");
             }
         }
-        else
-        {
+        else {
             show('#testnetSwitch');
             hide('#mainnetSwitch');
             hide("#_aNetChange");
@@ -167,7 +187,7 @@ export class Navigation extends React.Component {
         this.openNetworkSelectModal();
     }
 
-    
+
 
     _wc_clicked = async () => {
         try {
@@ -353,6 +373,27 @@ export class Navigation extends React.Component {
                                         await wallet.addMetamaskChain(43114);
                                         await wallet.switchNetwork(43114);
                                     }}>Avalanche</button>
+
+                                <button id="_btnXdai" className="round btn btn-outline-secondary p-3 mb-3 w-100"
+                                    onClick={async () => {
+                                        $("#_btnXdai").text('Sending request...');
+                                        await wallet.addMetamaskChain(100);
+                                        await wallet.switchNetwork(100);
+                                    }}>Gnosis Chain</button>
+
+                                <button id="_btnFtm" className="round btn btn-outline-secondary p-3 mb-3 w-100"
+                                    onClick={async () => {
+                                        $("#_btnFtm").text('Sending request...');
+                                        await wallet.addMetamaskChain(250);
+                                        await wallet.switchNetwork(250);
+                                    }}>Fantom</button>
+
+                                <button id="_btnCro" className="round btn btn-outline-secondary p-3 mb-3 w-100"
+                                    onClick={async () => {
+                                        $("#_btnCro").text('Sending request...');
+                                        await wallet.addMetamaskChain(25);
+                                        await wallet.switchNetwork(25);
+                                    }}>Cronos</button>
                                 <br />
                             </div>
                             <div id="testnetSwitch" className="modal-body">
