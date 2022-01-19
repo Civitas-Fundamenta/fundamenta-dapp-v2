@@ -26,13 +26,13 @@ export class WalletProvider {
     ]);
 
     static rpcUrls = new Map([
-        [1, "https://mainnet.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
+        [1, "http://184.67.59.54:8545"],
         [4, "https://rinkeby.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
         [5, "https://goerli.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
         [25, "https://evm-cronos.crypto.org"],
         [56, "https://bsc-dataseed.binance.org/"],
         [100, "https://rpc.xdaichain.com"],
-        [137, "https://nameless-spring-thunder.matic.quiknode.pro/"],
+        [137, "https://polygon-rpc.com"],
         [250, "https://rpc.ftm.tools"],
         [43114, "https://api.avax.network/ext/bc/C/rpc"],
         [80001, "https://polygon-mumbai.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"]
