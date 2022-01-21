@@ -29,13 +29,10 @@ export default class Home extends React.Component {
 
             var fmtaToken = await config.getFmtaToken(this);
 
-            console.log(this);
-
             ++counter;
 
             if (fmtaToken) {
                 var web3 = new Web3(new Web3.providers.HttpProvider(this.rpc));
-                console.log(wallet.web3);
                 web3.eth.defaultAccount = wallet.web3.eth.defaultAccount;
 
                 var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, fmtaToken.address);

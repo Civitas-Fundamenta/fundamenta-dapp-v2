@@ -18,6 +18,9 @@ export default class Staking extends React.Component {
 
     async getStake(network) {
         try {
+            if (!wallet.web3)
+                return;
+                
             var fmtaToken = await config.getFmtaToken(network);
             var stake = 0;
             var stakingContract = new wallet.web3.eth.Contract(config.app.stakeAbi, fmtaToken.stakingAddress);
@@ -37,6 +40,9 @@ export default class Staking extends React.Component {
 
     async getBalance(network) {
         try {
+            if (!wallet.web3)
+                return;
+
             var fmtaToken = await config.getFmtaToken(network);
             var balance = 0;
             var tokenContract = new wallet.web3.eth.Contract(config.app.tokenAbi, fmtaToken.address);
@@ -56,6 +62,9 @@ export default class Staking extends React.Component {
 
     async getBalances(network) {
         try {
+            if (!wallet.web3)
+                return;
+
             var stake = 0;
             var balance = 0;
             var reward = 0;
