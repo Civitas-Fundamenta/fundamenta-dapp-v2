@@ -249,7 +249,7 @@ export default class Home extends React.Component {
             this.displayTokenomics(56, '#bscStats');
             this.displayTokenomics(137, '#polyStats');
             this.displayTokenomics(43114, '#avaxStats');
-            this.displayTokenomics(100, '#xdaiStats');
+            //this.displayTokenomics(100, '#xdaiStats');
             this.displayTokenomics(250, '#ftmStats');
             this.displayTokenomics(25, '#croStats');
         } else {
@@ -332,7 +332,7 @@ export default class Home extends React.Component {
                         <div id="bscStats" />
                         <div id="polyStats" />
                         <div id="avaxStats" />
-                        <div id="xdaiStats" />
+                        {/*<div id="xdaiStats" />*/}
                         <div id="ftmStats" />
                         <div id="croStats" />
                         <div>

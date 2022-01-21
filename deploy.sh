@@ -6,7 +6,6 @@ reset
 rm -rf ${dir}/build
 
 source ${dir}/credentials
-server=${servers[1]}
 
 function _deploy_file() {
     HOST=$1
@@ -37,7 +36,7 @@ files=(
 )
 
 for i in "${files[@]}"; do
-    _deploy_file ${server} "build/$i" "/var/www/html/$i"
+    _deploy_file ${SERVER} "build/$i" "/var/www/html/$i"
 done
 
-_deploy_directory ${server} "build/static" "/var/www/html"
+_deploy_directory ${SERVER} "build/static" "/var/www/html"

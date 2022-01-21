@@ -26,7 +26,7 @@ export class WalletProvider {
     ]);
 
     static rpcUrls = new Map([
-        [1, "http://184.67.59.54:8545"],
+        [1, "https://mainnet.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
         [4, "https://rinkeby.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
         [5, "https://goerli.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"],
         [25, "https://evm-cronos.crypto.org"],
