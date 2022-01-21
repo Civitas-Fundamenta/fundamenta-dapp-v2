@@ -33,7 +33,7 @@ export class WalletProvider {
         [56, "https://bsc-dataseed.binance.org/"],
         [100, "https://rpc.xdaichain.com"],
         [137, "https://polygon-rpc.com"],
-        [250, "https://rpc.ftm.tools"],
+        [250, "https://rpc.ftm.tools/"],
         [43114, "https://api.avax.network/ext/bc/C/rpc"],
         [80001, "https://polygon-mumbai.infura.io/v3/9354d2b6c5ee45c2a4036efd7b617783"]
     ]);

@@ -14,9 +14,10 @@ export default class Home extends React.Component {
 
     static prices = null;
 
-    async displayUserBalances()
-    {
-        if (!wallet.isConnected) return;
+    async displayUserBalances() {
+        if (!wallet.isConnected()) return;
+        if (!wallet.web3) return;
+        if (!wallet.web3.eth) return;
 
         var networkNames = '';
         var balances = '';
@@ -28,47 +29,50 @@ export default class Home extends React.Component {
 
             var fmtaToken = await config.getFmtaToken(this);
 
+            console.log(this);
+
             ++counter;
 
             if (fmtaToken) {
                 var web3 = new Web3(new Web3.providers.HttpProvider(this.rpc));
+                console.log(wallet.web3);
                 web3.eth.defaultAccount = wallet.web3.eth.defaultAccount;
+
                 var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, fmtaToken.address);
                 var bal = await fmtaContract.methods.balanceOf(web3.eth.defaultAccount).call();
                 var balance = convert.fromAu(bal, 18);
 
-                networkNames += '<div>' + this.name +':&nbsp;</div>';
-                balances += '<div>' + balance.toFixed(2) + ' FMTA</div>'
+                networkNames += '<div>' + this.name + ':&nbsp;</div>';
+                balances += '<div>' + balance.toFixed(2) + ' FMTA</div>';
             }
 
-            if (counter === netCount)
-            {
+            if (counter === netCount) {
                 var balanceCard =
-                '<form class="card mb-3 border border-primary shadow">' +
+                    '<form class="card mb-3 border border-primary shadow">' +
                     '<div class="card-header">Balances</div>' +
                     '<div className="card-body">' +
-                        '<div class="ps-3 pt-3">' +
-                            '<div class="d-flex pb-3">' +
-                                '<div class="text-end text-body">' +
-                                    networkNames +
-                                '</div>' +
-                                '<div class="text-start text-body">' +
-                                    balances +
-                                '</div>' +
-                            '</div>' +
-                        '</div>' +
+                    '<div class="ps-3 pt-3">' +
+                    '<div class="d-flex pb-3">' +
+                    '<div class="text-end text-body">' +
+                    networkNames +
                     '</div>' +
-                '</form>'
+                    '<div class="text-start text-body">' +
+                    balances +
+                    '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</form>'
 
                 $("#balances").html(balanceCard);
             }
         });
     }
 
-    async displayUserStakes()
-    {
-        if (!wallet.isConnected) return;
+    async displayUserStakes() {
+        if (!wallet.isConnected()) return;
         if (!wallet.web3) return;
+        if (!wallet.web3.eth) return;
 
         var networkNames = '';
         var balances = '';
@@ -77,7 +81,7 @@ export default class Home extends React.Component {
         var counter = 0;
 
         $.each(config.networkMap, async function () {
-            
+
             var fmtaToken = await config.getFmtaToken(this);
 
             ++counter;
@@ -92,63 +96,58 @@ export default class Home extends React.Component {
                     var stakingContract = new web3.eth.Contract(config.app.stakeAbi, fmtaToken.stakingAddress);
                     var bal = await stakingContract.methods.stakeOf(web3.eth.defaultAccount).call();
                     var r = await stakingContract.methods.rewardsAccrued().call();
-                    
+
                     balance = convert.fromAu(bal, 18);
                     reward = convert.fromAu(r, 18);
                 }
 
-                networkNames += '<div>' + this.name +':&nbsp;</div>';
+                networkNames += '<div>' + this.name + ':&nbsp;</div>';
                 balances += '<div>' + balance.toFixed(2) + ' (' + reward.toFixed(2) + ') FMTA</div>'
             }
 
-            if (counter === netCount)
-            {
+            if (counter === netCount) {
                 var balanceCard =
-                '<form class="card mb-3 border border-primary shadow">' +
+                    '<form class="card mb-3 border border-primary shadow">' +
                     '<div class="card-header">Stakes</div>' +
                     '<div className="card-body">' +
-                        '<div class="ps-3 pt-3">' +
-                            '<div class="d-flex pb-3">' +
-                                '<div class="text-end text-body">' +
-                                    networkNames +
-                                '</div>' +
-                                '<div class="text-start text-body">' +
-                                    balances +
-                                '</div>' +
-                            '</div>' +
-                        '</div>' +
+                    '<div class="ps-3 pt-3">' +
+                    '<div class="d-flex pb-3">' +
+                    '<div class="text-end text-body">' +
+                    networkNames +
                     '</div>' +
-                '</form>'
+                    '<div class="text-start text-body">' +
+                    balances +
+                    '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</form>'
 
                 $("#stakes").html(balanceCard);
             }
         });
     }
 
-    async displayTokenomics(chainId, container)
-    {
+    async displayTokenomics(chainId, container) {
         var net = await config.getFromMap(chainId);
 
         if (!net) return;
 
         var fmtaToken = await config.getFmtaToken(net);
 
-        if (fmtaToken)
-        {
+        if (fmtaToken) {
             var web3 = new Web3(new Web3.providers.HttpProvider(net.rpc));
 
             var fmtaContract = new web3.eth.Contract(config.app.tokenAbi, fmtaToken.address);
             var stakingContract = new web3.eth.Contract(config.app.stakeAbi, fmtaToken.stakingAddress);
             var lpContract = undefined;
-            
+
             var poolBalance0 = new BigDecimal(0);
 
-            if (net.liquidityMining)
-            {
+            if (net.liquidityMining) {
                 lpContract = new web3.eth.Contract(config.app.miningAbi, net.liquidityMining.address);
 
-                if (net.liquidityMining.address)
-                {
+                if (net.liquidityMining.address) {
                     var poolInfo0 = await lpContract.methods.poolInfo(0).call();
                     poolBalance0 = convert.fromAuBigDecimal(poolInfo0.TotalRewardsPaidByPool, 18);
                 }
@@ -184,8 +183,7 @@ export default class Home extends React.Component {
             var totalStaked = new BigDecimal(0);
             var stakeRewards = new BigDecimal(0);
 
-            if (fmtaToken.stakingAddress)
-            {
+            if (fmtaToken.stakingAddress) {
                 totalStaked = convert.fromAuBigDecimal(await stakingContract.methods.totalStakes().call());
                 stakeRewards = convert.fromAuBigDecimal(await stakingContract.methods.totalRewardsPaid().call());
             }
@@ -199,40 +197,39 @@ export default class Home extends React.Component {
             var circulating = totalSupply.add(totalStaked).subtract(exclude);
 
             var mc = new BigDecimal(0);
-            
+
             if (config.app.net === 'mainnet' || config.app.net === 'mainnet.next')
                 mc = circulating.multiply(new BigDecimal(Home.prices.fundamenta.usd.toString()));
 
             $(container).html(
                 '<form class="card mb-3 border border-primary shadow">' +
-                    '<div class="card-header">' + net.name + '</div>' +
-                    '<div className="card-body">' +
-                        '<div class="ps-3 pt-3">' +
-                            '<div class="d-flex pb-3">' +
-                                '<div class="text-end text-body">' +
-                                    '<div>Circulating:&nbsp;</div>' +
-                                    '<div>Staked:&nbsp;</div>' +
-                                    '<div>Market Cap:&nbsp;</div>' +
-                                    '<div>Stake Rewards:&nbsp;</div>' +
-                                    '<div>LP Rewards:&nbsp;</div>' +
-                                '</div>' +
-                                '<div class="text-start text-body">' +
-                                    '<div>' + Number(circulating.value).toFixed(2) + ' FMTA</div>' +
-                                    '<div>' + Number(totalStaked.value).toFixed(2) + ' FMTA</div>' +
-                                    '<div>' + Number(mc.value).toFixed(2) + ' USD</div>' +
-                                    '<div>' + Number(stakeRewards.value).toFixed(2) + ' FMTA</div>' +
-                                    '<div>' + Number(poolBalance.value).toFixed(2) + ' FMTA</div>' +
-                                '</div>' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>' +
+                '<div class="card-header">' + net.name + '</div>' +
+                '<div className="card-body">' +
+                '<div class="ps-3 pt-3">' +
+                '<div class="d-flex pb-3">' +
+                '<div class="text-end text-body">' +
+                '<div>Circulating:&nbsp;</div>' +
+                '<div>Staked:&nbsp;</div>' +
+                '<div>Market Cap:&nbsp;</div>' +
+                '<div>Stake Rewards:&nbsp;</div>' +
+                '<div>LP Rewards:&nbsp;</div>' +
+                '</div>' +
+                '<div class="text-start text-body">' +
+                '<div>' + Number(circulating.value).toFixed(2) + ' FMTA</div>' +
+                '<div>' + Number(totalStaked.value).toFixed(2) + ' FMTA</div>' +
+                '<div>' + Number(mc.value).toFixed(2) + ' USD</div>' +
+                '<div>' + Number(stakeRewards.value).toFixed(2) + ' FMTA</div>' +
+                '<div>' + Number(poolBalance.value).toFixed(2) + ' FMTA</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
                 '</form>'
             );
         }
     }
 
-    async displayNetworkStats()
-    {
+    async displayNetworkStats() {
         var priceUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=fundamenta&vs_currencies=usd&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false'
 
         Home.prices = await $.ajax({
@@ -263,8 +260,7 @@ export default class Home extends React.Component {
         var amount = parseFloat($("#amount").val());
         var time = parseFloat($("#time").val());
 
-        if (isNaN(amount) || isNaN(time) || amount === 0 || time === 0)
-        {
+        if (isNaN(amount) || isNaN(time) || amount === 0 || time === 0) {
             msg.showError("Invalid amounts entered");
         }
 
@@ -279,8 +275,7 @@ export default class Home extends React.Component {
             var em = new EventEmitter();
 
             em.on('connect', async () => {
-                if (wallet.web3.eth.defaultAccount !== null)
-                {
+                if (wallet.web3 !== null && wallet.web3.eth.defaultAccount !== null) {
                     await this.displayUserBalances();
                     await this.displayUserStakes();
                 }
@@ -294,8 +289,7 @@ export default class Home extends React.Component {
             });
 
             em.on('accountsChanged', async (accounts) => {
-                if (wallet.web3.eth.defaultAccount !== null)
-                {
+                if (wallet.web3 !== null && wallet.web3.eth.defaultAccount !== null) {
                     await this.displayUserBalances();
                     await this.displayUserStakes();
                 }
@@ -304,8 +298,7 @@ export default class Home extends React.Component {
             });
 
             em.on('chainChanged', async () => {
-                if (wallet.web3.eth.defaultAccount !== null)
-                {
+                if (wallet.web3.eth.defaultAccount !== null) {
                     await this.displayUserBalances();
                     await this.displayUserStakes();
                 }
