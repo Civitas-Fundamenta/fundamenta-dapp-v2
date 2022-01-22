@@ -118,8 +118,8 @@ export class Navigation extends React.Component {
             enable('#_btnAvax');
             $('#_btnAvax').text("AVALANCHE");
 
-            /*enable('#_btnXdai');
-            $('#_btnXdai').text("GNOSIS CHAIN");*/
+            enable('#_btnXdai');
+            $('#_btnXdai').text("GNOSIS CHAIN");
 
             enable('#_btnFtm');
             $('#_btnFtm').text("FANTOM");
@@ -143,10 +143,10 @@ export class Navigation extends React.Component {
                 disable('#_btnAvax');
                 $('#_btnAvax').text("AVALANCHE (Current)");
             }
-            /*else if (wallet.chainId === 100) {
+            else if (wallet.chainId === 100) {
                 disable('#_btnXdai');
                 $('#_btnXdai').text("GNOSIS CHAIN (Current)");
-            }*/
+            }
             else if (wallet.chainId === 250) {
                 disable('#_btnFtm');
                 $('#_btnFtm').text("FANTOM (Current)");
@@ -374,12 +374,12 @@ export class Navigation extends React.Component {
                                         await wallet.switchNetwork(43114);
                                     }}>Avalanche</button>
 
-                                {/*<button id="_btnXdai" className="round btn btn-outline-secondary p-3 mb-3 w-100"
+                                <button id="_btnXdai" className="round btn btn-outline-secondary p-3 mb-3 w-100"
                                     onClick={async () => {
                                         $("#_btnXdai").text('Sending request...');
                                         await wallet.addMetamaskChain(100);
                                         await wallet.switchNetwork(100);
-                                    }}>Gnosis Chain</button>*/}
+                                    }}>Gnosis Chain</button>
 
                                 <button id="_btnFtm" className="round btn btn-outline-secondary p-3 mb-3 w-100"
                                     onClick={async () => {

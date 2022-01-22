@@ -14,10 +14,10 @@ export class Config {
 
     static app = {
 
-        net: "mainnet",
+        net: "testnet",
         serverCount: 10,
         serverDomain: "civiport.online",
-        confTime: 12,
+        confTime: 1,
         withdrawEventHash: "0xc1a6280eefe33f118e2ab28074ac0a44f953d5e5101c755bf744881a5a812434",
         resourceUrl: "cp3.civiport.online",
         holder0: "0xA4dda4EDfB34222063c77DFE2F50B30f5DF39870",
